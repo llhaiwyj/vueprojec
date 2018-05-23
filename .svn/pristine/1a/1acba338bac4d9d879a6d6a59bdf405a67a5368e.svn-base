@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>卡加后台管理系统</title>
+  </head>
+  <style>
+  	html {
+			height: 100%;
+			display: table;
+		}
+		body {
+			display: table-cell;
+			height: 100%;
+		}
+  	#app{
+  		width:100%;
+  		height:100%;
+  		position:absolute;
+  		z-index:999;
+  		top:0px;
+  		left:0px;
+  	}
+</style>
+ <body>
+    <div id="app"></div>
+</body>
+<script>
+
+</script>
+</html>

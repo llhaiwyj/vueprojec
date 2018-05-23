@@ -1,0 +1,182 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" v-show="show">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>用户管理---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-row :gutter="10"> 
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="serviceName" class="name1" clearable>
+										<template class="biaoti" slot="prepend">服务名称</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<span class="mc">所属商家：</span>
+									<select class="xl" v-model="bussinessId" v-on:change="changeType($event)" @change="checkeds">
+										<option v-for="item in bussiness" :value="item.bussinessID">{{item.bussinessName}}</option>
+									</select>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<span class="mc">适用门店：</span>
+									<select class="xl" v-model="storeID">
+										<option v-for="(j,index) in lists" :value="j.id">{{j.storeName}}</option>
+									</select>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<span class="mc">服务分组：</span>
+									<select class="xl" v-model="groupingId" @change="selectFlag()">
+										<option v-for="se in groups" :value="se.groupingId">{{se.groupingName}}</option>
+									</select>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="servicePrice" class="name1" clearable>
+										<template class="biaoti" slot="prepend">服务售价</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="servicePushMoney" class="name1" clearable>
+										<template class="biaoti" slot="prepend">服务提成</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<div class="input-group">
+										<span class="input-group-addon">单位</span>
+										<select placeholder="单位" v-model="unit">
+											<option v-for="se in units" :value="se.value">{{se.text}}</option>
+										</select>
+									</div>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="sort" class="name1" clearable>
+										<template class="biaoti" slot="prepend">排序</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<div class="input-group">
+										<span class="input-group-addon">是否上架</span>
+										<select v-model="state">
+											<option v-for="sel in states" :value="sel.value">{{sel.text}}</option>
+										</select>
+									</div>
+								</el-col>
+							</el-row>
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button @click="getCheckedNodes" class="el-button el-button--primary queding">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props: ['groups'],
+		data() {
+			return {
+				serviceName:'',//服务名称
+				bussinessId:'',//商家ID
+				bussiness: this.$storage.fetch("bussiness"),
+				bussinessstore:this.$storage.fetch("bussinessstore"),//商户下的门店
+                lists:[],//门店集合
+                storeID:'',//门店ID
+                groupingId:'',//服务ID
+                servicePrice:'',//售价
+                servicePushMoney:'',//服务提成
+                unit:'',//单位
+                sort:'',//排序
+                state:'',//是否上架
+				units: [{
+					value: '次',
+					text: '次'
+				}],
+				states: [{
+						value: '0',
+						text: '上架'
+					},
+					{
+						value: '1',
+						text: '下架'
+					}
+				],
+			}
+		},
+		//获取树形菜单
+		mounted: function() {},
+		methods: {
+			changeType(val) {
+				this.lists=[];
+				//赋值商户id
+               this.bussinessId=val.target.value;
+               console.log(this.bussinessstore)
+               for(var i=0;i<this.bussinessstore.length;i++){
+					if(this.bussinessId == this.bussinessstore[i].bussinessId){
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+			},
+			selectFlag(){
+					this.$ajax.post(`${this.$url}/storeService/validService.html`, {
+					storeID:this.storeID,
+					serviceName:this.serviceName
+				}).then(data => {
+						if(data.data == true){
+							this.$message({
+								type: 'success',
+								message: data.data.message
+							});
+							
+						}else {
+							this.$message({
+								type: 'error',
+								message: data.data.message
+							});
+						}
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+			},
+			getCheckedNodes() {
+				this.$ajax.post(`${this.$url}/storeService/insertStoreService.html`, {
+						serviceName: this.serviceName,
+						bussinessID: this.bussinessId,
+						storeID: this.storeID,
+						groupingId:this.groupingId,
+						servicePrice: this.servicePrice,
+						state: this.state,
+						servicePushMoney: this.servicePushMoney,
+						sort: this.sort,
+						unit:this.unit
+					}).then(data => {
+						if(data.data.flag == true) {
+								this.$message(data.data.message);
+								this.$emit('closes');
+						} else {
+								this.$message.error(data.data.message);
+						}
+					})
+					.catch((error) => {
+						this.$message.error('获取数据失败');
+					})
+			},
+			close: function() {
+				this.$emit('close');
+			},
+
+		}
+	}
+</script>

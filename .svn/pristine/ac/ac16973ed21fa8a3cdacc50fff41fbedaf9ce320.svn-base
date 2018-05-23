@@ -1,0 +1,308 @@
+<template>
+	<div class="rolesettings">
+		<div class="icon" v-show="role.isShowAdd">
+			<el-tooltip class="item" effect="dark" content="添加" placement="top">
+			 	<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+		  </el-tooltip>
+		  <!--<el-tooltip class="item" effect="dark" content="删除" placement="top">
+			<i class="el-icon-delete delete" size="small delete" @click="deletes()"></i>	
+			</el-tooltip>-->
+		</div>
+		<div  id="sousuo">
+			<el-collapse v-model="activeNames" @change="handleChange">
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">							
+							<el-input   v-model="roleName" clearable>
+							  <template class="biaoti" slot="prepend">姓名</template>
+						  </el-input>						   
+						</el-col>
+						<el-col class="row" :xs="5" :sm="5" :md="3" :lg="3" :xl="1"><el-button class="find" @click="fined">{{menuList[3]}}<!--查询--></el-button></el-col>						
+					</el-row>					
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		
+		
+		
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="tableData3" height="550" tooltip-effect="dark" style="width: 100%" 
+				@selection-change="handleSelectionChange">
+				<!--<el-table-column type="selection" prop="roleId" :selectable='checkboxInit' @selection-change="handleSelectionChange">
+				</el-table-column>-->
+				<el-table-column prop="roleId" label="角色ID" width="auto">
+				</el-table-column>
+				<el-table-column prop="roleName" label="角色名称" width="auto">
+				</el-table-column>
+				<el-table-column prop="state" label="角色级别" show-overflow-tooltip>
+					<template slot-scope="scope">
+						<div v-if="scope.row.state==0">超级管理角色</div>
+						<div v-if="scope.row.state==1">系统管理角色</div>
+						<div v-if="scope.row.state==2">商户管理角色</div>
+					</template> 
+				</el-table-column>
+				<el-table-column prop="remark" label="备注" show-overflow-tooltip>
+				</el-table-column>
+				
+				<el-table-column label="操作" width="180">
+					<template slot-scope="scope">
+						<!--<el-button type="text" size="small" @click="open2(scope.$index,tableData3)">{{menuList[1]}}删除</el-button> -->
+						<el-button type="text" size="small" @click="showModals(scope.$index,tableData3,'2')">{{menuList[4]}}<!--查看--></el-button>
+						<el-button type="text" size="small" @click="showModals(scope.$index,tableData3,'1')" v-show="role.isShowUpdate">修改</el-button>
+						<el-button type="text" size="small" @click="deletes(scope.$index,tableData3)" v-show="role.isShowDel">删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<!--<el-button class="xinzeng find" type="text" size="small" @click="showModal">{{menuList[0]}}</el-button>
+			<el-button type="text" size="small" @click="deletes()">{{menuList[1]}}</el-button>-->
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+				<div class="pages">
+					<el-pagination
+						@size-change="handleSizeChange"
+						@current-change="handleCurrentChange" 
+						:current-page="currentPage" 
+						:page-size="length" 
+						layout="total, sizes, prev, pager, next, jumper" 
+						:total="total">
+					</el-pagination>
+			    </div>
+				</el-col>	
+			</el-row>			
+		</div>
+		<modal v-show="isModalVisible" @close="closeModals" v-bind:uuid="uuid" v-on:close="serlf"/>
+		<modals v-show="isModalVisibles"@close="closeModals" v-bind:uuid="uuid" v-bind:updates="updatearr"  v-bind:sels="sel" v-bind:updatess="updateer" v-bind:dataId="dataid" v-bind:isClose="isClose" v-bind:disabled="disabled" v-bind:readonly="readonly" v-bind:read="read"  v-on:close="serlf"/>
+	</div>
+</template>
+
+<script>
+	//	import Pagination from '../Public/public.vue'
+	import Modal from './rolesmotai.vue'
+	import Modals from './rolesupdate.vue'
+	export default {
+		name:'rolesettings',
+		components: {
+            Modal,
+            Modals
+        },
+		data() {
+			return {
+				menuId:this.$route.query.menuIds,
+				multipleSelection: [],
+				menuList:[],
+				btnList:[],
+				tableData3: '',
+				currentPage: 1,
+				total: '',
+				length: 10,
+				isModalVisible: false,
+				isModalVisibles: false,
+
+				updatearr:'',
+				updateer:'',
+				dataid:[],
+				roleName:'',
+				isClose:true,
+				disabled:false,
+				readonly:false,
+				read:false,
+				disable:false,
+				sel:[],
+               
+                uuid:'',
+                //权限控制
+               // rolebtn:new Object(),
+				
+				role:{
+					isShowAdd:false,
+				    isShowDel:false,
+				    isShowUpdate:false,
+				},
+               
+			}
+		},
+		//页面初始话的时候调接口显示数据
+		mounted: function() {
+            //按钮权限控制
+            this.permission();
+            //查询
+			this.fined();
+		},
+		methods: {
+			andleSizeChange(leng) {
+				this.length = leng;
+				console.log(this.length)
+			},
+			
+			//点击下面页数传值再次调接口
+			handleCurrentChange(page) {
+				this.currentPage = page;
+				this.fined();
+			},
+			handleSelectionChange: function(val) {
+				this.multipleSelection = val;
+				console.log(val)
+			},
+			//删除刷新页面，
+			deletes(inde,all) {
+				 
+				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					
+					    
+					     	
+					     	this.$ajax.post(`${this.$url}/role/deleteRole.html`, {
+							ids: all[inde].roleId,
+							uuid:this.uuid
+						}).then(data => {
+							this.fined();
+							this.$message({
+								type: 'success',
+								message: '删除成功!'
+							});
+						})
+					   
+			            
+					
+					//确定操作
+			
+				}).catch(() => {
+					//取消操作
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			},//查找
+			
+			fined(){
+
+				let that = this
+		    	this.$ajax.post(`${this.$url}/role/selRolelist.html`,{start:this.currentPage,length:this.length,roleName:this.roleName}).then(data => {
+					console.log(data)
+					that.tableData3 = (data.data.data.list)
+					that.total = data.data.data.total
+					that.uuid = data.data.uuid
+					if(data.data.data.size > 10){
+						that.length = data.data.data.size
+					}
+					
+				})
+				.catch((error) => { 
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+			},
+			//权限控制
+			permission(){
+				//
+			  
+				this.$storage1.permission(this.$ajax,`${this.$url}/login/selectBtn.html`,this.menuId,this.role);
+				console.log(this.role)
+//              this.$ajax.post(`${this.$url}/login/selectBtn.html`,{menuID:this.menuId}).then(data => {
+//
+//              	
+//                  this.rolebtn=eval(data).data;
+//				console.log(data.data.m01)
+//                  
+//                  if(this.rolebtn.m01=="1"){
+//                  	this.isShowAdd=true;
+//                  }
+//                  if(this.rolebtn.m02=="1"){
+//                  	this.isShowDel=true;
+//                  }
+//                  if(this.rolebtn.m03=="1"){
+//                  	this.isShowUpdate=true;
+//                  }
+////                  alert(this.rolebtn.m01);
+//			    })
+//			    .catch((error) => { 
+//				console.log(error)
+//				this.$message.error('获取数据失败');
+//			    })
+			},
+			showModal: function () {
+               this.isModalVisible = true
+              
+            },
+            //点击修改获取值并且传到子页面
+            showModals: function (inde,all,flag) {
+            	
+               this.isModalVisibles = true
+               this.$ajax.post(`${this.$url}/role/loadUpdateMenuTree.html`, {roleId:all[inde].roleId}).then(request => {
+               	  console.log(request)
+               	this.updatearr=request.data.data[0]
+               
+               	 console.log(this.updatearr)
+               	this.updateer=request.data.trees
+             	console.log(this.updateer)
+             	//判断是谁登陆的
+                this.read=true//角色id只读的
+             	if(flag == 2){
+             		//判断用户超级管理员可以修改，其他只读
+             	this.isClose=false
+             	this.disabled=true
+             	this.readonly=true
+             	this.disable=true
+             	
+             	this.sel=[{ value: 1, text: '系统管理员' },{ value: 2, text: '商户管理员' },{ value: 3, text: '门店管理员' },]
+             	}
+             	if(flag == 1){
+             		let admin=this.$storage.fetch("isAdmin")
+					if(admin > 1){
+						
+						this.sel=[{ value: 2, text: '商户管理员' },{ value: 3, text: '门店管理员' }]
+					}else{
+						this.sel=[{ value: 1, text: '系统管理员' },{ value: 2, text: '商户管理员' },{ value: 3, text: '门店管理员' },]
+					}
+             	}
+             	
+             	 this.dataid=[];
+              	for(var i in this.updateer){
+              		 let list=this.updateer[i].children
+               		for(let y= 0;y< list.length; y++){
+               			
+               			let listBtn=list[y].children
+               			for(var z= 0; z< listBtn.length; z++){
+               				if(listBtn[z].checked){
+						this.dataid.push(listBtn[z].id)
+               			}
+               			
+					}
+               			
+               		}
+				}
+              		console.log(this.dataid)
+              
+               	 
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+            },
+            //模态框关闭
+           /* closeModal: function () {
+               this.isModalVisible = false
+            },*/
+            
+           closeModals(value){
+			//alert(value)
+			//this.$message.error(value);
+			if(value != undefined){
+				this.$message({type: 'success',message: value});
+			}
+			
+			//this.serlf();
+		    },
+            serlf: function (){
+            	this.$router.push({name:'backs',query : {menuIds: this.menuId}})
+            }
+		},
+	}
+</script>

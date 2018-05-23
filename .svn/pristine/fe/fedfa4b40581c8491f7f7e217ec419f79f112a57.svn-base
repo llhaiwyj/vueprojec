@@ -1,0 +1,256 @@
+<template>
+	<div id="wrapper">
+		<div class="header">
+			<span class="logo"><img src="../assets/log.png"/></span>
+			<span class="imglog"><img src="../../build/logo.png"/></span>
+			<button class="tui" @click="droupOut">退出</button>
+		</div>
+		<div class="progressContainer">
+			<div class="progress" v-if="isShow">
+			</div>
+		</div>
+		<!--<div class="progress-bar">
+		</div>-->
+		<div class="content">
+			<div class="conleft">
+				<div class="s0">
+					<router-link to="/homes" class="zi" @click="addTab(editableTabsValue2)">主页</router-link>
+					<!--					<router-link :to="{name:'SC0901', query : {menuIds: 'SC0901'}}" class="s11">{{角色}}</router-link>
+-->
+				</div>
+				<el-collapse v-model="activeName" accordion>
+					<el-collapse-item v-for="(menuItem, index) in menu" :key="index">
+						<template slot="title">
+						<i class="header-icon el-icon-date" style="width: 40px;text-align: center;"></i>{{menuItem.name}} 
+							
+						</template>
+						<ul v-if="menuItem.children">
+							<li class="s1" v-for="(subMenuItem, subIndex) in menuItem.children" :key="subIndex" @click="nav(subIndex,menuItem.children)">
+								<router-link :to="{name:subMenuItem.id, query : {menuIds: subMenuItem.id}}" class="s11">{{subMenuItem.name}}</router-link>
+							</li>
+							<!--<li class="s1" v-for="(subMenuItem, subIndex) in menuItem.children" :key="subIndex">
+								<router-link :to="{name:'SC0901', query : {menuIds: 'SC0901'}}" class="s11">{{角色}}</router-link>
+							</li>-->
+
+							<!--<li class="s2">
+								<router-link to="/self" class="s11">selfofe</router-link>
+							</li>
+							<li class="s3">
+								<router-link to="/echart" class="s11">echarts图表</router-link>
+							</li>
+							<li class="s4">
+								<router-link to="/xiu" class="s11">模态框2</router-link>
+							</li>
+							<li class="s4">
+								<router-link to="/shoplist" class="s11">列表</router-link>
+							</li>
+							<li class="s4">
+								<router-link to="/paixu" class="s11">排序</router-link>
+							</li>-->
+						</ul>
+					</el-collapse-item>
+					<!--<el-collapse-item>
+                        <template slot="title">
+							<i class="header-icon el-icon-tickets"></i>系统设置
+						</template>
+						<ul>
+							<li class="s1">
+								<router-link :to="{name:'rolesettings', params: {userName:'vam'}}" class="s11">角色设置</router-link>
+							</li>
+							<li class="s2">
+								<router-link to="/merchantset" class="s11">商家设置</router-link>
+							</li>
+						</ul>
+					</el-collapse-item>
+					<el-collapse-item title="效率 Efficiency">
+
+					</el-collapse-item>
+					<el-collapse-item title="可控 Controllability">
+
+					</el-collapse-item>-->
+				</el-collapse>
+				<!--<ul>
+    	   	  <li class="s1"><router-link to="/hea" class="s11"  @click="addTab(editableTabsValue2)">小鱼一卡通商城表格单</router-link></li>
+    	   	  <li class="s1"><router-link to="/self" class="s11">selfofe</router-link></li>
+    	   </ul>-->
+			</div>
+			<div class="conright">
+				<el-row :gutter="10">
+					<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+					<el-tabs v-model="editableTabsValue2" type="card" closable @tab-remove="removeTab">
+						<el-tab-pane v-for="(item, index) in editableTabs2" :key="item.name" :label="item.title" :name="item.name">
+							{{item.name}}
+						</el-tab-pane>
+					</el-tabs>
+				</el-col>
+				</el-row> 
+				<router-view></router-view>
+			</div>			
+		</div>
+		<div class="footer">天津晟世瑞景科技发展有限公司津ICP备16008628号</div>
+	</div>
+</template>
+
+<script>
+	import globalFrom from '../Public/public'
+	export default {
+		data() {
+			return {
+				menu: this.$storage.fetch("menuList"),
+				editableTabsValue2: '2',
+				activeName: '1',
+				isShow: true, // 是否显示进度条
+				val: 0, // 进度
+				editableTabs2: [{
+					title: '首页',
+					name: '1',
+					content: 'value'
+				}, ],
+				tabIndex: 2
+			}
+		},
+		//created() {
+		//			this.initGtCaptcha()
+		//		},
+		props: {
+			/**
+			 * 每10毫秒自增幅度
+			 */
+			step: {
+				type: Number,
+				default: 5,
+			},
+			/**
+			 * 初始值
+			 */
+			initVal: {
+				type: Number,
+				default: 0,
+			},
+			/**
+			 * 到一定进度停止
+			 */
+			stopVal: {
+				type: Number,
+				default: 100,
+			},
+			/**
+			 * 进度条继续到成功
+			 */
+			isOk: {
+				type: Boolean,
+				default: false,
+			},
+		},
+		mounted() {
+			//请求数据菜单
+			//this.changeData()测试全局方法
+			//	console.log(this.menu)
+
+			// 初始化后加载进度，加载到百分之多少由stopVal决定
+			this.val = this.initVal
+			let step = this.step
+			let timer = setInterval(() => {
+				this.val = this.val + step
+				//      this.$el.style.width = this.val + '%'
+				// 父组件数据加载完前进度条最多到stopVal的这个百分值
+				if(this.val >= this.stopVal) {
+					clearInterval(timer)
+					return
+				}
+			}, 200)
+		},
+		watch: {
+			/**
+			 * 监听组件props变化决定是否继续加载，一般在父组件数据加载完后改变此标志位
+			 */
+			isOk() {
+				let val = this.val
+				let step = this.step
+				let timer = setInterval(() => {
+					val = val + step
+					//      this.$el.style.width = val + '%'
+					// 加载到百分百完成
+					if(val >= 100) {
+						// 关闭定时器
+						clearInterval(timer)
+						// 加载完成关闭进度条
+						this.isShow = false
+						// 加载完成的回调
+						this.$emit('callback', 'load success')
+						return
+					}
+				}, 200)
+			},
+		},
+		methods: {
+			nav(index,all){
+				console.log(all[index].subMenuItem)
+			},
+			droupOut(){
+				this.$ajax.post(`${this.$url}/login/logout.html`, {}).then(restaurants => {
+					console.log(restaurants.data)
+					//返回操作
+					if(restaurants.data == true){
+						//删除session
+						this.$storage.save("menuList","");
+							this.$storage.save("menuBtn","");
+							this.$storage.save("isAdmin","");
+							this.$storage.save("buss","");
+							this.$storage.save("bussiness","");
+							this.$storage.save("bussinessstore","");
+					        this.$storage.save("examshuju", "");
+					        this.$storage.save("bianhao","");
+					        this.$router.push({name:'login'})
+					        
+					}
+				}) 
+			},
+			addTab(targetName) {
+				let newTabName = ++this.tabIndex + '';
+				this.editableTabs2.push({
+					title: 'this.html',
+					name: newTabName,
+					content: 'New Tab content'
+				});
+				this.editableTabsValue2 = newTabName;
+			},
+			removeTab(targetName) {
+				let tabs = this.editableTabs2;
+				let activeName = this.editableTabsValue2;
+				if(activeName === targetName) {
+					tabs.forEach(function(tab, index) {
+						if(tab.name === targetName) {
+							let nextTab = tabs[index + 1] || tabs[index - 1];
+							if(nextTab) {
+								activeName = nextTab.name;
+							}
+						}
+					});
+				}
+
+				this.editableTabsValue2 = activeName;
+				this.editableTabs2 = tabs.filter(tab => tab.name !== targetName);
+			}
+		}
+	}
+</script>
+
+<style>
+	@import "../assets/css/home.css"
+	/*.progress-bar {
+    position fixed
+    top 0
+    height 6px
+    width 0
+    background-color #999
+  }*/
+	/*.fade {
+    &-enter-active, &-leave-active {
+      transition: all .3s
+    }
+    &-enter, &-leave-active {
+      opacity: 0
+    }
+  }*/
+</style>

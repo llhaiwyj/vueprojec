@@ -1,0 +1,280 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" v-show="show">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>员工设置---修改</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<el-input placeholder="" v-model="emp.employeeCode" class="name1" clearable>
+								 <template class="biaoti" slot="prepend">员工工号</template>
+							</el-input></el-col>
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<el-input placeholder="" v-model="emp.employeeName" class="name1" clearable>
+								 <template class="biaoti" slot="prepend">员工姓名</template>
+							</el-input></el-col>
+						<!--<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<el-input placeholder="" v-model="emp.employeeID" class="name1" clearable>
+	                        <template class="biaoti" slot="prepend">员工ID</template>
+							</el-input></el-col>-->
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<el-input placeholder="" v-model="emp.identity" class="name1" clearable>
+								<template class="biaoti" slot="prepend">身份证号</template>
+							</el-input></el-col>
+													
+						<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<el-input placeholder="" v-model="emp.phoneNum" class="name1" clearable>
+								 <template class="biaoti" slot="prepend">手机号</template>
+							</el-input></el-col>											
+						<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<div class="input-group">
+							  <span class="input-group-addon">生日</span>
+							<el-date-picker class="shangstate" placeholder="生日" v-model="emp.employeeBirthday" format="yyyy-MM-dd" type="date">								
+							</el-date-picker>
+							</div>
+						</el-col>
+						<div class="xinxi">
+							<!--<el-col class="row" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">-->
+							<!--<select v-model="emp.employeeSex" v-on:change="xingbie($event)">-->
+								<!--<option value="">{{emp.employeeSex}}</option>-->
+								<!--<option value="">4534456</option>-->
+								<!--<option v-for="sexId in sexs" :value="sexId.value">{{sexId.text}}</option>
+							</select>-->
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+							  <span class="input-group-addon">性别</span>
+							<el-select class="shangstate" v-model="sex">
+								<el-option v-for="sexId in sexs" :key="sexId.value" :label="sexId.text" :value="sexId.value"></el-option>
+							</el-select>
+							</div>
+							</el-col>
+							<!--<el-col class="row" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
+							<select v-model="stat" v-on:change="zhunagtaizhi($event)">
+								<option value="">{{emp.state}}</option>
+								<option v-for="sel in states" :value="sel.value">{{sel.text}}</option>
+							</select>-->
+							<!--<el-col class="row" :xs="8" :sm="8" :md="8" :lg="8" :xl="8">
+							<el-select v-model="stat">
+								<el-option v-for="sel in states" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
+							</el-select>-->
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+							  <span class="input-group-addon">员工状态</span>
+							<el-select  class="shangstate" v-model="stat">
+								<el-option v-for="sel in states" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
+							</el-select>
+							</div>
+							</el-col>
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+							  <span class="input-group-addon">职务</span>
+							<select class="select" placeholder="" v-on:change="zhiwu($event)">
+								<option value="">{{emp.positionName}}</option>
+								<option v-for="item in state" :value="item.positionID">{{item.positionName}}</option>
+							</select>
+							</div>
+							</el-col>
+							<!--<el-select placeholder="职务" v-model="positiond">
+										<el-option v-for="se in state" :key="se.positionID" :label="se.positionName" :value="se.positionID"></el-option>-->
+							<!-- </el-select>-->
+						</div>
+						<div class="shoplist">
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+							  <span class="input-group-addon">所属商家</span>
+							<select class="select" v-on:change="changeBussiness($event)">
+								<option selected>{{emp.bussinessName}}</option>
+								<option v-for="item in bussinesss" :value="item.bussinessId">{{item.bussinessName}}</option>
+							</select>
+							</div>
+							</el-col>
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+							  <span class="input-group-addon">所属门店</span>
+							<select class="select" placeholder="" v-on:change="changeStore($event)">
+								<option value="">{{emp.storeName}}</option>
+								<option v-for="item in lists" :value="item.id">{{item.storeName}}</option>
+							</select>
+							</div>
+							</el-col>
+						</div>
+						<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<el-input placeholder="" v-model="emp.employeeAddress" class="name1" clearable>
+									<template class="biaoti" slot="prepend">门店地址</template>
+							</el-input>
+				      </el-col>
+						<!--<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<h4 class="input-group-property">门店地址</h4>
+						 </el-col>
+						<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+						<textarea class="textarea" v-model="emp.employeeAddress" placeholder="地址" ></textarea>
+						</el-col>-->
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--primary queding" @click="getUpdateStore">确定</button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props: ['emp', 'state'],
+		data() {
+			return {
+				bussinesss: this.$storage.fetch("bussiness"),
+				bussinessstore: this.$storage.fetch("bussinessstore"),
+				states: [{
+						value: '0',
+						text: '离职'
+					},
+					{
+						value: '1',
+						text: '在职'
+					}
+				],
+				stat:'',
+				sex: '',
+				shangjia: '',
+				mendian: '',
+				positiond: '',
+				sexs: [{
+						value: '0',
+						text: '男'
+					},
+					{
+						value: '1',
+						text: '女'
+					}
+				],
+				lists: [],
+			}
+		},
+		//获取树形菜单
+//		mounted: function() {
+//             
+//		},
+		methods: {
+			
+			//调用父组建的方法
+			close: function() {
+				this.$emit('close');
+
+			},
+			changeBussiness(event) {
+				this.shangjia = event.target.value;
+				for(var i = 0; i < this.bussinessstore.length; i++) {
+					if(this.shangjia == this.bussinessstore[i].bussinessId) {
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+
+			},
+			changeStore(event) {
+				this.mendian = event.target.value;
+				console.log(this.mendian)
+			},
+			zhiwu(event) {
+				this.positiond = event.target.value;
+			},
+			xingbie(event){
+				this.sex = event.target.value;
+			},
+			zhunagtaizhi(event){
+				this.stat = event.target.value;
+			},
+			//			statezhuangtai(event) {
+			//				this.state = event.target.value;
+			//			},
+			/*changePosition(event){
+				this.positions=event.target.value;
+			},*/
+			/*changeState(event){
+				this.options=event.target.value;
+			},*/
+			getUpdateStore: function() {
+//				this.employeeBirthday = this.GMTToStr(this.employeeBirthday);
+//				console.log(this.employeeBirthday);
+//              if(this.mendian=''){
+//              	
+//              }
+
+                console.log(this.emp.phoneNum);
+                console.log(this.emp.identity);
+                console.log(this.mendian)
+				let r = /^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/;
+				var cp = /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+				//				var reg=/^\d{1,20}$/;
+
+				if(!r.test(this.emp.phoneNum)) {
+					alert('请填写正确的手机号码');
+					return;
+				} else if(!cp.test(this.emp.identity)) {
+					alert('证件填写有误');
+					return;
+				} else {
+					this.$ajax.post(`${this.$url}/storeEmployee/valUpdateEmployeeCode.html`, {
+							storeID: this.mendian,
+							employeeID: this.emp.employeeID,
+							phoneNum: this.emp.phoneNum,
+							employeeCode: this.emp.employeeCode,
+							identity: this.emp.identity,
+						}).then(data => {
+							console.log(data.request.responseText)
+							var dd = JSON.parse(data.request.responseText);
+							console.log(dd.flag)
+
+							if(dd.flag == true) {
+								this.$message(dd.message);
+								this.$ajax.post(`${this.$url}/storeEmployee/updateEmployee.html`, {
+										employeeID: this.emp.employeeID,
+										employeeName: this.emp.employeeName,
+										phoneNum: this.emp.phoneNum,
+										bussinessID: this.shangjia,
+										storeID: this.mendian,
+										employeePositionID: this.positiond,
+										employeeCode: this.emp.employeeCode,
+										employeeSex: this.sex,
+										/*employeeBirthday:this.emp.employeeBirthday,*/
+										employeeAddress: this.emp.employeeAddress,
+										identity: this.emp.identity,
+										state: this.stat
+									}).then(restaurants => {
+										console.log(restaurants)
+										this.$emit('close');
+									})
+									.catch((error) => {
+										console.log(error)
+										this.$message.error('添加失败');
+									})
+							} else {
+								this.$message(dd.message);
+
+							}
+						})
+						.catch((error) => {
+							console.log(error)
+							this.$message.error('data.data.message');
+						})
+
+				}
+
+				//				console.log( this.sex)
+
+			},
+		}
+
+	}
+</script>

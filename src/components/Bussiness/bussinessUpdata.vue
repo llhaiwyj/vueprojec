@@ -1,0 +1,766 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>商家设置---修改</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>基本信息<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.bussinessID.$error }">
+										<span class="mc">商家编号</span>
+										<el-input @blur="test" v-model="usinfor.bussinessID" @change="selectFlag('1')" class="name1" clearable disabled="disabled">
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.bussinessID.required">不能为空</span>
+									<span class="form-group__message" v-if="!$v.usinfor.bussinessID.maxLength">能超过11位数字</span>
+									<span class="form-group__message" v-if="!$v.usinfor.bussinessID.aa">不能输入汉字</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.bussinessName.$error }">
+										<span class="mc">商家名称：</span>
+										<el-input @blur="test" v-model="usinfor.bussinessName" class="name1" @change="selectFlag('2')" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.bussinessName.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.bussinessLinkPerson.$error }">
+										<span class="mc">商家联系人：</span>
+										<el-input @blur="test" v-model="usinfor.bussinessLinkPerson" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.bussinessLinkPerson.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.phoneNum.$error }">
+										<span class="mc">联系电话：</span>
+										<el-input @blur="test" v-model="usinfor.phoneNum" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.phoneNum.required">不能为空</span>
+									<span class="form-group__message" v-if="!$v.usinfor.phoneNum.numeric">只能输入数字</span>
+									<span class="form-group__message" v-if="!$v.usinfor.phoneNum.minLength">请输入正确手机号</span>
+									<span class="form-group__message" v-if="!$v.usinfor.phoneNum.maxLength">能超过11位数字</span>
+								<!--	<span class="form-group__message" v-if="!$v.usinfor.phoneNum.Phone">手机号码输入有误</span>-->
+								</div>
+							</el-col>
+
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.bussinessScopeId.$error }">
+										<span class="mc">经营类型：</span>
+										<el-select @blur="test" class="xl" v-model="usinfor.bussinessScopeId">
+											<el-option v-for="item in accountlist" :key="item.scope" :label="item.scopeName" :value="item.scope"></el-option>
+										</el-select>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.bussinessScopeId.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.state.$error }">
+										<span class="mc">商家状态：</span>
+										<el-select @blur="test" class="xl" v-model="usinfor.state">
+											<el-option v-for="item in buss" :key="item.value" :label="item.label" :value="item.value"></el-option>
+										</el-select>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.state.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.isFormal.$error }">
+										<span class="mc">商家类型：</span>
+										<el-select @blur="test" class="xl" v-model="usinfor.isFormal">
+											<el-option v-for="item in businessType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+										</el-select>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.isFormal.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.durationTime.$error }">
+										<span class="mc">开始使用时间：</span>
+										<el-date-picker @blur="test" class="xl" @change="timeCalculate($event)" v-model="usinfor.durationTime" type="date" placeholder="选择日期">
+										</el-date-picker>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.durationTime.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.renewTime.$error }">
+										<span class="mc">结束使用时间：</span>
+										<el-input @blur="test" placeholder="" v-model="usinfor.renewTime" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.renewTime.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.provinceID.$error }">
+										<span class="mc">所在省：</span>
+										<select @blur="test" class="xl" v-model="usinfor.provinceID" v-on:change="areaprov($event)">
+											<option v-for="(k,index) in provs" :value="k.ID">{{k.areaName}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.provinceID.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.cityID.$error }">
+										<span class="mc">所在市：</span>
+										<select @blur="test" class="xl" v-model="usinfor.cityID" v-on:change="areacity($event)">
+											<option v-for="k  in cityArr" :value="k.ID">{{k.areaName}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.cityID.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.countryID.$error }">
+										<span class="mc">所在区：</span>
+										<select @blur="test" class="xl" v-model="usinfor.countryID" v-on:change="xianqus($event)">
+											<option v-for="l in districtArr" :value="l.ID">{{l.areaName}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.countryID.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>微信<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.wxappid.$error }">
+										<span class="mc">微信appid：</span>
+										<el-input @blur="test" v-model="usinfor.wxappid" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.usinfor.wxappid.maxLength">不能超过32位</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.wxtoken.$error }">
+									<span class="mc">微信token：</span>
+									<el-input @blur="test" v-model="usinfor.wxtoken" class="name1" clearable>
+									</el-input>
+									</div>
+								<span class="form-group__message" v-if="!$v.usinfor.wxtoken.aa">不能输入汉字</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.wxmchID.$error }">
+									<span class="mc">微信支付ID：</span>
+									<el-input @blur="test" v-model="usinfor.wxmchID" class="name1" clearable>
+									</el-input>
+									</div>
+								    <span class="form-group__message" v-if="!$v.usinfor.wxmchID.required">不能输入汉字</span>
+								</div>
+							</el-col>
+							<!--上传文件-->
+							<el-col :span="7" class="gutterspan">
+								<span class="mc">微信证书：</span>
+								<el-input v-model="usinfor.wxcert" class="name1" disabled="disabled">
+								</el-input>
+								<!-- <i class="el-icon-document sc" @mouseenter="enterpointer" @mouseleave="exportpointer"></i>-->
+								<addimg v-on:tofather="fromchild" :arr="0" :childmessage="0"></addimg>
+								<!--<div class="z_file" @click="clickme" @mouseenter="enterpointer" @mouseleave="exportpointer">
+									
+									<div class="iconde" v-show="iconshows">
+										<div class="lefticon"><i class="el-icon-edit deleteicon"></i></div>
+										<div class="righticon" @click.stop="deleteimg('0')"><i class="el-icon-delete deleteicon"></i></div>
+										<input type="file" id="wxcert" class="DISnone" name="wxsecret" @change="update($event,'0')" capture="camera">
+									</div>
+								</div>-->
+							</el-col>
+							<el-col class="row shangchuan" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="weixin">
+									<h5>商家图片<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							<!--	<img src="usinfor.wxLogo" class="bai100" style="width:100px;float:left;">-->
+								<addimge v-on:tofather="fromchild1" :arr="1" :childmessage="1" ref="childmethods"></addimge>
+
+								<!--<div class="z_file" @click="clickme1" @mouseenter="enterpointer1" @mouseleave="exportpointer1">
+									<img  :src="usinfor.wxlogo" class="bai100">-->
+								<!--<div class="iconde" v-show="iconshow">
+										<div class="lefticon"><i class="el-icon-edit deleteicon"></i></div>
+										<div class="righticon" @click.stop="deleteimg('1')"><i class="el-icon-delete deleteicon"></i></div>
+										<input type="file" id="inputfile"  class="DISnone" name="aaaa" @change="update($event,'1')" capture="camera">
+									</div>-->
+								<!--	</div>-->
+							</el-col>
+							<!--end上传文件-->
+							<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>支付宝<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.zfbappID.$error }">
+									<span class="mc">支付宝号pid：</span>
+									<el-input @blur="test" v-model="usinfor.zfbappID" class="name1" clearable>
+									</el-input>
+									</div>
+								    <span class="form-group__message" v-if="!$v.usinfor.zfbappID.required">不能输入汉字</span>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.usinfor.zfbprivateKey.$error }">
+									<span class="mc">支付密钥：</span>
+									<el-input @blur="test" v-model="usinfor.zfbprivateKey" class="name1" clearable>
+									</el-input>
+									</div>
+								<span class="form-group__message" v-if="!$v.usinfor.zfbprivateKey.required">不能输入汉字</span>
+								</div>
+							</el-col>
+						</el-row>
+
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button class="el-button el-button--primary queding" @click="submitUpdata">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	import addimg from '../../Public/uploadimg'
+	import addimge from '../../Public/uploadimg'
+	export default {
+		props: ['usinfor', 'accountlist', 'cityArr', 'districtArr','uuid'],
+		components: {
+			addimg,
+			addimge
+		},
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				listCity: this.$storage.fetch("listCity"),
+				img: this.$storage.fetch("imgs"),
+				provs: [],
+//				upload: '',
+				//				uploadfile: '',
+//				uploadpic: '',
+//				uploadimg: '',
+				COMiMAGE: this.$delurl,
+				iconshow: false,
+				iconshows: false,
+//				myimage: '',
+				businessType: [{
+					value: '20',
+					label: '试用'
+				}, {
+					value: '365',
+					label: '正式'
+				}],
+				buss: [{
+						value: '0',
+						label: '停用'
+					},
+					{
+						value: '1',
+						label: '启用'
+					}, {
+						value: '2',
+						label: '待审核'
+					}
+				]
+			}
+		},
+		validations: {
+			usinfor: {
+				bussinessID: {
+					required,
+					maxLength: maxLength(11),
+					aa: value => {
+						if(!/[\u4E00-\u9FA5]/g.test(value)) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				},
+				bussinessName: {
+					required
+				},
+				bussinessLinkPerson: {
+					required
+				},
+				phoneNum: {
+					required,
+					numeric,
+					minLength: minLength(11),
+					maxLength: maxLength(11),
+				},
+				bussinessScopeId: {
+					required
+				},
+				state: {
+					required
+				},
+				isFormal: {
+					required
+				},
+				durationTime: {
+					required
+				},
+				renewTime: {
+					required
+				},
+				provinceID: {
+					required
+				},
+				cityID: {
+					required
+				},
+				countryID: {
+					required
+				},
+				wxappid: {
+					maxLength: maxLength(32),
+				},
+				wxtoken: {
+					aa: value => {
+						if(!/[\u4E00-\u9FA5]/g.test(value)) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				},
+				wxmchID: {
+					aa: value => {
+						if(!/[\u4E00-\u9FA5]/g.test(value)) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				},
+				zfbappID: {
+					aa: value => {
+						if(!/[\u4E00-\u9FA5]/g.test(value)) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				},
+				zfbprivateKey: {
+					aa: value => {
+						if(!/[\u4E00-\u9FA5]/g.test(value)) {
+							return true;
+						} else {
+							return false;
+						}
+					}
+				},
+			}
+		},
+		mounted: function() {
+			console.log(this.img)
+			this.$refs.childmethods.acceptfather(this.img);
+			/*this.usinfor.wxlogo = this.COMiMAGE;
+			this.usinfor.wxcert= this.COMiMAGE;*/
+			this.provs=[];
+			for(let i in this.listCity) {
+				if(this.listCity[i].parentID == '0') {
+					this.provs.push(this.listCity[i])
+				}
+			}
+			//			for(let i in this.listCity) {
+			//				if(this.listCity[i].parentID == this.proves) {
+			//					this.cityArr.push(this.listCity[i])
+			//				}
+			//			}
+
+		},
+		/*watch: {
+			cityArr: {　
+				handler: function(newVal, oldVal) {
+					console.log('ssssss', newVal);
+				},
+				deep: true　　
+			}
+		},*/
+		methods: {
+			fromchild(childMsg) {
+				console.log(childMsg)
+				this.usinfor.wxcert = childMsg
+				console.log(this.usinfor.wxcert)
+			},
+			fromchild1(childMsg) {
+				console.log(childMsg)
+				this.usinfor.wxlogo = childMsg
+				console.log(this.usinfor.wxlogo)
+			},
+			test() {
+				this.$v.usinfor.bussinessID.$touch()
+				if(this.$v.usinfor.bussinessID.$error) {
+					return false;
+				}
+				this.$v.usinfor.bussinessName.$touch()
+				if(this.$v.usinfor.bussinessName.$error) {
+					return false;
+				}
+				this.$v.usinfor.bussinessLinkPerson.$touch()
+				if(this.$v.usinfor.bussinessLinkPerson.$error) {
+					return false;
+				}
+				this.$v.usinfor.phoneNum.$touch()
+				if(this.$v.usinfor.phoneNum.$error) {
+					return false;
+				}
+				this.$v.usinfor.bussinessScopeId.$touch()
+				if(this.$v.usinfor.bussinessScopeId.$error) {
+					return false;
+				}
+				this.$v.usinfor.state.$touch()
+				if(this.$v.usinfor.state.$error) {
+					return false;
+				}
+				this.$v.usinfor.isFormal.$touch()
+				if(this.$v.usinfor.isFormal.$error) {
+					return false;
+				}
+				this.$v.usinfor.durationTime.$touch()
+				if(this.$v.usinfor.durationTime.$error) {
+					return false;
+				}
+				this.$v.usinfor.renewTime.$touch()
+				if(this.$v.usinfor.renewTime.$error) {
+					return false;
+				}
+				this.$v.usinfor.provinceID.$touch()
+				if(this.$v.usinfor.provinceID.$error) {
+					return false;
+				}
+				this.$v.usinfor.cityID.$touch()
+				if(this.$v.usinfor.cityID.$error) {
+					return false;
+				}
+				this.$v.usinfor.countryID.$touch()
+				if(this.$v.usinfor.countryID.$error) {
+					return false;
+				}
+				this.$v.usinfor.wxappid.$touch()
+				if(this.$v.usinfor.wxappid.$error) {
+					return false;
+				}
+				this.$v.usinfor.wxtoken.$touch()
+				if(this.$v.usinfor.wxtoken.$error) {
+					return false;
+				}
+				this.$v.usinfor.wxmchID.$touch()
+				if(this.$v.usinfor.wxmchID.$error) {
+					return false;
+				}
+				this.$v.usinfor.zfbappID.$touch()
+				if(this.$v.usinfor.zfbappID.$error) {
+					return false;
+				}
+				this.$v.usinfor.zfbprivateKey.$touch()
+				if(this.$v.usinfor.zfbprivateKey.$error) {
+					return false;
+				}
+				return true;
+			},
+			selectFlag(flag) {
+				//封装参数
+				var dataMap = {};
+
+				let bussinessID = '';
+				if(flag == 2) {
+					if(this.usinfor.bussinessID == '') {
+						this.$message({
+							type: 'error',
+							message: '商户编号不能空!'
+						});
+						this.usinfor.bussinessName = '';
+						return false
+					}
+
+					dataMap['bussinessName'] = this.usinfor.bussinessName;
+					dataMap['bussinessID'] = '';
+					//查询名称
+				} else {
+					dataMap['bussinessName'] = '';
+					dataMap['bussinessID'] = this.usinfor.bussinessID;
+
+				}
+
+				var jsonData = JSON.stringify(dataMap);
+				//请求 后台返回数据
+				this.$ajax.post(`${this.$url}/bussiness/selectBussinessByNameAndID.html`, {
+						jsonData: jsonData
+					}).then(data => {
+						if(data.data == true) {
+
+							alert(data.data)
+						} else {
+							alert(data.data)
+
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+
+			},
+			checkFlag(e) {
+				//this.e.target.value
+				/*this.durationTime='';
+				this.renewTime='';*/
+				//this.isFormal='';
+				this.usinfor.durationTime = '';
+				this.usinfor.renewTime = '';
+
+			},
+			timeCalculate(e) {
+				if(this.usinfor.isFormal == '') {
+					this.$message({
+						type: 'error',
+						message: '请先选中商家类型!'
+					});
+					this.usinfor.durationTime = '';
+					return false
+				}
+				//alert(e)
+				// var AddDayCount=20;
+				var dd = new Date(e); //Wed Apr 04 2018 00:00:00 GMT+0800 (中国标准时间)
+				// alert(dd.getDate())
+				dd.setDate(dd.getDate() + Number(this.usinfor.isFormal)); //获取AddDayCount天后的日期    
+				var y = dd.getFullYear();
+				var m = (dd.getMonth() + 1) < 10 ? "0" + (dd.getMonth() + 1) : (dd.getMonth() + 1); //获取当前月份的日期，不足10补0    
+				var d = dd.getDate() < 10 ? "0" + dd.getDate() : dd.getDate(); //获取当前几号，不足10补0    
+				this.usinfor.renewTime = y + "-" + m + "-" + d
+				//alert(y+"-"+m+"-"+d)
+			},
+
+			//			deleteimg(myindex) {
+			////				console.log(this.usinfor.wxlogo)
+			//				let paths='';
+			//				if(myindex == '0'){
+			//					paths=this.usinfor.wxcert
+			//				}else{
+			//					paths=this.usinfor.wxlogo
+			//				}
+			//				this.$ajax.post(`${this.$url}/bussiness/deleteUpload.html`, {
+			//						servicePath: paths,
+			//						chunk: myindex
+			//					}).then(data => {
+			//						if(data.data.flag == true) {
+			//							if(myindex == '0'){
+			//								this.usinfor.wxcert= this.COMiMAGE
+			//								}else{
+			//								this.usinfor.wxlogo= this.COMiMAGE
+			//								}
+			//							this.$message.error('删除成功');
+			//							this.iconshow = false;
+			//							
+			//						}
+			//					})
+			//					.catch((error) => {
+			//						console.log(error)
+			//					})
+			//			},
+			//			enterpointer() {
+			//				if(this.usinfor.wxcert == this.COMiMAGE) {} else {
+			//					this.iconshows = true;
+			//				}
+			//			},
+			//			exportpointer() {
+			//				this.iconshows = false;
+			//			},
+			//			enterpointer1() {
+			//				if(this.usinfor.wxlogo == this.COMiMAGE) {} else {
+			//					this.iconshow = true;
+			//				}
+			//			},
+			//			exportpointer1() {
+			//				this.iconshow = false;
+			//			},
+
+			areaprov: function(even) {
+				//this.$emit('areaprov', event.target.value);
+				this.usinfor.provinceID = even.target.value
+
+				this.cityArr = [];
+				for(let i in this.listCity) {
+					if(this.usinfor.provinceID == this.listCity[i].parentID) {
+						//						this.cityArr = this.arr[i];
+						//this.$set(this.cityArr, i, this.arrLists[i])
+						//vue.set(this.cityArr, i, this.arrLists[i])
+						//this.cityArr.push(this.arrLists[i])
+						this.cityArr.push(this.listCity[i]);
+					}
+				}
+				console.log(this.prov)
+			},
+			areacity: function(event) {
+				//this.$emit('areaprovs', event.target.value)
+				this.usinfor.cityID = event.target.value
+				this.districtArr = [];
+				for(let i in this.listCity) {
+					if(this.usinfor.cityID == this.listCity[i].parentID) {
+
+						this.districtArr.push(this.listCity[i]);
+					}
+				}
+			},
+			xianqus(event) {
+				//console.log(this.rangelist)
+				this.usinfor.countryID = event.target.value
+			},
+
+			submitUpdata() {
+                let r = /^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/;
+				if(!this.test()) {
+					return false;
+				}
+				if(!r.test(this.usinfor.phoneNum)) {
+					this.$message.error('请填写正确的手机号码');
+					return false;
+				}
+				//				let flags=this.checkeds()
+				//           if(flags){
+				let areaname = '';
+				for(let i = 0; i < this.listCity.length; i++) {
+					if(this.usinfor.provinceID == this.listCity[i].ID || this.usinfor.cityID == this.listCity[i].ID || this.usinfor.countryID == this.listCity[i].ID) {
+						if(areaname == '') {
+							areaname = this.listCity[i].areaName
+						} else {
+							areaname = areaname + ',' + this.listCity[i].areaName
+						}
+
+					}
+				}
+				this.usinfor.durationTime = this.GMTToStr(this.usinfor.durationTime);
+				//md5加密
+                var dataMap = {};
+				dataMap['bussinessID'] = this.usinfor.bussinessID;
+				dataMap['bussinessName'] = this.usinfor.bussinessName;
+				dataMap['bussinessLinkPerson'] = this.usinfor.bussinessLinkPerson;
+				dataMap['phoneNum'] = this.usinfor.phoneNum;
+				dataMap['isFormal'] = this.usinfor.isFormal;
+				dataMap['scopeId'] = this.usinfor.bussinessScopeId;
+				dataMap['state'] = this.usinfor.state;
+				dataMap['provinceID'] = this.usinfor.provinceID;
+				dataMap['address'] = areaname;
+				dataMap['wxappid'] = this.usinfor.wxappid;
+
+				var sign = this.$utilMd5s.md5Code(JSON.stringify(dataMap));
+				dataMap['wxlogo'] = this.usinfor.wxLogo;
+				dataMap['zfbappID'] =this.usinfor.zfbappID;
+				dataMap['zfbprivateKey'] = this.usinfor.zfbprivateKey;
+				dataMap['wxcert'] = this.usinfor.wxcert;
+				dataMap['wxmchID'] = this.usinfor.wxmchID;
+				dataMap['wxtoken'] = this.usinfor.wxtoken;
+
+				dataMap['durationTime'] = this.usinfor.durationTime;
+				dataMap['renewTime'] = this.usinfor.renewTime;
+
+				dataMap['cityID'] = this.usinfor.cityID;
+				dataMap['countryID'] = this.usinfor.countryID;
+				dataMap['sign'] = sign;
+				//防止重复提交
+				dataMap['uuid'] = this.uuid;
+
+				var jsonData = JSON.stringify(dataMap);
+				this.$ajax.post(`${this.$url}/bussiness/updateBussiness.html`, {
+					jsonData: jsonData
+//						bussinessID: this.usinfor.bussinessID,
+//						bussinessName: this.usinfor.bussinessName,
+//						bussinessLinkPerson: this.usinfor.bussinessLinkPerson,
+//						phoneNum: this.usinfor.phoneNum,
+//						isFormal: this.usinfor.isFormal,
+//						scopeId: this.usinfor.bussinessScopeId,
+//						durationTime: this.usinfor.durationTime,
+//						renewTime: this.usinfor.renewTime,
+//						provinceID: this.usinfor.provinceID,
+//						cityID: this.usinfor.cityID,
+//						countryID: this.usinfor.countryID,
+//						wxappid: this.usinfor.wxappid,
+//						wxtoken: this.usinfor.wxtoken,
+//						wxmchID: this.usinfor.wxmchID,
+//						wxcert: this.usinfor.wxcert,
+//						zfbappID: this.usinfor.zfbappID,
+//						zfbprivateKey: this.usinfor.zfbprivateKey,
+//						state: this.usinfor.state,
+//						address: areaname,
+//						wxlogo: this.usinfor.wxLogo
+
+					}).then(data => {
+
+						console.log(data)
+						this.$emit('closes');
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+				//             }
+
+			},
+			GMTToStr(time) {
+				let date = new Date(time)
+				let Str = date.getFullYear() + '-' +
+					(date.getMonth() + 1) + '-' +
+					date.getDate()
+				return Str
+			},
+			close: function() {
+				//				console.log(this.assar)
+				this.$emit('close');
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId,
+					}
+				})
+			},
+		},
+	}
+</script>
+<style>
+	/*.bai100{
+		width:100px !important;
+		height:100px !important;
+		float:left;
+	}*/
+</style>

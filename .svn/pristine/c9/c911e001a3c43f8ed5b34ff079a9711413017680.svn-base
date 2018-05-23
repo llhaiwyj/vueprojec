@@ -1,0 +1,142 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" v-show="show">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>用户管理---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-row :gutter="10"> 
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.serviceName" class="name1" clearable :disabled="true">
+										<template class="biaoti" slot="prepend">服务名称</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.servicePrice" class="name1" clearable>
+										<template class="biaoti" slot="prepend">服务售价</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.serviceSalesPrice" class="name1" clearable>
+										<template class="biaoti" slot="prepend">服务会员价</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.servicePushMoney" class="name1" clearable>
+										<template class="biaoti" slot="prepend">服务提成</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.serviceSalesPushMoney" class="name1" clearable>
+										<template class="biaoti" slot="prepend">销售提成</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.bussinessName" class="name1" clearable :disabled="true">
+										<template class="biaoti" slot="prepend">适用商家</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.storeName" class="name1" clearable :disabled="true">
+										<template class="biaoti" slot="prepend">适用门店</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.serviceNamePy" class="name1" clearable :disabled="true">
+										<template class="biaoti" slot="prepend">服务简拼</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<div class="input-group">
+										<span class="input-group-addon">单位</span>
+										<select placeholder="单位" v-model="shujus.unit">
+											<option v-for="se in units" :value="se.value">{{se.text}}</option>
+										</select>
+									</div>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input v-model="shujus.sort" class="name1" clearable>
+										<template class="biaoti" slot="prepend">排序</template>
+									</el-input>
+								</el-col>
+								<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<div class="input-group">
+										<span class="input-group-addon">是否上架</span>
+										<select v-model="shujus.state">
+											<option v-for="sel in states" :value="sel.value">{{sel.text}}</option>
+										</select>
+									</div>
+								</el-col>
+							</el-row>
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button @click="getCheckedNodes" class="el-button el-button--primary queding">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+						<!--<button type="button" class="el-button el-button--primary" @click="close">确 定</button>-->
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props: ['shujus'],
+		data() {
+			return {
+				units: [{
+					value: '次',
+					text: '次'
+				}],
+				states: [{
+						value: '0',
+						text: '上架'
+					},
+					{
+						value: '1',
+						text: '下架'
+					}
+				],
+			}
+		},
+		//获取树形菜单
+		mounted: function() {},
+		methods: {
+			getCheckedNodes() {
+				this.$ajax.post(`${this.$url}/service_manager/updateService.html`, {
+						serviceName: this.shujus.serviceName,
+						serviceID: this.shujus.serviceID,
+						bussinessID: this.shujus.bussinessID,
+						storeID: this.shujus.storeID,
+						serviceNamePy: this.shujus.serviceNamePy,
+						servicePrice: this.shujus.servicePrice,
+						serviceSalesPrice: this.shujus.serviceSalesPrice,
+						state: this.shujus.state,
+						servicePushMoney: this.shujus.servicePushMoney,
+						salesPushMoney: this.shujus.serviceSalesPushMoney,
+						sort: this.shujus.sort,
+						unit:this.shujus.unit,
+					}).then(data => {
+						console.log(data)
+						this.$emit('close');
+					})
+					.catch((error) => {
+						this.$message.error('获取数据失败');
+					})
+			},
+			close: function() {
+				this.$emit('close');
+			},
+
+		}
+	}
+</script>

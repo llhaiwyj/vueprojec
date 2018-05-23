@@ -1,0 +1,235 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop"  v-show="show">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>角色设置---修改</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+								<el-row :gutter="10">
+							<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>角色基本信息<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">								 
+							  	<span class="mc">角色ID :</span>
+							  	 <input class="inputbox name1" type="text" v-model="updates.roleId" readonly="readonly" />	
+							  </div>
+							  </el-col>
+							  	<el-col :span="7" class="gutterspan">
+							  	<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.updates.roleName.$error }">
+							  	<span class="mc">角色名称 :</span>
+								<input class="inputbox name1" type="text" @blur="test" v-model="updates.roleName" :readonly="readonly"/>	
+								</div>
+								<span class="form-group__message" v-if="!$v.updates.roleName.required">不能为空</span>
+								</div>
+							  </el-col>
+							  <el-col :span="7" class="gutterspan">
+							  	<div class="box">
+							  	<span class="mc">角色备注 :</span>
+								<input class="inputbox name1" type="text" v-model="updates.remark" :readonly="readonly"/>
+								</div>
+							  </el-col>
+							    <el-col :span="7" class="gutterspan">
+							    <div class="box">
+							    	<div class="form-group" v-bind:class="{'form-group--error': $v.updates.state.$error }">
+							  	<span class="mc">选择角色：</span>
+							  	<select class="xl" placeholder="请选择"  @blur="test"   v-model="updates.state" v-on:change="changeType($event)" :disabled="disabled">
+									<option  v-for="se in sels" v-bind:value="se.value" >{{ se.text }}</option>						
+								</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.updates.state.required">不能为空</span>
+								</div>
+							  </el-col>	
+							  <el-col :span="7" class="gutterspan">
+							  	<el-tree :data="updatess" 
+								show-checkbox 
+								accordion 
+								node-key="id"
+								highlight-current
+								ref="tree"
+                                :default-checked-keys="dataId"
+								:props="defaultProps" >
+							</el-tree>
+							  </el-col>
+						</el-row>	
+						<!--<el-row :gutter="10">
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+									<span class="input-group-addon">角色ID</span>
+	                                  <input class="inputbox" type="text" v-model="updates.roleId" :readonly="readonly" />
+							    </div>										
+							</el-col>
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+									<span class="input-group-addon">角色名称</span>
+									<input class="inputbox" type="text" v-model="updates.roleName" :readonly="readonly"/>
+								</div>	
+							</el-col>
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+								<span class="input-group-addon">备注</span>
+								<input class="inputbox" type="text" v-model="updates.remark" :readonly="readonly"/>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+									<span class="input-group-addon">请选择角色</span>
+									<select class="select" placeholder="请选择"  v-model="updates.state" v-on:change="changeType($event)" :disabled="disabled">
+									<option  v-for="se in sels" v-bind:value="se.value" >{{ se.text }}</option>						
+								</select>
+							    </div>									
+							</el-col>
+								<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<el-tree :data="updatess" 
+								show-checkbox 
+								accordion 
+								node-key="id"
+								highlight-current
+								ref="tree"
+                                :default-checked-keys="dataId"
+								:props="defaultProps" >
+							</el-tree>
+							</el-col>	
+						</el-row>-->
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" v-show="isClose" class="el-button el-button--primary queding" @click="close">确 定</button>
+						<button type="button" class="el-button el-button--default guanbi" @click="closes">关闭</button>						
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required} from 'vuelidate/lib/validators'
+	export default {
+		props: ['uuid','updates','sels','updatess','dataId','md','isClose','disabled','readonly','read'],
+		data() {
+			return {
+				arrs: '',
+				roleID: '',
+				rolename: '',
+				remarks: '',
+				state:'',
+				assar: '',
+				
+				defaultProps: {
+					children: 'children',
+					label: 'name'
+				},
+			}
+		},created(){
+			
+         },   
+         	validations: {   
+		 
+		    updates:{
+		       roleName: {
+		            required
+		       },
+		       state:{
+		       	required
+		       }
+		    }
+
+    },
+		mounted: function() {
+					//判断系统管理员还是商户管理员，来动态展示下拉选的内容
+					//this.$storage.save("isAdmin","0")
+					/*let admin=this.$storage.fetch("isAdmin")
+					if(admin > 1){
+						
+						this.sel=[{ value: 2, text: '商户管理员' },{ value: 3, text: '门店管理员' }]
+					}else if(admin == 0){
+						this.sel=[{ value: 1, text: '系统管理员' },{ value: 2, text: '商户管理员' },{ value: 3, text: '门店管理员' },]
+
+					}else{
+						this.sel=[{ value: 0, text: '系统管理员' }]
+					}*/
+					
+				    
+			
+
+		
+			
+			
+		}, 
+		methods: {
+			test(){
+           	this.$v.updates.roleName.$touch()
+             	if(this.$v.updates.roleName.$error){
+					return false;
+				}
+             	this.$v.updates.state.$touch()
+             	if(this.$v.updates.roleName.$error){
+					return false;
+				}
+             	return true;
+            },
+			closes (){
+				this.$emit('close');
+			},
+			changeType(val) {
+				
+               this.state=val.target.value
+			},  
+			close: function() {
+
+                if(!this.test()){
+                	return false;
+                }
+				if(this.state == ''){
+					this.state=this.updates.state
+				}
+				console.log(this.updates.remark)
+				if(this.updates.state == 0){
+					this.$emit('close','超级管理员不能修改');
+					return false
+				}
+				
+				let listTree=[].concat(this.$refs.tree.getCheckedKeys(), this.$refs.tree.getHalfCheckedKeys())
+				let treeList=[];
+				for(var i=0;i < listTree.length; i++){
+					let obj=this.$refs.tree.getNode(listTree[i]).data
+					    delete obj.childNodes;
+					treeList.push(obj)
+				}
+				console.log(treeList)
+				this.assar = JSON.stringify(treeList);
+				
+				this.$ajax.post(`${this.$url}/role/updateRole.html`, {roleRemark:this.updates.remark,roleID: this.updates.roleId,roleName:this.updates.roleName,arr: this.assar,state:this.state,uuid:this.uuid}).then(request => {
+						this.$emit('close');
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			/*indexSelects (val,even) {
+			   console.log(val)
+			    this.bid=event.target.value
+			    console.log(this.bid)
+			},*/
+			handleRemove(file, fileList) {
+				console.log(file, fileList);
+			},
+			handlePreview(file) {
+				console.log(file);
+			},
+			handleNodeClick(data) {
+				console.log(data);
+			}
+		}
+	}
+</script>

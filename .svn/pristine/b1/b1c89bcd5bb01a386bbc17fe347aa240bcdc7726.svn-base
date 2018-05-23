@@ -1,0 +1,197 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" @click="close" v-show="show">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>商品属性---修改</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body" style="height:auto">
+					<slot name="body">
+							<el-row :gutter="10">
+							<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>商品属性信息<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col>
+							  <el-col :span="7" class="gutterspan">
+							  	<span class="mc">属性名称：</span>
+							  	<el-input v-model="attributeDat.attributeName" disabled placeholder=""class="name1" clearable>
+								 </el-input>							
+							  </el-col>
+							    <el-col :span="7" class="gutterspan">
+							  	<span class="mc">状态：</span>
+								<el-select  class="xl" v-model="attributeDat.flag" @change="goodState($event)">
+								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+							</el-select>
+							  </el-col>	
+							  <el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>商品属性信息<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							  <el-checkbox-group v-model="attributeDetailName" @change="handleCheckedCitiesChange">
+							    <el-checkbox v-for="attr in attributeDetailData" :label="attr.attributeDetailValue" :key="attr.attributeDetailID" :value="attr.attributeDetailID"></el-checkbox>
+							  </el-checkbox-group>
+							</el-col>
+						</el-row>
+						<!--<el-row :gutter="10">
+					      <el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+					      	<el-input v-model="attributeDat.attributeName" disabled placeholder=""class="name1" clearable>
+					      		<template class="biaoti" slot="prepend">属性名称</template>
+					      	</el-input>
+					      </el-col>
+					      <el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								 <div class="input-group">
+									<span class="input-group-addon">属性状态</span>
+									<el-select  class="shangstate" v-model="attributeDat.flag" @change="goodState($event)">
+								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+							</el-select>
+							</div>	
+							
+					      </el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<h4 class="input-group-property">请选择商品属性</h4>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							  <el-checkbox-group v-model="attributeDetailName" @change="handleCheckedCitiesChange">
+							    <el-checkbox v-for="attr in attributeDetailData" :label="attr.attributeDetailValue" :key="attr.attributeDetailID" :value="attr.attributeDetailID"></el-checkbox>
+							  </el-checkbox-group>
+							</el-col>
+						</el-row>-->
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--primary queding" @click="getUpdateStore">确定</button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+						
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+<script>
+	// const cityOptions = ['颜色', '容积', '材质', '香味','适用部位','功能','使用方式',];
+	export default {
+		props: ['attributeDat','attributeDetailData','attributeDetailName'],
+		data() {
+			return {
+				options: [{
+				value: '1',
+				label: '启用'
+			},
+			{
+				value: '2',
+				label: '停用'
+			}],
+			  checkAll: false,
+	       // checkedCities: ['颜色', '容积'],
+	      //  cities: cityOptions,
+	        isIndeterminate: true,
+	        state:'',
+	        cities:[],
+	        
+			};
+		},
+		//初始化门店的经营类别
+		methods: {
+			//全选
+//     handleCheckAllChange(val) {
+//      this.checkedCities = val ? cityOptions : [];
+//      this.isIndeterminate = false;
+//    },
+      handleCheckedCitiesChange(value) {
+      	
+        let checkedCount = value.length;
+        this.checkAll = checkedCount === this.attributeDetailData.length;
+        this.isIndeterminate = checkedCount > 0 && checkedCount < this.attributeDetailData.length;
+      },
+      goodState(value){
+				
+				this.state=value
+				
+			},
+      //调用父组建的方法
+			close: function() {
+				//	console.log(this.assar)
+				this.$emit('close');
+			},
+			getUpdateStore(){
+				if(this.state == ''){
+					this.state=this.attributeDat.flag
+				}
+				let detailList=[];
+				this.cities=this.attributeDetailName;
+				
+				for(let i=0; i< this.attributeDetailData.length; i++){
+						detailList.push(this.attributeDetailData[i].attributeDetailValue)
+				}
+				let detailId=''
+				let lis=this.array_difference(detailList,this.cities)
+				  for(let i=0; i< lis.length; i++){
+				  	for(let y=0; y< this.attributeDetailData.length; y++){
+				  		if(lis[i] == this.attributeDetailData[y].attributeDetailValue){
+				  			if(detailId == ''){
+				  				detailId=this.attributeDetailData[y].attributeDetailID
+				  			}else{
+				  				detailId=detailId+','+this.attributeDetailData[y].attributeDetailID
+				  			}
+				  		}
+				  	}
+						
+				}
+				 //请求修改后台
+				 this.$ajax.post(`${this.$url}/attribute/updateAttribute.html`, {
+									attributeID:this.attributeDat.attributeID,
+									attributeName: this.attributeDat.attributeName, 
+									finalids:detailId,
+									flag: this.state            
+								}).then(restaurants => {
+									console.log(restaurants.data.message)
+									this.$emit('close',restaurants.data.message);
+								})  
+				
+				
+			},
+			 array_difference(a, b) { // 差集 a - b
+				    //clone = a
+				    var clone = a.slice(0);
+				    for(var i = 0; i < b.length; i ++) {
+				        var temp = b[i];
+				        for(var j = 0; j < clone.length; j ++) {
+				            if(temp === clone[j]) {
+				                //remove clone[j]
+				                clone.splice(j,1);
+				            }
+				        }
+				    }
+				    return this.array_remove_repeat(clone);
+			},
+			array_remove_repeat(a) { // 去重
+				    var r = [];
+				    for(var i = 0; i < a.length; i ++) {
+				        var flag = true;
+				        var temp = a[i];
+				        for(var j = 0; j < r.length; j ++) {
+				            if(temp === r[j]) {
+				                flag = false;
+				                break;
+				            }
+				        }
+				        if(flag) {
+				            r.push(temp);
+				        }
+				    }
+				    return r;
+			},
+       }
+	}
+</script>
+
+

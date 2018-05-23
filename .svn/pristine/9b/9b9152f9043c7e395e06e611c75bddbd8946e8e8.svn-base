@@ -1,0 +1,314 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" v-show="show">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>门店服务---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.serviceName.$error }">
+											<span class="mc">服务名称</span>
+											<el-input @blur="test" v-model="serviceName" @change="selectFlag('1')" class="name1" clearable>
+											</el-input>
+										</div>
+										<span class="form-group__message" v-if="!$v.serviceName.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.bussinessId.$error }">
+											<span class="mc">所属商家</span>
+											<select class="xl" @blur="test" v-model="bussinessId" v-on:change="changeType($event)" @change="checkeds">
+												<option v-for="item in bussiness" :value="item.bussinessID">{{item.bussinessName}}</option>
+											</select>
+										</div>
+										<span class="form-group__message" v-if="!$v.bussinessId.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.storeID.$error }">
+											<span class="mc">适用门店</span>
+											<select @blur="test" class="xl" v-model="storeID">
+												<option v-for="(j,index) in lists" :value="j.id">{{j.storeName}}</option>
+											</select>
+										</div>
+										<span class="form-group__message" v-if="!$v.storeID.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.groupingId.$error }">
+											<span class="mc">服务分组</span>
+											<select @blur="test" class="xl" v-model="groupingId" @change="selectFlag()">
+												<option v-for="se in groups" :value="se.groupingId">{{se.groupingName}}</option>
+											</select>
+										</div>
+										<span class="form-group__message" v-if="!$v.groupingId.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.servicePrice.$error }">
+											<span class="mc">服务售价</span>
+											<el-input @blur="test" v-model="servicePrice" class="name1" clearable>
+											</el-input>
+										</div>
+										<span class="form-group__message" v-if="!$v.servicePrice.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.servicePushMoney.$error }">
+											<span class="mc">服务提成</span>
+											<el-input @blur="test" v-model="servicePushMoney" class="name1" clearable>
+											</el-input>
+										</div>
+										<span class="form-group__message" v-if="!$v.servicePushMoney.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.unit.$error }">
+											<span class="mc">单位</span>
+											<select @blur="test" class="xl" v-model="unit">
+												<option v-for="se in units" :value="se.value">{{se.text}}</option>
+											</select>
+										</div>
+										<span class="form-group__message" v-if="!$v.unit.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.sort.$error }">
+											<span class="mc">排序</span>
+										<el-input @blur="test" v-model="sort" class="xl" clearable>
+									</el-input>
+										</div>
+										<span class="form-group__message" v-if="!$v.sort.required">不能为空</span>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<div class="form-group" v-bind:class="{'form-group--error': $v.state.$error }">
+											<span class="mc">是否上架</span>
+										<select @blur="test" class="xl" v-model="state">
+										<option v-for="sel in states" :value="sel.value">{{sel.text}}</option>
+									</select>
+										</div>
+										<span class="form-group__message" v-if="!$v.state.required">不能为空</span>
+									</div>
+								</el-col>
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button @click="getCheckedNodes" class="el-button el-button--primary queding">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	export default {
+		props: ['groups'],
+		data() {
+			return {
+				serviceName: '', //服务名称
+				bussinessId: '', //商家ID
+				bussiness: this.$storage.fetch("bussiness"),
+				bussinessstore: this.$storage.fetch("bussinessstore"), //商户下的门店
+				lists: [], //门店集合
+				storeID: '', //门店ID
+				groupingId: '', //服务ID
+				servicePrice: '', //售价
+				servicePushMoney: '', //服务提成
+				businessScope:'',
+				unit: '', //单位
+				sort: '', //排序
+				state: '', //是否上架
+				units: [{
+					value: '次',
+					text: '次'
+				}],
+				states: [{
+						value: '0',
+						text: '上架'
+					},
+					{
+						value: '1',
+						text: '下架'
+					}
+				],
+			}
+		},
+		validations: {
+			serviceName: {
+				required
+			},
+			bussinessId: {
+				required
+			},
+			storeID: {
+				required
+			},
+			groupingId: {
+				required
+			},
+			servicePrice: {
+				required
+			},
+			servicePushMoney: {
+                required
+			},
+			unit:{
+				required
+			},
+			sort:{
+				required
+			},
+			state:{
+				required
+			}
+
+		},
+		//获取树形菜单
+		mounted: function() {},
+		methods: {
+			test() {
+				this.$v.serviceName.$touch()
+				if(this.$v.serviceName.$error) {
+					return false;
+				}
+				this.$v.bussinessId.$touch()
+				if(this.$v.bussinessId.$error) {
+					return false;
+				}
+				this.$v.storeID.$touch()
+				if(this.$v.storeID.$error) {
+					return false;
+				}
+				this.$v.groupingId.$touch()
+				if(this.$v.groupingId.$error) {
+					return false;
+				}
+				this.$v.servicePrice.$touch()
+				if(this.$v.servicePrice.$error) {
+					return false;
+				}
+				this.$v.servicePushMoney.$touch()
+				if(this.$v.servicePushMoney.$error) {
+					return false;
+				}
+				this.$v.unit.$touch()
+				if(this.$v.unit.$error) {
+					return false;
+				}
+				this.$v.sort.$touch()
+				if(this.$v.sort.$error) {
+					return false;
+				}
+				this.$v.state.$touch()
+				if(this.$v.state.$error) {
+					return false;
+				}
+				return true;
+			},
+			changeType(val) {
+				this.lists = [];
+				//赋值商户id
+				this.bussinessId = val.target.value;
+				console.log(this.bussinessstore)
+				for(var i = 0; i < this.bussinessstore.length; i++) {
+					if(this.bussinessId == this.bussinessstore[i].bussinessId) {
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+				this.$ajax.post(`${this.$url}/storeService/selServiceList.html`, {
+						bussinessID: this.bussinessId,
+					}).then(data => {
+						this.businessScope=data.data.bussScope[0].scope
+						console.log(data)
+					})
+					.catch((error) => {
+						this.$message.error('获取数据失败');
+					})
+			},
+			selectFlag() {
+				this.$ajax.post(`${this.$url}/storeService/validService.html`, {
+						storeID: this.storeID,
+						serviceName: this.serviceName
+					}).then(data => {
+						if(data.data == true) {
+							this.$message({
+								type: 'success',
+								message: data.data.message
+							});
+
+						} else {
+							this.$message({
+								type: 'error',
+								message: data.data.message
+							});
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			getCheckedNodes() {
+				if(!this.test()) {
+					return false;
+				}
+				this.$ajax.post(`${this.$url}/storeService/insertStoreService.html`, {
+						serviceName: this.serviceName,
+						bussinessID: this.bussinessId,
+						storeID: this.storeID,
+						businessScope:this.businessScope,
+						groupingId: this.groupingId,
+						servicePrice: this.servicePrice,
+						state: this.state,
+						servicePushMoney: this.servicePushMoney,
+						sort: this.sort,
+						unit: this.unit
+					}).then(data => {
+						if(data.data.flag == true) {
+							this.$message(data.data.message);
+							this.$emit('closes');
+						} else {
+							this.$message.error(data.data.message);
+						}
+					})
+					.catch((error) => {
+						this.$message.error('获取数据失败');
+					})
+			},
+			close: function() {
+				this.serviceName = ''
+				this.bussinessId = ''
+				this.storeID = ''
+				this.groupingId = ''
+				this.servicePrice = ''
+				this.state = ''
+				this.servicePushMoney = ''
+				this.sort = ''
+				this.unit = ''
+				this.$emit('close');
+			},
+
+		}
+	}
+</script>

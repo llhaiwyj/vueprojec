@@ -1,0 +1,210 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modals" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>用户管理---待续费</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+									<span class="mc">商家编号</span>
+									<el-input v-model="renewalfeeArrs.bussinessID" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+									<span class="mc">商户名称：</span>
+									<el-input v-model="renewalfeeArrs.bussinessName" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.renewalfeeArrs.isFormal.$error }">
+									<span class="mc">商户类型：</span>
+									<el-input v-model="renewalfeeArrs.isFormal" v-if="renewalfeeArrs.isFormal='365'"  class="name1" disabled="disabled">
+									</el-input>
+									<el-select @blur="test" class="xl" v-else="renewalfeeArrs.isFormal='20'" v-model="renewalfeeArrs.isFormal">
+										<el-option v-for="item in businessType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.renewalfeeArrs.isFormal.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.day.$error }">
+									<span class="mc">续费时长</span>
+									<el-select @blur="test" class="xl" v-model="day" @change="timeCalculate($event)">
+										<el-option v-for="item in lengthRenewal" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.day.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+								<span class="mc">结束使用时间：</span>
+								<el-input @blur="test" v-model="renewalfeeArrs.renewTime" disabled="disabled" class="name1" clearable>
+								</el-input>
+							</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.renewTime.$error }">
+									<span class="mc">续费使用时间：</span>
+									<el-input @blur="test" v-model="renewTime" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.renewTime.required">不能为空</span>
+							</div>
+						</el-col>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button @click="getCheckedNodes" class="el-button el-button--primary queding">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+						<!--<button type="button" class="el-button el-button--primary" @click="close">确 定</button>-->
+					</slot>
+				</div>
+			</div>z
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	export default {
+		props: ['renewalfeeArrs'],
+		data() {
+			return {
+				day: '',
+				renewTime: '',
+				businessType: [{
+					value: '20',
+					label: '试用'
+				}, {
+					value: '365',
+					label: '正式'
+				}],
+				lengthRenewal: [{
+					value: '30',
+					label: '30天'
+				}, {
+					value: '365',
+					label: '一年'
+				}]
+			}
+		},
+		validations: {
+			day: {
+				required
+			},
+			renewTime: {
+				required
+			},
+			renewalfeeArrs: {
+				isFormal: {
+					required
+				},
+			}
+		},
+		mounted: function() {},
+		methods: {
+			test() {
+				this.$v.renewalfeeArrs.isFormal.$touch()
+				if(this.$v.renewalfeeArrs.isFormal.$error) {
+					return false;
+				}
+				this.$v.day.$touch()
+				if(this.$v.day.$error) {
+					return false;
+				}
+				this.$v.renewTime.$touch()
+				if(this.$v.renewTime.$error) {
+					return false;
+				}
+				return true;
+			},
+			timeCalculate(e) {
+//				if(this.day == '') {
+//					this.$message({
+//						type: 'error',
+//						message: '请先选中商户类型!'
+//					});
+//					this.renewTime = '';
+//					return false
+//				}
+				if(!e) {
+					this.renewTime = '';
+				}
+
+				//alert(e)
+				// var AddDayCount=20;
+                
+				var dd = new Date(this.renewalfeeArrs.renewTime); //Wed Apr 04 2018 00:00:00 GMT+0800 (中国标准时间)
+				// alert(dd.getDate())
+				//				  this.renewTime=this.renewalfeeArrs.renewTime+this.lone
+				dd.setDate(dd.getDate() + Number(this.day)); //获取AddDayCount天后的日期    
+				var y = dd.getFullYear();
+				var m = (dd.getMonth() + 1) < 10 ? "0" + (dd.getMonth() + 1) : (dd.getMonth() + 1); //获取当前月份的日期，不足10补0    
+				var d = dd.getDate() < 10 ? "0" + dd.getDate() : dd.getDate(); //获取当前几号，不足10补0    
+				this.renewTime = y + "-" + m + "-" + d
+				//alert(y+"-"+m+"-"+d)
+
+			},
+			
+			getCheckedNodes() {
+				if(!this.test()) {
+					return false;
+				}
+				
+				this.durationTime = this.GMTToStr(this.renewalfeeArrs.renewTime);
+				this.$ajax.post(`${this.$url}/bussiness/renewBussiness.html`, {
+						bussinessID: this.renewalfeeArrs.bussinessID,
+						bussinessName: this.renewalfeeArrs.bussinessName,
+						isFormal: this.renewalfeeArrs.isFormal,
+						durationTime: this.renewalfeeArrs.renewTime,
+						renewTime: this.renewTime,
+						day: this.day
+					}).then(data => {
+						if(data.data.flag == true) {
+							this.$message.success(data.data.message);
+							this.$emit('closes');
+						} else {
+							this.$message.error(data.data.message);
+						}
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			GMTToStr(time) {
+				let date = new Date(time)
+				let Str = date.getFullYear() + '-' +
+					(date.getMonth() + 1) + '-' +
+					date.getDate()
+				return Str
+			},
+			close: function() {
+				//				console.log(this.assar)
+				this.$emit('close');
+
+			},
+		}
+	}
+</script>
+
+<style>
+.modals .mc {
+    width: 100px !important;
+}
+</style>

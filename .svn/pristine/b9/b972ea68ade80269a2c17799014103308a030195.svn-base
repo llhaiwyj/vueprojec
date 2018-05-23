@@ -1,0 +1,254 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" @click="close" v-show="show">
+			<div class="modals" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>商家服务库设置---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">服务名称：</span>
+								<el-input v-model="serviceName" class="name1" clearable @change="checkeds">
+								</el-input>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<span class="mc">所属商家：</span>
+								<select class="xl" v-model="bussinessId" v-on:change="bussinessshop($event)" @change="checkeds">
+									<option v-for="item in bussiness" :value="item.bussinessID">{{item.bussinessName}}</option>
+								</select>
+							</el-col>
+							<!--<el-col :span="7" class="gutterspan">
+								<span class="mc">经营类别：</span>
+								<el-input v-model="businessScope" class="name1" disabled="disabled" clearable>
+								</el-input>
+							</el-col>-->
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">服务分组：</span>
+								<select class="xl" v-model="groupingId" v-on:change="fuwufenzu($event)" @change="checkeds">
+									<option v-for="se in lists" :value="se.groupingId">{{se.groupingName}}</option>
+								</select>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">服务售价：</span>
+								<el-input v-model="servicePrice" class="name1" clearable >
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">服务提成：</span>
+								<el-input v-model="servicePushMoney" class="name1" clearable >
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">单位：</span>
+								<select class="xl" v-model="unit" >
+									<option v-for="se in units" :value="se.value">{{se.text}}</option>
+								</select>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">排序：</span>
+								<el-input v-model="sort" class="name1" clearable >
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">是否启用：</span>
+								<select class="xl" v-model="state">
+									<option v-for="sel in states" v-bind:value="sel.value">{{sel.text}}</option>
+								</select>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<el-tree :data="bussTree" node-key="id" show-checkbox accordion highlight-current ref="tree" :props="defaultProps">
+								</el-tree>
+							</el-col>
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--primary" @click="getCheckedNodes">确 定</button>
+						<button type="button" class="el-button el-button--default" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props: ['lists', 'businessScopes'],
+		data() {
+			return {
+				bussiness: this.$storage.fetch("bussiness"),
+				units: [{
+					value: '次',
+					text: '次'
+				}],
+				unit: '',
+				states: [{
+						value: '0',
+						text: '启用'
+					},
+					{
+						value: '1',
+						text: '停用'
+					}
+				],
+				defaultProps: {
+					children: 'children',
+					label: 'name'
+				},
+				assar: '',
+				categoryID: '',
+				businessScopeID: '',
+				serviceName: '',
+				servicePrice: '',
+				servicePushMoney:'',
+//				serviceSalesPrice: '',
+				serviceNamePy: '',
+				sort: '',
+				unit: '',
+				stat: '',
+				fuwu: '',
+				bussinessId:'',
+				shnagjia:'',
+				bussTree:'',
+			};
+		},
+		//初始化门店的经营类别
+		mounted: function() {
+
+		},
+		methods: {
+			bussinessshop(event){
+				this.shnagjia = event.target.value
+				console.log(this.shnagjia)
+				this.$ajax.post(`${this.$url}/bussinessService/loadAddTree.html`,{bussinessID:this.bussinessId}).then(data => {
+						console.log(data)
+						console.log(data.data.bussTree)
+						this.bussTree = data.data.bussTree
+						//						console.log(data.data.roleTree)
+//						console.log(data.data.list)
+//						this.list = data.data.list
+//						console.log(this.list)
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			checkeds() {
+				//保存点击验证
+				let tip = this.$message.error;
+				let tipyu = "请输入服务名称";
+				if(this.serviceName == "") {
+					this.$storage1.UserName(this.serviceName, tip, tipyu);
+					return false;
+				}
+				tipyu = "请选择商家";
+				if(this.bussinessId == "") {
+					//this.$message.error("请输入查询的内容");
+					this.$storage1.UserName(this.bussinessId, tip, tipyu);
+					return false;
+				}
+				tipyu = "请选择服务分组";
+				if(this.groupingId == "") {
+					//this.$message.error("请输入查询的内容");
+					this.$storage1.UserName(this.groupingId, tip, tipyu);
+					return false;
+				}
+				tipyu = "请填写服务售价";
+				if(this.servicePrice == "") {
+					this.$storage1.UserName(this.servicePrice, tip, tipyu);
+					return false;
+				}
+//else (Number(this.servicePrice)>0||Number(this.servicePrice)==0){
+//					
+//				}
+				tipyu = "请选择单位";
+				if(this.unit == "") {
+					this.$storage1.UserName(this.unit, tip, tipyu);
+					return false;
+				}
+				tipyu = "请输入序号";
+				if(this.sort == "") {
+					this.$storage1.UserName(this.sort, tip, tipyu);
+					return false;
+				}
+				tipyu = "请选择门店状态";
+				if(this.state == "") {
+					this.$storage1.UserName(this.state, tip, tipyu);
+					return false;
+				}
+				return true;
+			},
+			//调用父组建的方法
+			close: function() {
+
+				this.$emit('close');
+
+			},
+			fuwufenzu(event) {
+				this.fuwu = event.target.value
+			},
+			getCheckedNodes() {
+				let flags = this.checkeds()
+				if(flags){
+					this.assar = JSON.stringify(this.$refs.tree.getCheckedNodes());
+				//				let listTree=[].concat(this.$refs.tree.getCheckedKeys(), this.$refs.tree.getHalfCheckedKeys())
+				//				let treeList=[];
+				//				for(var i=0;i < listTree.length; i++){
+				//					let obj=this.$ref.tree.getNode(listTree[i]).data
+				//					    delete obj.childNodes;
+				//					treeList.push(obj)
+				//				}
+				//				console.log(treeList)
+				//				this.assar = JSON.stringify(treeList);
+				//				this.$ajax.post(`${this.$url}/service_xyykt_manager/validService.html`, { addServiceName: this.serviceName }).then(data => {
+				//						console.log(data)
+				//						if(data.data.flag == true) {
+				this.$ajax.post(`${this.$url}/bussinessService/insertService.html`, {
+						serviceName: this.serviceName,
+						businessScope:this.businessScope,
+						groupingId: this.groupingId,
+						servicePrice: this.servicePrice,
+						servicePushMoney:this.servicePushMoney,
+						unit: this.unit,
+						sort: this.sort,
+						state: this.state,
+						bussCheckedarr:this.assar
+					}).then(restaurants => {
+						console.log(restaurants)
+						if(restaurants.data.flag == true) {
+							this.$message(restaurants.data.message);
+							this.$emit('close');
+						} else {
+							this.$message.error(restaurants.data.message);
+						}
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					});
+				}
+				
+				//						}else{
+				//							this.$message(restaurants.data.message);
+				//						}
+
+//			})
+//		.catch((error) => {
+//			console.log(error)
+//			this.$message.error('获取数据失败');
+//		});
+
+	},
+
+	}
+	}
+</script>

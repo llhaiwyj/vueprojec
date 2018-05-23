@@ -1,0 +1,831 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>门店设置---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.no.$error }">
+									<span class="mc">门店编号</span>
+									<el-input @blur="test" v-model="no" class="name1" @change="selectFlag('1')" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.no.required">不能为空</span>
+								<span class="form-group__message" v-if="!$v.no.aa">不能输入汉字</span>
+								<span class="form-group__message" v-if="!$v.no.maxLength">不能超过11位数字</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.storeName.$error }">
+									<span class="mc">门店名称</span>
+									<el-input @blur="test" v-model="storeName" class="name1" @change="selectFlag('2')" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.storeName.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan" v-show="bussinessShows">
+							<div class="box">
+								<span class="mc">所属商家</span>
+								<el-input v-model="bussinessName" class="name1" disabled="disabled">
+								</el-input>
+								<!--<select class="xl" v-model="bussinessID" disabled="disabled">
+									<option v-for="item in store" :value="item.bussinessID">{{item.bussinessName}}</option>
+								</select>-->
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan" v-show="bussinessShow">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.bussinessID.$error }">
+									<span class="mc">所属商家</span>
+									<el-select @blur="test" class="xl" v-model="bussinessID">
+										<el-option v-for="item in store" :key="item.bussinessID" :label="item.bussinessName" :value="item.bussinessID"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.bussinessID.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.storePhone.$error }">
+									<span class="mc">门店电话</span>
+									<el-input @blur="test" v-model="storePhone" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.phoneNum.required">不能为空</span>
+								<span class="form-group__message" v-if="!$v.phoneNum.numeric">只能输入数字</span>
+								<span class="form-group__message" v-if="!$v.phoneNum.minLength">请输入正确手机号</span>
+								<span class="form-group__message" v-if="!$v.phoneNum.maxLength">不能超过11位数字</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.storeLinkPerson.$error }">
+									<span class="mc">联系人</span>
+									<el-input @blur="test" v-model="storeLinkPerson" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.storeLinkPerson.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.phoneNum.$error }">
+									<span class="mc">手机号码</span>
+									<el-input @blur="test" v-model="phoneNum" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.phoneNum.required">不能为空</span>
+								<span class="form-group__message" v-if="!$v.phoneNum.numeric">只能输入数字</span>
+								<span class="form-group__message" v-if="!$v.phoneNum.minLength">请输入正确手机号</span>
+								<span class="form-group__message" v-if="!$v.phoneNum.maxLength">不能超过11位数字</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.state.$error }">
+									<span class="mc">门店状态</span>
+									<el-select @blur="test" class="xl" v-model="state">
+										<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.state.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.isRest.$error }">
+									<span class="mc">是否歇业</span>
+									<el-select @blur="test" class="xl" v-model="isRest">
+										<el-option v-for="item in outofbusiness" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.isRest.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.doTimeStart.$error }">
+									<span class="mc">营业开始时间</span>
+									<el-time-select @blur="test" class="xl" v-model="doTimeStart" @change="selecttime('1')" :picker-options="{start:'08:30',step:'00:30',end:'22:00'}">
+									</el-time-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.doTimeStart.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.doTimeEnd.$error }">
+									<span class="mc">营业结束时间</span>
+									<el-time-select @blur="test" class="xl" v-model="doTimeEnd" @change="selecttime('2')" :picker-options="{start:'08:30',step:'00:30',end:'22:00',minTime:doTimeStart}">
+									</el-time-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.doTimeEnd.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.YuYue.$error }">
+									<span class="mc">是否预约</span>
+									<el-select @blur="test" class="xl" v-model="YuYue" v-on:change="makeappointment">
+										<el-option v-for="item in activity" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.YuYue.required">不能为空</span>
+							</div>
+						</el-col>
+
+						<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<div class="yueyue" v-show="xianshi">
+								<div class="ti">
+									<el-col class="row" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+										<p class="s" v-for="i in time">{{i}}</p>
+									</el-col>
+								</div>
+								<div class="ti">
+									<el-col class="row" :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+										<p class="time" name="aa" v-for="i in renshu" contenteditable="true">{{i}}</p>
+									</el-col>
+								</div>
+								<!--	<el-col class="row" :xs="18" :sm="18" :md="18" :lg="18" :xl="18"><button type="button" class="but el-button el-button--primary" @click="save">保存</button></el-col>-->
+							</div>
+						</el-col>
+
+						<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<div class="reform">
+								<h5>门店地址<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.storeLng.$error }">
+									<span class="mc">门店经度</span>
+									<el-input @blur="test" v-model="storeLng" class="name1" clearable>
+									</el-input>
+								</div>
+								<!--<span class="form-group__message" v-if="!$v.storeLng.required">不能为空</span>-->
+								<span class="form-group__message" v-if="!$v.storeLng.aa">不能输入汉字</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.storeLat.$error }">
+									<span class="mc">门店纬度</span>
+									<el-input @blur="test" v-model="storeLat" class="name1" clearable>
+									</el-input>
+								</div>
+								<!--<span class="form-group__message" v-if="!$v.storeLat.required">不能为空</span>-->
+								<span class="form-group__message" v-if="!$v.storeLat.aa">不能输入汉字</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.proves.$error }">
+									<span class="mc">所在省</span>
+									<select @blur="test" class="xl" v-model="proves" v-on:change="areaprov($event)">
+										<option v-for="(k,index) in provs" :value="k.ID">{{k.areaName}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.proves.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.citys.$error }">
+									<span class="mc">所在市</span>
+									<select @blur="test" class="xl" v-model="citys" v-on:change="areacity($event)">
+										<option v-for="k  in cityArr" :value="k.ID">{{k.areaName}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.citys.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.diqu.$error }">
+									<span class="mc">所在区</span>
+									<select @blur="test" class="xl" v-model="diqu" v-on:change="xianqus($event)">
+										<option v-for="l in districtArr" :value="l.ID">{{l.areaName}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.diqu.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.storeAreaID.$error }">
+									<span class="mc">商圈</span>
+									<select @blur="test" class="xl" v-model="storeAreaID" v-on:change="xian($event)">
+										<option v-for="l in street" :value="l.ID">{{l.name}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.storeAreaID.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.storeAddress.$error }">
+									<span class="mc">门店地址</span>
+									<el-input @blur="test" v-model="storeAddress" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.storeAddress.required">不能为空</span>
+							</div>
+						</el-col>
+
+						<!--上传文件-->
+						<!--end上传文件-->
+						<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<div class="reform">
+								<h5>门店logo<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+							</div>
+						</el-col>
+						<el-col class="row shangchuan" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<addimg v-on:tofather="fromchild" :arr="0" :childmessage="1" class='imgs'></addimg>
+						   	<addimg v-on:tofather="fromchild1" :arr="1" :childmessage="1" class='imgs'></addimg>
+							<addimg v-on:tofather="fromchild2" :arr="2" :childmessage="1" class='imgs'></addimg>
+						</el-col>
+					</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button class="el-button el-button--primary queding" @click="storeAdd">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	import addimg from '../../Public/uploadimg'
+	export default {
+		props: [],
+		components: {
+			addimg
+		},
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				listCity: this.$storage.fetch("listCity"),
+				areaList: this.$storage.fetch("areaList"),
+				store: this.$storage.fetch("bussiness"),
+				isAdmin: this.$storage.fetch("isAdmin"),
+				bussinessID: this.$storage.fetch("buss"),
+				xianshi: false,
+				no: '',
+				storeName: '',
+//				bussinessID: '',
+				storePhone: '',
+				storeLinkPerson: '',
+				phoneNum: '',
+				state: '',
+				isRest: '',
+				storeAreaID: '',
+				options: [{
+						value: '0',
+						label: '启用'
+					},
+					{
+						value: '1',
+						label: '停用'
+					}
+				],
+				outofbusiness: [{
+						value: '0',
+						label: '是'
+					},
+					{
+						value: '1',
+						label: '否'
+					}
+				],
+				doTimeStart: '',
+				doTimeEnd: '',
+				YuYue: '',
+				activity: [{
+						value: '1',
+						label: '是'
+					},
+					{
+						value: '0',
+						label: '否'
+					}
+				],
+				storeLng: '',
+				storeLat: '',
+				proves: '120000',
+				citys: '',
+				diqu: '',
+				streets: '',
+				storeAreaName: '',
+				storeAddress: '',
+				provs: [],
+				cityArr: [],
+				districtArr: [],
+				street: [],
+				arrays: [],
+				arrs: '',
+				time: [],
+				renshu: [],
+				picUrl:'',
+				picurl:[],
+				bussinessShow:false,
+				bussinessShows:false,
+				bussinessName:'',
+			}
+		},
+		validations: {
+			no: {
+				required,
+				aa: value => {
+					if(!/[\u4E00-\u9FA5]/g.test(value)) {
+						return true;
+					} else {
+						return false;
+					}
+				},
+				maxLength: maxLength(11),
+			},
+			storeName: {
+				required
+			},
+			bussinessID: {
+				required
+			},
+			storePhone: {
+				required,
+				numeric,
+				minLength: minLength(11),
+				maxLength: maxLength(11),
+				//or:or(/^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/)
+			},
+			storeLinkPerson: {
+				required
+			},
+			phoneNum: {
+				required,
+				numeric,
+				minLength: minLength(11),
+				maxLength: maxLength(11),
+				//or:or(/^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/)
+			},
+			state: {
+				required
+			},
+			isRest: {
+				required
+			},
+			doTimeStart: {
+				required
+			},
+			doTimeEnd: {
+				required
+			},
+			YuYue: {
+				required
+			},
+			storeLng: {
+				aa: value => {
+					if(!/[\u4E00-\u9FA5]/g.test(value)) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			},
+			storeLat: {
+				aa: value => {
+					if(!/[\u4E00-\u9FA5]/g.test(value)) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			},
+			proves: {
+				required
+			},
+			citys: {
+				required
+			},
+			diqu: {
+				required
+			},
+			storeAreaID: {
+				required
+			},
+			storeAddress: {
+				required
+			},
+
+		},
+		mounted: function() {
+			//根据isAdmin状态值来判断所属商家得显隐
+			if(this.isAdmin==0){
+				this.bussinessShow=true
+			}else{
+				console.log(this.bussinessID)
+				for(let i in this.store){
+					if(this.bussinessID==this.store[i].bussinessID){
+						this.bussinessName=this.store[i].bussinessName
+					}
+				}
+				console.log(this.bussinessName)
+				this.bussinessShows=true
+			}
+			
+			for(let i in this.listCity) {
+				if(this.listCity[i].parentID == '0') {
+					this.provs.push(this.listCity[i])
+				}
+			}
+			for(let i in this.listCity) {
+				if(this.listCity[i].parentID == this.proves) {
+					this.cityArr.push(this.listCity[i])
+				}
+			}
+			//         console.log(this.provs)
+		},
+		methods: {
+			fromchild(childMsg) {
+				let img = childMsg
+				this.picurl.push(img)
+			},
+			fromchild1(childMsg) {
+				let img1 = childMsg
+				this.picurl.push(img1)
+				//				console.log(childMsg)
+				//				this.uploadfile=childMsg
+				//				console.log(this.uploadfile)
+			},
+			fromchild2(childMsg) {
+				let img2 = childMsg
+				this.picurl.push(img2)
+				console.log(this.picurl)
+				//				console.log(childMsg)
+				//				this.uploadfile=childMsg
+				//				console.log(this.uploadfile)
+			},
+			test() {
+				this.$v.no.$touch()
+				if(this.$v.no.$error) {
+					return false;
+				}
+				this.$v.storeName.$touch()
+				if(this.$v.storeName.$error) {
+					return false;
+				}
+				this.$v.bussinessID.$touch()
+				if(this.$v.bussinessID.$error) {
+					return false;
+				}
+				this.$v.storePhone.$touch()
+				if(this.$v.storePhone.$error) {
+					return false;
+				}
+				this.$v.storeLinkPerson.$touch()
+				if(this.$v.storeLinkPerson.$error) {
+					return false;
+				}
+				this.$v.phoneNum.$touch()
+				if(this.$v.phoneNum.$error) {
+					return false;
+				}
+				this.$v.state.$touch()
+				if(this.$v.state.$error) {
+					return false;
+				}
+				this.$v.isRest.$touch()
+				if(this.$v.isRest.$error) {
+					return false;
+				}
+				this.$v.doTimeStart.$touch()
+				if(this.$v.doTimeStart.$error) {
+					return false;
+				}
+				this.$v.doTimeEnd.$touch()
+				if(this.$v.doTimeEnd.$error) {
+					return false;
+				}
+				this.$v.YuYue.$touch()
+				if(this.$v.YuYue.$error) {
+					return false;
+				}
+				this.$v.storeLng.$touch()
+				if(this.$v.storeLng.$error) {
+					return false;
+				}
+				this.$v.storeLat.$touch()
+				if(this.$v.storeLat.$error) {
+					return false;
+				}
+				this.$v.proves.$touch()
+				if(this.$v.proves.$error) {
+					return false;
+				}
+				this.$v.citys.$touch()
+				if(this.$v.citys.$error) {
+					return false;
+				}
+				this.$v.diqu.$touch()
+				if(this.$v.diqu.$error) {
+					return false;
+				}
+				this.$v.storeAreaID.$touch()
+				if(this.$v.storeAreaID.$error) {
+					return false;
+				}
+				this.$v.storeAddress.$touch()
+				if(this.$v.storeAddress.$error) {
+					return false;
+				}
+				return true;
+			},
+			//预约的隐藏和显示
+			makeappointment() {
+				console.log(this.YuYue)
+				if(this.YuYue == '1') {
+					this.xianshi = true
+					this.$ajax.post(`${this.$url}/bussinessStore/initYuYueSet.html`).then(data => {
+							console.log(data)
+							this.time = data.data.list[0].split(',')
+							this.renshu = data.data.list[1].split(",")
+							console.log(this.time)
+						    console.log(this.renshu)
+
+						})
+						.catch((error) => {
+							console.log(error)
+							this.$message.error('获取数据失败');
+						})
+				} else {
+					this.xianshi = false
+				}
+			},
+			selecttime(e) {
+				if(e == 2) {
+					if(this.doTimeStart == '') {
+						this.$message({
+							type: 'error',
+							message: '请您先选择开始营业时间!'
+						});
+						this.doTimeEnd = '';
+						return false
+					}
+				}
+			},
+			selectFlag(flag) {
+				//封装参数
+				//				var dataMap = {};
+				//
+				//				let no = '';
+				//				if(flag == 2) {
+				//					if(this.no == '') {
+				//						this.$message({
+				//							type: 'error',
+				//							message: '门店编号不能空!'
+				//						});
+				//						this.storeName = '';
+				//						return false
+				//					}
+				//					dataMap['bussinessID'] = this.bussinessID;
+				//					dataMap['no'] = '';
+				//
+				//					//查询名称
+				//				} else {
+				//					dataMap['bussinessID'] = '';
+				//					dataMap['no'] = this.no;
+				//
+				//				}
+				//
+				//				var jsonData = JSON.stringify(dataMap);
+				//				请求 后台返回数据
+				this.$ajax.post(`${this.$url}/bussinessStore/validBussinessStore.html`, { no: this.no, bussinessID: this.bussinessID }).then(data => {
+						console.log(data)
+						if(data.data == true) {
+							this.$message({
+								type: 'success',
+								message: data.data.message
+							});
+						} else {
+							this.$message({
+								type: 'error',
+								message: data.data.message
+							});
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+
+			},
+			//城市四级联动开始
+			areaprov: function(even) {
+				//this.$emit('areaprov', event.target.value);
+				this.proves = even.target.value
+
+				this.cityArr = [];
+				for(let i in this.listCity) {
+					if(this.proves == this.listCity[i].parentID) {
+						//						this.cityArr = this.arr[i];
+						//this.$set(this.cityArr, i, this.arrLists[i])
+						//vue.set(this.cityArr, i, this.arrLists[i])
+						//this.cityArr.push(this.arrLists[i])
+						this.cityArr.push(this.listCity[i]);
+					}
+				}
+				//				console.log(this.prov)
+			},
+			areacity: function(event) {
+				//this.$emit('areaprovs', event.target.value)
+				this.citys = event.target.value
+				this.districtArr = [];
+				for(let i in this.listCity) {
+					if(this.citys == this.listCity[i].parentID) {
+
+						this.districtArr.push(this.listCity[i]);
+					}
+				}
+			},
+			xianqus(event) {
+				//				console.log(this.rangelist)
+				this.diqu = event.target.value
+				console.log(this.diqu)
+				this.street = [];
+				for(let i in this.areaList) {
+					if(this.diqu == this.areaList[i].areaID) {
+
+						this.street.push(this.areaList[i]);
+					}
+				}
+				console.log(this.street)
+			},
+			xian(event) {
+				this.storeAreaID = event.target.value
+				console.log(this.storeAreaID)
+				for(let i in this.areaList) {
+					if(this.storeAreaID == this.areaList[i].ID) {
+						this.storeAreaName = this.areaList[i].name
+					}
+				}
+				console.log(this.storeAreaName)
+			},
+			//城市四级联动结束
+			storeAdd() {
+				let r = /^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/;
+				if(!this.test()) {
+					return false;
+				}
+				if(!r.test(this.phoneNum)) {
+					this.$message.error('请填写正确的手机号码');
+					return false;
+				}
+				//				let flags = this.checkeds()
+				//				if(flags) {
+				let areaname = '';
+				for(let i = 0; i < this.listCity.length; i++) {
+					if(this.proves == this.listCity[i].ID || this.citys == this.listCity[i].ID || this.diqu == this.listCity[i].ID) {
+						if(areaname == '') {
+							areaname = this.listCity[i].areaName
+						} else {
+							areaname = areaname + ',' + this.listCity[i].areaName
+						}
+					}
+				}
+				console.log(areaname)
+				var luckElements = document.getElementsByName("aa");
+//				alert(luckElements.length)
+				this.arrays = []
+				for(let i = 0; i < luckElements.length; i++) {
+					if(luckElements[i].innerHTML == '') {
+						luckElements[i].innerHTML = 0
+					}
+					this.arrays.push(luckElements[i].innerHTML)
+				}
+
+				this.arrs = this.arrays.join(',')
+				console.log(this.arrs)
+                this.picUrl=this.picurl.join(',')
+                console.log(this.picUrl)
+                
+//              this.durationTime = this.GMTToStr(this.durationTime);
+//
+//				//md5加密
+//				var dataMap = {};
+//				dataMap['no'] = this.no;
+//				dataMap['storeName'] = this.storeName;
+//				dataMap['bussinessID'] = this.bussinessID;
+//				dataMap['storePhone'] = this.storePhone;
+//				dataMap['state'] = this.state;
+//				dataMap['scopeId'] = this.scopeId;
+//				dataMap['state'] = this.state;
+//				dataMap['doTimeStart'] = this.doTimeStart;
+//				dataMap['doTimeEnd'] = doTimeEnd;
+//				dataMap['YuYue'] = this.YuYue;
+//
+//				var sign = this.$utilMd5s.md5Code(JSON.stringify(dataMap));
+//				dataMap['areaName'] = this.areaName;
+//				dataMap['storeLat'] = this.storeLat;
+//				dataMap['storeLng'] = this.storeLng;
+//				dataMap['province'] = this.province;
+//				dataMap['city'] = this.city;
+//				dataMap['county'] = this.county;
+//
+//				dataMap['area'] = this.storeAreaID;
+//				dataMap['storeAddress'] = this.storeAddress;
+//
+//				dataMap['isRest'] = this.isRest;
+//				dataMap['storeCity'] = this.storeCity;
+//              dataMap['yuYueNumberArr'] = this.yuYueNumberArr;
+//              dataMap['picUrl'] = this.picUrl;
+//				dataMap['sign'] = sign;
+//				//防止重复提交
+//				dataMap['uuid'] = this.uuid;
+//
+//				var jsonData = JSON.stringify(dataMap);
+                
+                
+				this.$ajax.post(`${this.$url}/bussinessStore/insertBussinessStore.html`, {
+						no: this.no,
+						storeName: this.storeName,
+						bussinessID: this.bussinessID,
+						storePhone: this.storePhone,
+						storeLinkPerson: this.storeLinkPerson,
+						phoneNum: this.phoneNum,
+						state: this.state,
+						doTimeStart: this.doTimeStart,
+						doTimeEnd: this.doTimeEnd,
+						YuYue: this.YuYue,
+						areaName: this.storeAreaName,
+						storeLat: this.storeLat,
+						storeLng: this.storeLng,
+						province: this.proves,
+						city: this.citys,
+						county: this.diqu,
+						area: this.storeAreaID,
+						storeAddress: this.storeAddress,
+						isRest: this.isRest,
+						storeCity: areaname,
+						yuYueNumberArr: this.arrs,
+						picUrl:this.picUrl
+					}).then(restaurants => {
+						this.$message('添加成功');
+						this.$emit('closes');
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('添加失败,请核实您的信息');
+					})
+				//				}
+			},
+			close() {
+				//				this.no = ''
+				//				this.storeName = ''
+				//				this.bussinessId = ''
+				//				this.storePhone = ''
+				//				this.storeLinkPerson = ''
+				//				this.phoneNum = ''
+				//				this.state = ''
+				//				this.doTimeStart = ''
+				//				this.doTimeEnd = ''
+				//				this.YuYue = ''
+				//				this.storeAreaName = ''
+				//				this.storeLat = ''
+				//				this.storeLng = ''
+				//				this.proves = ''
+				//				this.citys = ''
+				//				this.diqu = ''
+				//				this.storeAreaID = ''
+				//				this.storeAddress = ''
+				//				this.isRest = ''
+				//				this.arrs = ''
+				this.$emit('close');
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId,
+					}
+				})
+			}
+		},
+	}
+</script>
+<style>
+	.imgs {
+		float: left;
+		margin-top: 10px;
+		margin-right: 10px;
+	}
+</style>

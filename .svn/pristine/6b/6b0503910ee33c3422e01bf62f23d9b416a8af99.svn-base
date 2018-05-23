@@ -1,0 +1,296 @@
+<template>
+	<div class="conmmercial">
+		<div class="icon">
+			 <el-tooltip class="item" effect="dark" content="添加" placement="top">
+			 	<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+		    </el-tooltip>
+			<el-tooltip class="item" effect="dark" content="删除" placement="top">
+			<i class="el-icon-delete delete" size="small delete" @click="deletes()"></i>	
+			</el-tooltip>
+		</div>	
+		<div id="sousuo">
+			<el-collapse v-model="activeNames" @change="handleChange">
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+							<div class="input-group">
+									<span class="input-group-addon">商户经营类别</span>
+									<select v-model="scopeId" v-on:change="changeScopeId($event)">
+										<option value="">全部</option>
+										<option v-for="item in businessScope" :value="item.scope">{{item.scopeNamew}}</option>
+									</select>
+							</div>
+						</el-col> 
+						<el-col class="row" :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+							<!--<select class="select" placeholder="类别状态"  v-model="state" v-on:change="changeState($event,item)" >
+						<option  v-for="item in options" v-bind:value="item.value">{{item.text}}</option>
+					</select>-->
+					        <div class="input-group">
+									<span class="input-group-addon">商户状态</span>
+									<el-select class="shangstate" v-model="state" placeholder="状态">
+										<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+							</div>							
+							<!--<select v-model="state">
+					<option v-for="(j,index) in options" :value="j.value">{{j.label}}</option>
+				</select>-->
+						</el-col>
+						<el-col class="row" :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+							<el-input v-model="goodsCategoryName" class="name1" clearable v-on:keyup.native="canclespace">
+							    <template class="biaoti" slot="prepend">商品类别名称</template>
+							 </el-input>
+						</el-col>
+						<el-col class="row" :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+							<el-input v-model="attributeName" class="name1" clearable v-on:keyup.native="canclespace">
+								<template class="biaoti" slot="prepend">商品属性名称</template>
+							</el-input>
+						</el-col>
+		
+						<el-col class="row" :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+							<el-button class="find" @click="fined">查询</el-button>
+						</el-col>
+					</el-row>
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="goodCategoryData" height="632" tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange">
+				<el-table-column type="selection" prop="goodsCategoryID" :selectable='checkboxInit' @selection-change="handleSelectionChange">
+				</el-table-column>
+				<el-table-column prop="scopeName" label="商户经营类别名称" show-overflow-tooltip>
+				</el-table-column>
+				<!--<el-table-column sortable prop="createTime" label="创建时间"  show-overflow-tooltip>
+				</el-table-column>-->
+				<el-table-column prop="goodsCategoryName" label="商品类别名称" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="goodsCategoryNo" label="商品类别编号" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="attributeName" label="属性名称" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="flag" label="状态 " show-overflow-tooltip>
+					<template slot-scope="scope">
+						<div v-if="scope.row.flag==1">启用</div>
+						<div v-if="scope.row.flag==2">停用</div>
+					</template> 
+				</el-table-column>
+				<el-table-column label="操作">
+					<template slot-scope="scope">
+						<el-button type="text" size="small" @click="showModals(scope.$index,goodCategoryData)">修改</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+				<div class="pages">
+					<el-pagination
+						@size-change="handleIndexChange"
+						@current-change="handleCurrentChange" 
+						:current-page="currentPage" 
+						:page-size="length" 
+						layout="total, sizes, prev, pager, next, jumper" 
+						:total="total">
+					</el-pagination>
+			    </div>
+				</el-col>	
+			</el-row>	
+			<!--<el-button class="but" type="text" size="small" @click="showModals">修改</el-button>-->
+		</div>
+		<modal v-show="isModalVisible" @close="closeModal" v-bind:businessScopes="businessScope" v-bind:attribute="attributes" v-on:close="serlf"></modal>
+		<modals v-show="isModalVisibles" @close="closeModals" v-bind:businessScopes="businessScope" v-bind:attribute="attributes" v-bind:goodCategoryDatas="GoodsLevelCategory" v-bind:checkedCities="checkedCitie" v-on:close="serlf"></modals>
+	</div>
+</template>
+<!--<style type="text/css">
+	@import "../assets/css/shopcategory.css"
+</style>-->
+<script>
+	import Modal from './shopsadd.vue'
+	import Modals from './shopsamend.vue'
+		var regust = /^ +| +$/g; // 匹配空格
+	
+	export default {
+		name: 'conmmercial',
+		components: {
+			Modal,
+			Modals
+		},
+		data() {
+			return {
+				multipleSelection: [],
+				menuId: this.$route.query.menuIds,
+				goodCategoryData: '',
+				GoodsLevelCategory: '',
+				currentPage: 1,
+				total: '',
+				length: 10,
+				attributes: [],
+				businessScope: [],
+				options: [{
+					value: '',
+					label: '全部'
+				}, {
+					value: '1',
+					label: '启用'
+				}, {
+					value: '2',
+					label: '停用'
+				}],
+				isModalVisible: false,
+				isModalVisibles: false,
+				state: '',
+				scopeId: '',
+				goodsCategoryName: '',
+				attributeName:'',
+				zh: '',
+				checkedCitie: [],
+
+			}
+		},
+		//初始化获取列表
+		mounted: function() {
+			this.finds();
+		},
+		methods: {
+			//改变页数触发
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				//this.fined();
+				this.finds();
+
+			}, //改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length = index;
+				//this.fined();
+				this.finds();
+			},
+			changeScopeId(value) {
+
+				this.scopeId = val.target.value;
+				alert(this.scopeId)
+			},
+			canclespace() {
+				let tip = this.$message.error;
+				let tipyu = "请不要输入空格";				
+		      this.goodsCategoryName=this.$storage1.KeyupUN(this.goodsCategoryName,tip,tipyu);
+		       this.attributeName=this.$storage1.KeyupUN(this.attributeName,tip,tipyu);
+			},
+			fined() {
+				//点击查询空格验证
+				let tip = this.$message.error;
+				let tipyu = "请输入查询的内容";
+				this.$storage1.UserName(this.goodsCategoryName, tip, tipyu);
+				this.$storage1.UserName(this.attributeName, tip, tipyu);
+				this.finds();
+			},
+			finds() {
+				this.$ajax.post(`${this.$url}/goodsCategory/selectGoodsCategory.html`, {
+						start: this.currentPage,
+						length: this.length,
+						state: this.state,
+						goodsCategoryName: this.goodsCategoryName,
+						scopeId: this.scopeId,
+						attributeName: this.attributeName
+					}).then(data => {
+						console.log(data)
+						this.goodCategoryData = (data.data.data.list)
+						this.total = data.data.data.total
+						this.attributes = data.data.attributes
+						this.businessScope = data.data.businessScope
+
+						console.log(this.attributes)
+						console.log(this.businessScope)
+
+						//					console.log(that.length)
+						//					console.log(that.currentPage)
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModal: function() {
+				this.isModalVisible = true
+			},
+			showModals: function(inde, all) {
+				this.isModalVisibles = true
+				//获取回显的数据
+				this.$ajax.post(`${this.$url}/goodsCategory/selectGoodsCategoryId.html`, {
+						goodsCategoryID: all[inde].goodsCategoryID
+					}).then(res => {
+						console.log(res.data.data)
+						this.GoodsLevelCategory = res.data.data
+						this.checkedCitie = res.data.data.attributeName.split(",")
+						console.log(this.checkedCitie)
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			serlf() {
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId
+					}
+				})
+			},
+
+			closeModals() {
+				this.isModalVisibles = false
+			},
+			handleSelectionChange: function(val) {
+				this.multipleSelection = val;
+				console.log(val)
+			},
+			deletes() {
+		      if (this.multipleSelection.length == 0) {
+	    		    this.$message({
+							type: 'info',
+							message: '请选择要删除的条数!'
+						});				
+	 				return false;
+	 	             } 
+				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					let deleteId = '';			
+					for(var i = 0; i < this.multipleSelection.length; i++) {
+						if(deleteId == '') {
+							deleteId = this.multipleSelection[i].goodsCategoryID
+						} else {
+							deleteId = deleteId + "," + this.multipleSelection[i].goodsCategoryID
+						}
+					}
+					this.$ajax.post(`${this.$url}/goodsCategory/deleteGoodsCategory.html`, {
+						ids: deleteId
+					}).then(data => {
+						this.fined();
+						this.$message({
+							type: 'success',
+							message: '删除成功!'
+						});
+					})
+					//确定操作
+
+				}).catch(() => {
+					//取消操作
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			}
+
+		}
+	};
+</script>

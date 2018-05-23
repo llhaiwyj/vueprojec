@@ -1,0 +1,371 @@
+<template>
+	<div class="rolesettings">
+		<div class="icon">
+			<el-tooltip class="item" effect="dark" content="添加" placement="top">
+			 	<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+		  </el-tooltip>
+		  <!--<el-tooltip class="item" effect="dark" content="删除" placement="top">
+			<i class="el-icon-delete delete" size="small delete" @click="deletes()"></i>	
+			</el-tooltip>	-->
+		</div>
+		<div id="sousuo">
+			<el-collapse v-model="activeNames" @change="handleChange">
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<el-input placeholder="" v-model="empName"  clearable>
+								 <template class="biaoti" slot="prepend">账号名称</template>
+							</el-input>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<el-input placeholder="" v-model="contacts" clearable>
+								 <template class="biaoti" slot="prepend">联系人</template>								
+							</el-input>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<el-input placeholder="" v-model="empPhone" clearable>
+								 <template class="biaoti" slot="prepend">手机号码</template>																
+							</el-input>
+						</el-col>
+						<!--商户列表-->
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+							   <span class="input-group-addon">商户</span>
+									<select v-model="bussinessId" v-on:change="changeType($event)">
+								       <option  v-for="buss in bussiness" v-bind:value="buss.bussinessId" >{{ buss.bussinessName }}</option>				
+							        </select>
+							</div>								
+					    </el-col>
+					    
+					</el-row>
+					<el-row :gutter="10">
+					<!--门店列表-->
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+							   <span class="input-group-addon">门店</span>
+									<select v-model="storeId">
+								       <option v-for="(j,index) in lists" :value="j.id">{{j.storeName}}</option>
+							        </select>
+							</div>							
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+							   <span class="input-group-addon">用户状态</span>
+									<select v-model="empState" ><!--用户状态-->						
+										<option  :value="1">启用</option>
+										<option  :value="2">停用</option>							
+							        </select>
+							</div>									
+						</el-col>
+						<el-col class="row" :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+						  <el-button class="find" @click="fined"><!--{{menuList[3]}}-->查询</el-button>
+						</el-col>
+					</el-row>
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="tableData3" height="550" tooltip-effect="dark" style="width: 100%" 
+				@selection-change="handleSelectionChange">
+				<!--<el-table-column type="selection" prop="empId" :selectable='checkboxInit' @selection-change="handleSelectionChange">
+				</el-table-column>-->
+				<el-table-column prop="empName" label="账号名称">
+				</el-table-column>
+				<el-table-column prop="contacts" label="联系人">
+				</el-table-column>
+				<el-table-column prop="empPhone" label="手机号码" show-overflow-tooltip>
+				</el-table-column>			
+				<el-table-column prop="bussinessName" label="商户权限" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="storeName" label="门店权限" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="empNote" label="备注" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="state" label="用户状态" show-overflow-tooltip>
+					<template slot-scope="scope">
+	                    <div v-if="scope.row.state==0">超级管理员</div>
+	                    <div v-if="scope.row.state==1">系统管理员</div>
+	                    <div v-if="scope.row.state==2">商户管理员</div>
+	                    <div v-if="scope.row.state==3">门店管理员</div>
+	                 </template>
+				</el-table-column>
+				<el-table-column prop="empState" label="用户状态" show-overflow-tooltip>
+					<template slot-scope="scope">
+	                    <div v-if="scope.row.empState==1">启用</div>
+	                    <div v-if="scope.row.empState==2">停用</div>
+	                </template>
+				</el-table-column>
+				<!--<el-table-column prop="bussinessName" label="商户" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="storeName" label="门店" show-overflow-tooltip>
+				</el-table-column>-->
+				<el-table-column label="操作" width="160">
+					<template slot-scope="scope">
+						<!--<el-button type="text" size="small" @click="open2(scope.$index,tableData3)">{{menuList[1]}}删除</el-button>	-->				
+						<el-button type="text" size="small" @click="showModals(scope.$index,tableData3,'1')"><!--{{menuList[2]}}-->修改</el-button>
+						<el-button type="text" size="small" @click="deletes(scope.$index,tableData3)"><!--{{menuList[2]}}-->删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+				<div class="pages">
+				<el-pagination 
+				@size-change="handleIndexChange"
+				@current-change="handleCurrentChange" 
+				:current-page="currentPage" 
+				:page-size="length" 
+				layout="total, sizes, prev, pager, next, jumper" 
+				:total="total">
+			</el-pagination>
+			</div>	
+				</el-col>	
+			</el-row>				
+		</div>
+		<modal v-show="isModalVisible" @close="closeModal" v-on:close="serlf"/>
+		<modals v-show="isModalVisibles"@close="closeModals" v-bind:uploadfil="uploadfil" v-bind:sels="sel" v-bind:arrs="arr" v-bind:bussarrs="bussarr" v-bind:employee="employe" v-bind:dataId="dataid" v-bind:bussdataId="bussdataid" v-on:close="serlf"/>
+	</div>
+</template>
+
+<script>
+	//	import Pagination from '../Public/public.vue'
+	import Modal from './usersmotai.vue'
+	import Modals from './usersupdate.vue'
+	export default {
+		name:'rolesettings',
+		components: {
+            Modal,
+            Modals
+        },
+		data() {
+			return {
+				menuId:this.$route.query.menuIds,
+				multipleSelection:[],
+				menuList:[],
+				tableData3: '',
+				currentPage: 1,
+				total: '',
+				length: 10,
+				isModalVisible: false,
+				isModalVisibles: false,
+				arr:'',
+				bussarr:'',
+				employe:'',
+				empState:'',
+				storeId:'',
+				bussinessId:'',
+				bussiness:this.$storage.fetch("bussiness"),//角色下的所有商户
+				bussinessstore:this.$storage.fetch("bussinessstore"),//商户下的门店
+                lists:[],
+                dataid:[],
+                bussdataid:[],
+                sel:[],
+                uploadfil:'',
+			}
+		},
+		//页面初始话的时候调接口显示数据
+		mounted: function() {
+			  this.fined();
+			
+		},
+		methods: {
+			
+			changeType(val) {
+				this.lists=[];
+				//赋值商户id
+               this.bussinessId=val.target.value;
+               console.log(this.bussinessstore)
+               for(var i=0;i<this.bussinessstore.length;i++){
+					if(this.bussinessId == this.bussinessstore[i].bussinessId){
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+			},//改变页数触发
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage=page;
+				 this.fined();
+				
+			},//改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length=index;
+				 this.fined();
+				
+			},
+			handleSelectionChange: function(val) {
+				this.multipleSelection = val;
+				console.log(val)
+			},
+			//删除刷新页面，
+			/*open2 (index,user){
+		       this.$ajax.post(`${this.$url}/role/deleteRole.html`,{ids:user[index].roleId}).then(data => {
+		       	   user.splice(index,1)
+		       })
+			},*/
+			//查找
+			fined(){
+				
+		    	this.$ajax.post(`${this.$url}/employee/selEmployeelist.html`,{start:this.currentPage,length:this.length,bussinessID:this.bussinessId,storeID:this.storeId,empName:this.empName,contacts:this.contacts,empPhone:this.empPhone}).then(data => {
+					console.log(data)
+					this.tableData3 = (data.data.data.list)
+					this.total = data.data.data.total
+					console.log(this.tableData3)
+					//权限控制
+					/*let list=this.changeMenuBtn(this.menuId);
+					if(this.$storage.fetch("isAdmin") == 0){
+						for(let i=0 ;i<list.length; i++){
+							if(i != list.length-1){
+								this.menuList[i]="";
+							}else{
+								this.menuList[i]=list[i];
+							}
+							
+							
+						}
+					}else{
+						this.menuList=list;
+					}*/
+					
+					//let list=this.changeMenuBtn(this.menuId);
+					//alert(this.menuList)
+					if(data.data.data.size > 10){
+						this.length = data.data.data.size
+					}
+					
+					console.log(this.length)
+					console.log(this.currentPage)
+				})
+				.catch((error) => { 
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+			},
+			showModal: function () {
+               this.isModalVisible = true
+              
+            },
+            //点击修改获取值并且传到子页面
+            showModals: function (inde,all,flag) {
+            	
+               this.isModalVisibles = true
+               
+               let admin=this.$storage.fetch("isAdmin")
+					if(admin > 1){
+						
+						this.sel=[{ value: 2, text: '商户管理员' },{ value: 3, text: '门店管理员' }]
+					}else{
+						this.sel=[{ value: 1, text: '系统管理员' },{ value: 2, text: '商户管理员' },{ value: 3, text: '门店管理员' },]
+					}
+               //获取回显的数据
+               this.$ajax.post(`${this.$url}/employee/loadUpdateTree.html`, {empId:all[inde].empId}).then(res => {
+               	  
+             
+             	this.arr=res.data.roleTree
+				this.bussarr=res.data.bussTree
+				
+             	this.employe=res.data.employee[0]
+             	this.uploadfil=this.$imgurl+this.employe.picture
+             	console.log(res.data.employee)
+             	 console.log(res.data.employee[0].bussinessId)
+             	this.dataid=[];
+              	for(var i=0;i<this.arr.length;i++){
+              		 let list=this.arr[i].children
+               		for(var y= 0;y< list.length; y++){
+               			
+               			if(list[y].checked){
+						this.dataid.push(list[y].id)
+					}
+               		}
+				}
+              	this.bussdataid=[];
+              	for(var i=0;i<this.bussarr.length;i++){
+              		 let list=this.bussarr[i].children
+               		for(var y= 0;y< list.length; y++){
+               			let lists=list[y].children
+               			for(var z= 0;z< lists.length; z++){
+               			if(lists[z].checked){
+						this.bussdataid.push(lists[z].id)
+					}
+               			
+					}
+               		}
+				}
+              	console.log(this.bussarr)
+              	/*for(let y=0;y<this.bussarr.length;y++){
+               		
+					if(this.bussarr[y].checked){
+//						console.log(this.updateer[i].id)
+						this.bussdataid.push(this.bussarr[y].id)
+						console.log(this.bussdataid)
+					}
+					
+				}*/
+               	 
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+            },
+            //模态框关闭
+            closeModal: function () {
+               this.isModalVisible = false
+            },
+            closeModals: function () {
+               this.isModalVisibles = false
+            },
+           /* selectTrees: function(updatee,disable){
+            	for(let i=0;i<this.updatee.length;i++){
+            		
+               		updatee[i].disabled=disable
+               		//console.log(this.updateer[i].id)
+					if(updatee[i].checked){
+//						console.log(this.updateer[i].id)
+						this.dataid.push(updatee[i].id)
+						console.log(this.dataid)
+					}
+					
+						selectTrees(updatee[i].children,disable);
+					
+				}
+            },*/serlf: function() {
+            	//this.router.reload()
+            	//this.router.push({name:this.menuId,query : {menuIds: this.menuId}})
+            	//跳转到空页面来刷新路由
+            	this.$router.push({name:'backs',query : {menuIds: this.menuId}})
+		        //this.fined();
+	},
+	deletes(inde,all) {
+								 
+								this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+									confirmButtonText: '确定',
+									cancelButtonText: '取消',
+									type: 'warning'
+								}).then(() => {
+                               
+            
+			this.$ajax.post(`${this.$url}/employee/deleteEmp.html`, {
+				id: all[inde].empId
+			}).then(data => {
+				this.fined();
+				this.$message({
+					type: 'success',
+					message: '删除成功!'
+				});
+			})
+			//确定操作
+
+		}).catch(() => {
+			//取消操作
+			this.$message({
+				type: 'info',
+				message: '已取消删除'
+			});
+		});
+	}
+},
+}</script>

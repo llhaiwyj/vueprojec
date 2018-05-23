@@ -1,0 +1,312 @@
+<template>
+	<div class="rolesettings">
+		<div class="icon">
+			<el-tooltip class="item" effect="dark" content="添加" placement="top" v-show="role.isShowAdd">
+				<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+			</el-tooltip>
+		</div>
+		<!--查询列表-->
+		<div id="sousuo">
+			<el-collapse v-model="activeNames">
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<el-input placeholder="" v-model="employeeName" clearable>
+								<template class="biaoti" slot="prepend">员工姓名</template>
+							</el-input>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<el-input placeholder="" v-model="phoneNum" clearable>
+								<template class="biaoti" slot="prepend">手机号码</template>
+							</el-input>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">所属商家</span>
+								<select v-model="bussinessID" v-on:change="changeType($event)">
+									<option value="">----全部----</option>
+									<option v-for="item in bussiness" :value="item.bussinessID">{{item.bussinessName}}</option>
+								</select>
+							</div>
+						</el-col>
+						<!--门店列表-->
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">所属门店</span>
+								<select v-model="storeID">
+									<option value="">----全部----</option>
+									<option v-for="(j,index) in lists" :value="j.id">{{j.storeName}}</option>
+								</select>
+							</div>
+						</el-col>
+
+					</el-row>
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">员工职务</span>
+								<select placeholder="" v-model="positionID">
+									<option value="">----全部----</option>
+									<option v-for="se in positions" v-bind:value="se.positionID">{{se.positionName}}</option>
+								</select>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">员工状态</span>
+								<select placeholder="" v-model="state">
+									<option value="">----全部----</option>
+									<option v-for="sel in states" v-bind:value="sel.value">{{sel.text}}</option>
+								</select>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="2" :sm="5" :md="2" :lg="2" :xl="2">
+							<el-button class="find" @click="fined">查询</el-button>
+						</el-col>
+					</el-row>
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="tableData3" height="632" tooltip-effect="dark" style="width: 100%;">
+				<!--<el-table-column prop="employeeID" label="员工ID" show-overflow-tooltip>
+			</el-table-column>-->
+				<el-table-column prop="employeeName" label="员工姓名" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="employeeCode" label="员工工号" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="bussinessName" label="所属商家" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="storeName" label="所属门店" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="phoneNum" label="手机号码" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="positionName" label="员工职务" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="createTime" label="注册日期" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="state" label="员工状态" show-overflow-tooltip>
+					<template slot-scope="scope">
+						<el-button id="zi" type="text" v-if="scope.row.state==1" size="small">在职</el-button>
+						<el-button id="zi1" type="text" v-else="scope.row.state==0" size="small">离职</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column label="操作">
+					<template slot-scope="scope">
+						<el-button type="text" size="small" @click="open2(scope.$index,tableData3)" v-show="role.isShowDel">删除</el-button>
+						<el-button type="text" size="small" @click="showModals(scope.$index,tableData3,'1')" v-show="role.isShowUpdate">修改</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<!--<el-button type="text" size="xinzeng small" @click="showModal" class="add xinzeng">添加</el-button>-->
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+					<div class="pages">
+						<el-pagination @size-change="handleIndexChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+						</el-pagination>
+					</div>
+				</el-col>
+			</el-row>
+		</div>
+
+		<modal v-show="isModalVisible" @close="closeModal" v-on:closes="serlf" v-bind:position="positions" v-on:close="serlfs" />
+		<modals v-show="isModalVisibles" @close="closeModals" v-bind:emp="updatearr" v-bind:employeeID="employeeID" v-bind:position="positions" v-bind:lists="lists" v-on:closes="serlf" v-on:close="serlfs" />
+	</div>
+</template>
+
+<script>
+	import Modal from './storeEmployeeAdd.vue'
+	import Modals from './storeEmployeeUpdate.vue'
+	export default {
+		name: 'storeEmployee',
+		components: {
+			Modal,
+			Modals
+		},
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				menuList: [],
+				tableData3: '',
+				currentPage: 1,
+				total: '',
+				length: 10,
+				isModalVisible: false,
+				isModalVisibles: false,
+				state: '',
+				storeId: '',
+				bussinessId: '',
+				bussiness: this.$storage.fetch("bussiness"),
+				bussinessstore: this.$storage.fetch("bussinessstore"),
+				storelist: [],
+				lists: [],
+				updatearr: '',
+				positions: '',
+				stat: '',
+				employeeID: '',
+				states: [{
+						value: '0',
+						text: '离职'
+					},
+					{
+						value: '1',
+						text: '在职'
+					}
+				],
+				employeeName: '',
+				phoneNum: '',
+				bussinessID: '',
+				storeID: '',
+				positionID: '',
+				role:{
+					isShowAdd:false,
+				    isShowDel:false,
+				    isShowUpdate:false,
+				},
+			}
+		},
+		//页面初始化的时候调接口显示数据
+		mounted: function() {
+			this.permission();
+			this.fined();
+		},
+		methods: {
+			permission(){
+				this.$storage1.permission(this.$ajax,`${this.$url}/login/selectBtn.html`,this.menuId,this.role);
+				console.log(this.role)
+
+			},
+			changeType(event) {
+				//赋值商户id
+				this.lists = [];
+				//赋值商户id
+				this.bussinessID = event.target.value;
+				console.log(this.bussinessID)
+				for(var i = 0; i < this.bussinessstore.length; i++) {
+					if(this.bussinessID == this.bussinessstore[i].bussinessId) {
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+				console.log(this.lists)
+			},
+			//改变页数触发
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				this.fined();
+
+			}, //改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length = index;
+				this.fined();
+
+			},
+			open2(index, emp) {
+				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+
+					this.$ajax.post(`${this.$url}/storeEmployee/deleteEmployee.html`, {
+						ids: emp[index].employeeID
+					}).then(data => {
+						this.fined();
+						this.$message({
+							type: 'success',
+							message: '删除成功!'
+						});
+					})
+					//确定操作
+
+				}).catch(() => {
+					//取消操作
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			},
+
+			showModals: function(inde, all, flag) {
+				this.isModalVisibles = true
+				this.$ajax.post(`${this.$url}/storeEmployee/initEmployeeUpdate.html`, { employeeID: all[inde].employeeID }).then(data => {
+						console.log(data)
+						this.updatearr = data.data.data.list[0]
+						this.bussinessID = data.data.data.list[0].bussinessID
+						this.lists=[]
+						for(var i = 0; i < this.bussinessstore.length; i++) {
+							if(this.bussinessID == this.bussinessstore[i].bussinessID) {
+								//获取门店数据
+								this.lists.push(this.bussinessstore[i]);
+							}
+						}
+						console.log(this.updatearr)
+						this.employeeID = data.data.employeeID
+						if(flag == 2) {
+							this.isClose = false
+							this.disabled = true
+							this.readonly = true
+							this.disable = true
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+
+			},
+			//查找
+			fined() {
+				this.$ajax.post(`${this.$url}/storeEmployee/storeEmployeeList.html`, {
+						start: this.currentPage,
+						length: this.length,
+						employeeName: this.employeeName,
+						phoneNum: this.phoneNum,
+						bussinessID: this.bussinessID,
+						storeID: this.storeID,
+						positionID: this.positionID,
+						state: this.state,
+					}).then(data => {
+						console.log(data)
+						this.tableData3 = (data.data.data.list)
+						this.total = data.data.data.total
+						this.positions = data.data.jobList
+						console.log(this.tableData3)
+						if(data.data.data.size > 10) {
+							this.length = data.data.data.size
+						}
+						console.log(this.length)
+						console.log(this.currentPage)
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModal: function() {
+				this.isModalVisible = true
+			},
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			//模态框关闭
+			closeModals: function() {
+				this.isModalVisibles = false;
+			},
+			serlf: function() {
+				this.$router.push({ name: 'backs', query: { menuIds: this.menuId } })
+			},
+			serlfs: function() {
+				this.isModalVisible = false
+				this.isModalVisibles = false
+			},
+		}
+	}
+</script>

@@ -1,0 +1,336 @@
+show<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" >
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>商户商品服务分组管理---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body" style="height:auto">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>商户商品分组<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col>
+							<el-col :span="7" class="gutterspan">
+								<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.businessId.$error }">
+							  	<span class="mc">商户：</span>							  	
+									<select class="xl"  v-model="businessId" @blur="test">
+										<option value="" selected="selected">---请选择---</option>
+										<option v-for="item in busines" :value="item.bussinessID">{{item.bussinessName}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.businessId.required">不能为空</span>
+								</div>
+							  </el-col>	
+							  <el-col :span="7" class="gutterspan">
+							  	<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.groupCategory.$error }">
+							  	<span class="mc">分组类别：</span>
+									<select @blur="test" placeholder="请选择" class="xl" v-model="groupCategory" >
+										<option value="" selected="selected">---请选择---</option>
+										<option v-for="item in options" :value="item.value">{{item.label}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.groupCategory.required">不能为空</span>
+								</div>
+							  </el-col>	
+							   <el-col :span="7" class="gutterspan">
+							   	<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.groupingCode.$error }">
+							  	<span class="mc">分组编号：</span>
+							  	<el-input @blur="test" v-model="groupingCode" @change="selectGroupId('1')" class="name1" clearable>
+								 </el-input>
+								  <i class="yes el-icon-check" v-if="isShow"></i>
+								<i class="no el-icon-close" v-if="isShows"></i>
+								 </div>
+								<span class="form-group__message" v-if="!$v.groupingCode.required">不能为空</span>								
+								</div>								
+							  </el-col>
+							  <el-col :span="7" class="gutterspan">
+							  	<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.groupCategoryName.$error }">
+							  	<span class="mc">分组名称：</span>
+							  	<el-input  @blur="test" v-model="groupCategoryName" @change="selectGroupId('2')" class="name1" clearable >
+								</el-input>
+								<i class="yes el-icon-check" v-if="isSho"></i>
+								<i class="no el-icon-close" v-if="isShos"></i>
+								 </div>
+								<span class="form-group__message" v-if="!$v.groupCategoryName.required">不能为空</span>							 
+								</div>
+							  </el-col>
+							  <el-col :span="7" class="gutterspan">
+							  	<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.state.$error }">
+							  	<span class="mc">分组状态：</span>
+									<select class="xl" @blur="test" v-model="state" placeholder="请选择">
+										<option v-for="item in optionState" :value="item.value">{{item.label}}</option>
+									</select>
+								 </div>
+								<span class="form-group__message" v-if="!$v.state.required">不能为空</span>
+								</div>
+							  </el-col>	
+							<!--<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+								<span class="input-group-addon">商户</span>
+									<select v-model="businessId" v-on:change="changeBusinessId($event)">
+										<option v-for="item in busines" :value="item.bussinessId">{{item.bussinessName}}</option>
+									</select>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+									<span class="input-group-addon">分组类别</span>
+									<select v-model="groupCategory" v-on:change="changeGroupCategory($event)">
+										<option v-for="item in options" :value="item.value">{{item.label}}</option>
+									</select>
+							</div>
+							</el-col>
+							<el-col  id="pand" class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<el-input placeholder="" v-model="groupingCode" @change="selectGroupId('1')" class="name1" clearable>
+									 <template class="biaoti" slot="prepend">分组编号</template>
+								</el-input>
+								<i class="yes el-icon-check" v-if="isShow"></i>
+								<i class="no el-icon-close" v-if="isShows"></i>
+							</el-col>
+							<el-col  id="pand" class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<el-input placeholder="" v-model="groupCategoryName" @change="selectGroupId('2')" class="name1" clearable >
+									<template class="biaoti" slot="prepend">分组名称</template>
+								</el-input>
+								<i class="yes el-icon-check" v-if="isShow"></i>
+								<i class="no el-icon-close" v-if="isShows"></i>
+							</el-col>
+
+							<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+							<div class="input-group">
+									<span class="input-group-addon">分组状态</span>
+									<select v-model="state" v-on:change="changeState($event)">
+										<option v-for="item in optionState" :value="item.value">{{item.label}}</option>
+									</select>
+							</div>
+						</el-col> -->
+														
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--primary queding" @click="getaddCategory">确定</button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>						
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+<script>
+	import { required} from 'vuelidate/lib/validators'
+	export default {
+		props: ['uuid','busines'],
+		data() {
+			return {
+				options: [{
+					value: '1',
+					label: '服务'
+				}, {
+					value: '2',
+					label: '商品'
+				}],
+				optionState: [{
+					value: '',
+					label: '---请选择---'
+				}, {
+					value: '1',
+					label: '启用'
+				}, {
+					value: '2',
+					label: '停用'
+				}],
+				bussinessName:'',
+				businessId: '',				
+				groupCategoryName:'',
+				state: '',
+				groupingCode:'',
+				groupCategory:'',
+				isShow:false,
+				isShows:false,
+				isSho:false,
+				isShos:false
+							
+			};
+		},
+		validations: {   
+		    businessId: {  
+		      required 
+		    } , 
+		    groupCategory: {  
+		      required  
+		    },  
+		    groupingCode: {  
+		      required  
+		    },
+		    groupCategoryName: {  
+		      required  
+		    },
+		     state: {  
+		      required  
+		    },
+    },
+		//初始化门店的经营类别
+		methods: {
+				test(){
+					
+             	this.$v.businessId.$touch()
+             	if(this.$v.businessId.$error){
+					return false;
+				}
+             	this.$v.groupCategory.$touch()
+             	if(this.$v.groupCategory.$error){
+					return false;
+				}
+             	this.$v.groupingCode.$touch()
+             	if(this.$v.groupingCode.$error){
+					return false;
+				}
+             	this.$v.groupCategoryName.$touch()
+             	if(this.$v.groupCategoryName.$error){
+					return false;
+				}
+             	this.$v.state.$touch()
+             	if(this.$v.state.$error){
+					return false;
+				}
+             	return true;
+             },
+			selectGroupId(flag){
+				let tip = this.$message.error;
+				let tipyu = "商户不能为空";
+				if(this.businessId == ""){
+    	        	this.$storage1.UserName(this.businessId, tip, tipyu);
+    	        	return false;
+    	        }
+				 var dataMap = {};
+				 dataMap['businessId'] = this.businessId;
+				if(flag == 1){
+					dataMap['groupingCode'] = this.groupingCode;
+					dataMap['groupCategoryName'] = '';
+				}
+				if(flag == 2){
+					 dataMap['groupingCode'] = '';
+					 dataMap['groupCategoryName'] = this.groupCategoryName;
+				}
+				var jsonData = JSON.stringify(dataMap);
+			
+				//获取id值去后台查询
+				this.$ajax.post(`${this.$url}/groupCategory/validGroupCategory.html`, { jsonData:jsonData}).then(restaurants => {
+					//console.log(jsonData)
+					if(flag==1){
+						if(restaurants.data == true){
+						this.isShow=true
+						this.isShows=false						
+						//alert(groupingCode.restaurants.data)
+					}else{
+						//alert(restaurants.data)
+						this.isShow=false											
+						this.isShows=true
+						this.$message.error('分组编号重复');
+					}
+					}
+					if(flag==2){
+						if(restaurants.data == true){
+						this.isSho=true
+						this.isShos=false
+						
+						//alert(groupingCode.restaurants.data)
+					}else{
+						//alert(restaurants.data)
+						this.isSho=false
+						this.isShos=true
+						this.$message.error('分组名称重复');
+					}
+					}
+					
+					
+					
+					
+				}) 
+			},
+			
+			/*changeState(value) {
+
+				this.state = val.target.value;
+				//alert(this.scopeId)
+			},
+			changeGroupCategory(value) {
+
+				this.groupCategory = val.target.value;
+				//alert(this.scopeId)
+			},*/
+			//调用父组建的方法
+			close: function() {
+				//	console.log(this.assar)
+				this.$emit('close');
+			},
+		
+			getaddCategory() {
+				//保存的方法				
+			  if(!this.test()){
+					return false;
+				}
+			 if(this.isShow==false){
+			 	this.$message.error('请核对您的信息，防止重复添加');
+			 	return false
+			 }
+
+                //保存点击验证
+//				let tip = this.$message.error;
+//				let tipyu = "请输入添加的内容";
+//				if(this.groupingCode == ""){
+//  	        	this.$storage1.UserName(this.groupingCode, tip, tipyu);
+//  	        	
+//  	        	return false;
+//  	        }
+//				if (this.groupCategoryName == "") {
+//	    		    this.$storage1.UserName(this.groupCategoryName, tip, tipyu);					
+//  				return false;
+//  	       } 
+//  	        if(this.businessId == ""){
+//  	        	this.$storage1.UserName(this.businessId, tip, tipyu);
+//  	        	return false;
+//  	        }
+//  	        if(this.state == ""){
+//  	        	this.$storage1.UserName(this.state, tip, tipyu);
+//  	        	return false;
+//  	        }
+//  	         if(this.groupCategory == ""){
+//  	        	this.$storage1.UserName(this.groupCategory, tip, tipyu);
+//  	        	return false;
+//  	        }
+
+    	        //封装参数
+    	         var dataMap = {};
+				      dataMap['groupingCategory'] = this.groupCategory;
+				      dataMap['businessId'] = this.businessId;
+				      dataMap['state'] = this.state;
+				      dataMap['groupingCode'] = this.groupingCode;
+				      dataMap['groupCategoryName'] = this.groupCategoryName;
+				      var sign = this.$utilMd5s.md5Code(JSON.stringify(dataMap));
+				      dataMap['sign'] = sign;
+				      dataMap['uuid'] = this.uuid;
+				      var jsonData = JSON.stringify(dataMap);
+				this.$ajax.post(`${this.$url}/groupCategory/insertGroupCategory.html`, { 
+					jsonData:jsonData					
+				}).then(restaurants => {
+					//console.log(restaurants)
+					//this.$emit('close');
+					this.$emit('close',restaurants.data.message)
+					//alert(restaurants.data.message)
+				})                
+			},
+		}
+	}
+</script>

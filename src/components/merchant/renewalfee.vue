@@ -1,0 +1,384 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modals" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>用户管理---待续费</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.renewalfeeArrs.bussinessID.$error }">
+							<span class="mc">商家编号</span>
+							<el-input @blur="test" v-model="renewalfeeArrs.bussinessID" @change="selectFlag('1')" class="name1" clearable>
+							</el-input>
+							</div>
+							<span class="form-group__message" v-if="!$v.renewalfeeArrs.bussinessID.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.renewalfeeArrs.bussinessName.$error }">
+							<span class="mc">商户名称：</span>
+							<el-input  @blur="test" v-model="renewalfeeArrs.bussinessName" class="name1" @change="selectFlag('2')" clearable>
+							</el-input>
+							</div>
+								<span class="form-group__message" v-if="!$v.renewalfeeArrs.bussinessName.required">不能为空</span>
+							</div>
+						</el-col>	
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.renewalfeeArrs.isFormal.$error }">
+							<span class="mc">商户类型：</span>
+							<el-select  @blur="test" class="xl" v-model="renewalfeeArrs.isFormal" @change="checkFlag($event)">
+								<el-option v-for="item in businessType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+							</el-select>
+							</div>
+								<span class="form-group__message" v-if="!$v.renewalfeeArrs.isFormal.required">不能为空</span>								
+								</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.lone.$error }">
+							<span class="mc">续费时长</span>
+							<el-select  @blur="test" class="xl" v-model="lone" @change="timeCalculate($event)">
+								<el-option v-for="item in lengthRenewal" :key="item.value" :label="item.label" :value="item.value"></el-option>
+							</el-select>
+							</div>
+								<span class="form-group__message" v-if="!$v.lone.required">不能为空</span>								
+								</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">							
+							<span class="mc">结束使用时间：</span>
+							<el-input  @blur="test" v-model="renewalfeeArrs.renewTime" disabled="disabled" class="name1" clearable>
+							</el-input>
+							</div>
+						</el-col>
+						<el-col :span="10" class="gutterspan">
+							<div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.renewTime.$error }">
+							<span class="mc">续费使用时间：</span>
+							<el-input  @blur="test" v-model="renewTime" class="name1" clearable>
+							</el-input>
+							</div>
+								<span class="form-group__message" v-if="!$v.renewTime.required">不能为空</span>								
+								</div>
+						</el-col>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button @click="getCheckedNodes" class="el-button el-button--primary queding">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close" >关闭</button>
+						<!--<button type="button" class="el-button el-button--primary" @click="close">确 定</button>-->
+					</slot>
+				</div>
+			</div>z
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required,numeric,minLength,maxLength,or} from 'vuelidate/lib/validators'
+	export default {
+		props: ['renewalfeeArrs'],
+		data() {
+			return {
+				lone:'',
+				renewTime:'',
+				businessType: [{
+					value: '20',
+					label: '试用'
+				}, {
+					value: '365',
+					label: '正式'
+				}],
+				lengthRenewal:[{
+					value: '20',
+					label: '20天'
+				}, {
+					value: '365',
+					label: '一年'
+				}
+				]
+			}
+		},
+		validations: {
+			lone:{
+				required
+			},renewTime:{
+				required
+			},
+			renewalfeeArrs:{	
+		    bussinessID: {  
+		      required 
+		    } , 
+		    bussinessName: {  
+		      required  
+		    }, isFormal: {  
+		      required  
+		    }, 		   
+		    }
+    },
+		mounted: function() {
+		},
+		methods: {
+			test(){
+				this.$v.renewalfeeArrs.bussinessID.$touch()
+             	if(this.$v.renewalfeeArrs.bussinessID.$error){
+					return false;
+				}
+             	this.$v.renewalfeeArrs.bussinessName.$touch()
+             	if(this.$v.renewalfeeArrs.bussinessName.$error){
+					return false;
+				}            	
+             	this.$v.renewalfeeArrs.isFormal.$touch()
+             	if(this.$v.renewalfeeArrs.isFormal.$error){
+					return false;
+				}
+             	this.$v.lone.$touch()
+             	if(this.$v.lone.$error){
+					return false;
+				}
+             	this.$v.renewTime.$touch()
+             	if(this.$v.renewTime.$error){
+					return false;
+				}            	
+             	return true;
+			},
+			checkeds(){
+				   //保存点击验证
+				let tip = this.$message.error;
+				let tipyu = "请输入商家编号";
+				if(this.bussinessID == ""){
+    	        	this.$storage1.UserName(this.bussinessID, tip, tipyu);
+    	        	
+    	        	return false;
+    	        }
+				tipyu = "请输入商家名称";
+				if (this.bussinessName == "") {
+    				//this.$message.error("请输入查询的内容");
+	    		    this.$storage1.UserName(this.bussinessName, tip, tipyu);					
+    				return false;
+    	       } 
+    	       tipyu = "请输入联系人";
+    	        if(this.bussinessLinkPerson == ""){
+    	        	this.$storage1.UserName(this.bussinessLinkPerson, tip, tipyu);
+    	        	return false;
+    	        }
+    	        tipyu = "请输入手机号";
+    	        if(this.phoneNum == ""){
+    	        	this.$storage1.UserName(this.phoneNum, tip, tipyu);
+    	        	return false;
+    	        }else{
+    	        	//验证手机号格式
+    	        	let r = /^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/;
+    	        	if(!r.test(this.phoneNum)) {
+					   this.$message({
+							type: 'error',
+							message: '请填写正确的手机号码!'
+						});
+					return false;
+				   }
+    	        }
+    	        tipyu = "请输入商户类型";
+    	         if(this.isFormal == ""){
+    	        	this.$storage1.UserName(this.isFormal, tip, tipyu);
+    	        	return false;
+    	        }
+    	        tipyu = "请输入经营类型";
+    	         if(this.scopeId == ""){
+    	        	this.$storage1.UserName(this.scopeId, tip, tipyu);
+    	        	
+    	        	return false;
+    	        }
+    	        tipyu = "请输入使用开始时间";
+				if (this.durationTime == "") {
+    				//this.$message.error("请输入查询的内容");
+	    		    this.$storage1.UserName(this.durationTime, tip, tipyu);					
+    				return false;
+    	       } 
+    	       tipyu = "请选择所在省份";
+    	        if(this.proves== ""){
+    	        	this.$storage1.UserName(this.proves, tip, tipyu);
+    	        	return false;
+    	        }
+    	        tipyu = "请选择所在城市";
+    	        if(this.citys == ""){
+    	        	this.$storage1.UserName(this.citys, tip, tipyu);
+    	        	return false;
+    	        }
+    	        tipyu = "请选择所在区域";
+    	         if(this.diqu == ""){
+    	        	this.$storage1.UserName(this.diqu, tip, tipyu);
+    	        	return false;
+    	        }
+    	         return true;
+			},
+			selectFlag(flag){
+				 //封装参数
+    	         var dataMap = {};
+    	         
+				
+				let bussinessID='';
+				if(flag == 2){
+					if(this.bussinessID == '' ){
+						this.$message({
+							type: 'error',
+							message: '商户编号不能空!'
+						});
+						this.bussinessName='';
+						return false
+					}
+					
+					 dataMap['bussinessName'] = this.bussinessName;
+					  dataMap['bussinessID'] = '';
+					//查询名称
+				}else{
+					dataMap['bussinessName'] = '';
+				    dataMap['bussinessID'] = this.bussinessID;
+				
+				}
+				
+				     
+				     
+				      var jsonData = JSON.stringify(dataMap);
+				//请求 后台返回数据
+				this.$ajax.post(`${this.$url}/bussiness/selectBussinessByNameAndID.html`, { jsonData:jsonData }).then(data => {
+							if(data.data == true){
+						          this.$message({
+							         type: 'success',
+							         message: data.data
+						          });
+//									alert(data.data)
+								}else{
+									this.$message({
+							         type: 'success',
+							         message: data.data
+						          });
+//									alert(data.data)
+									
+								}
+						})
+						.catch((error) => {
+							console.log(error)
+							this.$message.error('获取数据失败');
+						})
+				
+				
+				
+			},
+			checkFlag(e){
+				//this.e.target.value
+				this.renewalfeeArrs.durationTime='';
+				this.renewalfeeArrs.renewTime='';
+				
+				//this.isFormal='';
+			},
+			timeCalculate(e){
+				if(this.lone == ''){
+					this.$message({
+							type: 'error',
+							message: '请先选中商户类型!'
+						});
+					this.renewTime='';
+					return false
+				}
+				if(!e){
+					this.renewTime='';
+				}
+				
+				//alert(e)
+				 // var AddDayCount=20;
+				
+				  var dd = new Date(this.renewalfeeArrs.renewTime);   //Wed Apr 04 2018 00:00:00 GMT+0800 (中国标准时间)
+				 // alert(dd.getDate())
+//				  this.renewTime=this.renewalfeeArrs.renewTime+this.lone
+						   dd.setDate(dd.getDate()+Number(this.lone));//获取AddDayCount天后的日期    
+						   var y = dd.getFullYear();     
+						   var m = (dd.getMonth()+1)<10?"0"+(dd.getMonth()+1):(dd.getMonth()+1);//获取当前月份的日期，不足10补0    
+						   var d = dd.getDate()<10?"0"+dd.getDate():dd.getDate();//获取当前几号，不足10补0    
+						  this.renewTime=y+"-"+m+"-"+d
+						   //alert(y+"-"+m+"-"+d)
+						  
+			},
+			clickme() {
+				this.$storage1.getid("inputfile");
+			},
+			deleteimg(myindex) {
+				this.$ajax.post(`${this.$url}/bussiness/deleteUpload.html`, {
+						servicePath: this.uploadfile,
+						chunk: myindex
+					}).then(data => {
+						if(data.data.flag == true) {
+							this.$message.error('删除成功');
+							this.iconshow = false;
+							this.uploadfile = this.COMiMAGE
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+					})
+			},
+			enterpointer() {
+				if(this.uploadfile == this.COMiMAGE) {} else {
+					this.iconshow = true;
+				}
+			},
+			exportpointer() {
+				this.iconshow = false;
+			},
+			accounts(event) {
+				this.fanwei = event.target.value
+			},
+			getCheckedNodes() {
+				let flags=this.checkeds()
+                if(!flags){
+                   return false
+				}
+				
+				 this.durationTime = this.GMTToStr(this.renewalfeeArrs.renewTime);
+				this.$ajax.post(`${this.$url}/bussiness/renewBussiness.html`, { 
+					bussinessID: this.renewalfeeArrs.bussinessID,
+					bussinessName: this.renewalfeeArrs.bussinessName,
+					isFormal: this.renewalfeeArrs.isFormal,
+					durationTime: this.renewalfeeArrs.renewTime,
+					renewTime: this.renewTime,
+					day:this.lone
+				}).then(data => {
+					if(data.data.flag==true){
+						this.$message.success(data.data.message);
+				        this.$emit('close');
+					}else{
+						this.$message.error(data.data.message);
+					}
+					
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+             },
+			GMTToStr(time) {
+					let date = new Date(time)
+					let Str = date.getFullYear() + '-' +
+						(date.getMonth() + 1) + '-' +
+						date.getDate()
+					return Str
+			},
+			close: function() {
+				//				console.log(this.assar)
+				this.$emit('close');
+
+			},
+		}
+	}
+</script>
+
+<style>
+
+</style>

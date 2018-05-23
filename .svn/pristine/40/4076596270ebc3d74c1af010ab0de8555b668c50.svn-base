@@ -1,0 +1,421 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" v-show="show">
+			<div class="modals" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>员工设置---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.employeeName.$error }">
+										<span class="mc">员工姓名</span>
+										<el-input @blur="test" v-model="employeeName" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.employeeName.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.bussinessID.$error }">
+										<span class="mc">所属商家</span>
+										<select class="xl" @blur="test" v-model="bussinessID" v-on:change="changeType($event)" @change="checkeds">
+											<option v-for="item in bussiness" :value="item.bussinessID">{{item.bussinessName}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.bussinessID.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.storeID.$error }">
+										<span class="mc">所属门店</span>
+										<select @blur="test" class="xl" v-model="storeID" v-on:change="storeyanzhneg($event)">
+											<option v-for="(j,index) in lists" :value="j.storeID">{{j.storeName}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.storeID.required">不能为空</span>
+								</div>
+							</el-col>
+								<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.employeeCode.$error }">
+										<span class="mc">员工工号</span>
+										<el-input @blur="test" v-model="employeeCode" class="name1" @change="selectFlag('1')" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.employeeCode.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.identity.$error }">
+										<span class="mc">身份证号</span>
+										<el-input @blur="test" v-model="identity" class="name1" @change="selectFlag('2')" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.identity.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.employeeSex.$error }">
+										<span class="mc">性别</span>
+										<el-select class="xl" @blur="test" v-model="employeeSex">
+											<el-option v-for="sexId in sexs" :key="sexId.value" :label="sexId.text" :value="sexId.value"></el-option>
+										</el-select>
+									</div>
+									<span class="form-group__message" v-if="!$v.employeeSex.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.phoneNum.$error }">
+										<span class="mc">手机号</span>
+										<el-input @blur="test" v-model="phoneNum" class="name1" @change="selectFlag('3')" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.phoneNum.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.employeeBirthday.$error }">
+										<span class="mc">生日</span>
+										<el-date-picker @blur="test" class="xl" placeholder="" v-model="employeeBirthday" format="yyyy-MM-dd">
+										</el-date-picker>
+									</div>
+									<span class="form-group__message" v-if="!$v.employeeBirthday.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.state.$error }">
+										<span class="mc">员工状态</span>
+										<el-select class="xl" @blur="test" v-model="state">
+											<el-option v-for="sel in states" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
+										</el-select>
+									</div>
+									<span class="form-group__message" v-if="!$v.state.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.employeePositionID.$error }">
+										<span class="mc">职务</span>
+										<el-select class="xl" @blur="test" v-model="employeePositionID">
+											<el-option v-for="se in position" :key="se.positionID" :label="se.positionName" :value="se.positionID"></el-option>
+										</el-select>
+									</div>
+									<span class="form-group__message" v-if="!$v.employeePositionID.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.employeeAddress.$error }">
+										<span class="mc">门店地址</span>
+										<el-input @blur="test" v-model="employeeAddress" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.employeeAddress.required">不能为空</span>
+								</div>
+							</el-col>
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--primary queding" @click="getCheckedNodes">确 定</button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	export default {
+		props: ['position'],
+		data() {
+			return {
+				bussiness: this.$storage.fetch("bussiness"),
+				bussinessstore: this.$storage.fetch("bussinessstore"),
+				storeIDs: this.$storage.fetch("storeIDs"),
+				lists: [],
+				sexs: [{
+						value: '0',
+						text: '男'
+					},
+					{
+						value: '1',
+						text: '女'
+					}
+				],
+				states: [{
+						value: '0',
+						text: '离职'
+					},
+					{
+						value: '1',
+						text: '在职'
+					}
+				],
+				employeeName: '',
+				employeeCode: '',
+				bussinessID: '',
+				storeID: '',
+				identity: '',
+				employeeSex: '',
+				phoneNum: '',
+				employeeBirthday: '',
+				state: '',
+				employeePositionID: '',
+				employeeAddress: '',
+			};
+		},
+		validations: {
+			employeeName: {
+				required
+			},
+			employeeCode: {
+				required
+			},
+			bussinessID: {
+				required
+			},
+			storeID: {
+				required
+			},
+			identity: {
+				required
+			},
+			employeeSex: {
+				required
+			},
+			phoneNum: {
+				required
+			},
+			employeeBirthday: {
+				required
+			},
+			state: {
+				required
+			},
+			employeePositionID: {
+				required
+			},
+			employeeAddress: {
+				required
+			},
+
+		},
+		//初始化门店的经营类别
+		mounted: function() {
+			//			this.$ajax.post(`${this.$url}/storeEmployee/selectPositionList.html`, {}).then(res => {
+			//					console.log(res)
+			//					this.positions = res.data.data
+			//					console.log(this.positions)
+			//				})
+			//				.catch((error) => {
+			//					console.log(error)
+			//					this.$message.error('获取数据失败');
+			//				});
+
+		},
+		methods: {
+			test() {
+				this.$v.employeeName.$touch()
+				if(this.$v.employeeName.$error) {
+					return false;
+				}
+				this.$v.employeeCode.$touch()
+				if(this.$v.employeeCode.$error) {
+					return false;
+				}
+				this.$v.bussinessID.$touch()
+				if(this.$v.bussinessID.$error) {
+					return false;
+				}
+				this.$v.storeID.$touch()
+				if(this.$v.storeID.$error) {
+					return false;
+				}
+				this.$v.identity.$touch()
+				if(this.$v.identity.$error) {
+					return false;
+				}
+				this.$v.employeeSex.$touch()
+				if(this.$v.employeeSex.$error) {
+					return false;
+				}
+				this.$v.phoneNum.$touch()
+				if(this.$v.phoneNum.$error) {
+					return false;
+				}
+				this.$v.employeeBirthday.$touch()
+				if(this.$v.employeeBirthday.$error) {
+					return false;
+				}
+				this.$v.state.$touch()
+				if(this.$v.state.$error) {
+					return false;
+				}
+				this.$v.employeePositionID.$touch()
+				if(this.$v.employeePositionID.$error) {
+					return false;
+				}
+				this.$v.employeeAddress.$touch()
+				if(this.$v.employeeAddress.$error) {
+					return false;
+				}
+				return true;
+			},
+			selectFlag(flag) {
+				//封装参数
+//				var dataMap = {};
+//              alert(flag)
+				let employeeCode = '';
+				let identity = '';
+				let phoneNum = '';
+				if(flag == 1 && this.employeeCode != '') {
+					employeeCode = this.employeeCode;
+					identity = '';
+				    phoneNum = '';
+				}
+				if(flag == 2 && this.identity != '') {
+					identity = this.identity;
+					employeeCode = '';
+					phoneNum = '';
+				}
+				if(flag == 3 && this.phoneNum != '') {
+					phoneNum= this.phoneNum;
+					identity = '';
+					employeeCode = '';
+				}
+                 
+//				var jsonData = JSON.stringify(dataMap);
+				//请求 后台返回数据
+				this.$ajax.post(`${this.$url}/storeEmployee/validEmployeePhoneNum.html`, {
+					employeeCode:employeeCode,
+					identity:identity,
+					phoneNum:phoneNum
+				}).then(data => {
+							if(flag == 1 && data.data == false) {
+								this.$message({
+									type: 'error',
+									message: '员工编号重复'
+								});
+							} 
+							if(flag == 2 && data.data == false) {
+								this.$message({
+									type: 'error',
+									message: '身份证重复'
+								});
+							} 
+							if(flag == 3 && data.data == false) {
+								this.$message({
+									type: 'error',
+									message: '电话号码重复'
+								});
+							} 
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+
+			},
+			//调用父组建的方法
+			close: function() {
+				this.employeeName = ''
+				this.employeeCode = ''
+				this.bussinessID = ''
+				this.storeID = ''
+				this.identity = ''
+				this.employeeSex = ''
+				this.phoneNum = ''
+				this.employeeBirthday = ''
+				this.state = ''
+				this.employeePositionID = ''
+				this.employeeAddress = ''
+				//				console.log(this.assar)
+				this.$emit('close');
+
+			},
+			changeType(val) {
+				//赋值商户id
+				this.lists = [];
+				//赋值商户id
+				this.bussinessID = val.target.value;
+				console.log(this.bussinessstore)
+				for(var i = 0; i < this.bussinessstore.length; i++) {
+					if(this.bussinessID == this.bussinessstore[i].bussinessID) {
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+			},
+			storeyanzhneg(event){
+				this.storeID=event.target.value;
+				this.$storage.save("storeIDs", this.storeID);
+				if(this.storeID!=this.storeIDs){
+					this.employeeCode = '';
+				}
+			},
+			getCheckedNodes() {
+				if(!this.test()) {
+					return false;
+				}
+				this.employeeBirthday = this.GMTToStr(this.employeeBirthday);
+				console.log(this.employeeBirthday);
+				let r = /^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/;
+				var cp = /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+				//				var reg=/^\d{1,20}$/;
+
+				if(!r.test(this.phoneNum)) {
+					this.$message.error('请填写正确的手机号码');
+					return false;
+				}
+				if(!cp.test(this.identity)) {
+					this.$message.error('证件填写有误');
+					alert('证件填写有误');
+					return false;
+				}
+				this.$ajax.post(`${this.$url}/storeEmployee/insertEmployee.html`, {
+						employeeName: this.employeeName,
+						employeeCode: this.employeeCode,
+						bussinessID: this.bussinessID,
+						storeID: this.storeID,
+						identity: this.identity,
+						employeeSex: this.employeeSex,
+						phoneNum: this.phoneNum,
+						employeeBirthday: this.employeeBirthday,
+						state: this.state,
+						employeePositionID: this.employeePositionID,
+						employeeAddress: this.employeeAddress,
+					}).then(restaurants => {
+						this.$emit('closes');
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('添加失败');
+					})
+			},
+			GMTToStr(time) {
+				let date = new Date(time)
+				let Str = date.getFullYear() + '-' +
+					(date.getMonth() + 1) + '-' +
+					date.getDate()
+				return Str
+			}
+
+		}
+	}
+</script>

@@ -1,0 +1,78 @@
+<template>
+	<div class="uploadimage">
+		<div id="buttonfile" @click="clickme"> <img class="bai100" src="../assets/tjzp.png" alt="添加图片"> </div>
+		<input type="file" @change="update($event,'0')" accept="image/*" capture="camera" id="inputfile" class="filehidden" />
+	</div>
+</template>
+<script>
+export default {
+	data() {
+		return {
+		}
+	},
+	mounted: function() {},
+	watch: {},
+	methods: {
+		clickme(){
+			this.$verification.getid("inputfile");
+		},
+		update(e,index){
+			let file = e.target.files[0];           
+			          let param = new FormData(); //创建form对象
+			          param.append('file',file,file.name);//通过append向form对象添加数据
+			          param.append('chunk',index);//上传的第一个 类型0 文本类型  第二个1图片类型 第三个 2 图片类型
+			          console.log(param.get('file')); //FormData私有类对象，访问不到，可以通过get判断值是否传进去
+			          const instance=this.$ajax.create({
+			          	withCredentials: true
+			          })
+			          
+			          instance.post(`${this.$url}/bussiness/upload.html`,param)
+			          .then(response=>{
+			          	console.log(response.data);
+			          	// 0代表图片1代表文件
+			          	if(index==0){
+			          		this.uploadfile=response.data.content
+			          		console.log('http://ykttest.oss-cn-beijing.aliyuncs.com/'+ this.uploadfile);
+			          	}
+			          	if(index==1){
+			          		this.uploadpic=response.data.content
+			          		console.log(this.uploadpic)
+			          	}
+			          	if(index==2){
+			          		this.uploadimg=response.data.content
+			          		console.log(this.uploadimg)
+			          	}
+
+			          })        
+			      },
+		update11(e){
+			let file = e.target.files[0];
+			if(window.FileReader) {
+				var fr = new FileReader();
+				fr.onloadend = function(e) {
+					var  tu = e.target.result; 
+					this.mydata = tu;
+					console.log(this.mydata);
+				};
+				fr.readAsDataURL(file);
+			}
+		},
+	}
+}
+</script>
+<style scoped>
+.filehidden{
+	display: none;
+}
+#buttonfile{
+	width: 60px;
+	height: 60px;
+	border: 1px solid red;
+
+}
+.bai100{
+	width: 100%;
+	height: 100%;
+}
+
+</style>

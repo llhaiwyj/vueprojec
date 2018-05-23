@@ -1,0 +1,212 @@
+<template>
+	<div class="servicemangement">
+		<div class="icon">
+			<el-tooltip class="item" effect="dark" content="添加" placement="top">
+				<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+			</el-tooltip>
+		</div>
+		<div id="sousuo">
+			<el-collapse>
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<el-input v-model="name"  clearable>
+								<template class="biaoti" slot="prepend">商品名称</template>
+							</el-input>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+							   <span class="input-group-addon">门店名称</span>
+									<select v-model="storeId">
+								       <option v-for="(j,index) in lists" :value="j.id">{{j.storeName}}</option>
+							        </select>
+							</div>							
+						</el-col>
+						<el-col class="row" :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+							<el-button class="find" @click="fined">查询</el-button>
+						</el-col>
+					</el-row>
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="storemanage" height="632" tooltip-effect="dark" style="width: 100%">
+				<el-table-column prop="serviceName" label="商品名称" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="bussinessName" label="商家" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="storeName" label="门店" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="serviceSalesPrice" label="价格" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="serviceSalesPushMoney" label="销售提成" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="state" label="状态 " show-overflow-tooltip>
+					<template slot-scope="scope">
+						<el-button id="zi1" type="text" v-if="scope.row.state==2" size="small">下架</el-button>
+						<el-button id="zi" type="text" v-else="scope.row.state==1" size="small">上架</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column label="操作">
+					<template slot-scope="scope">
+						<el-button type="text" size="small" @click="showModals(scope.$index,storemanage)">修改</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+				<div class="pages">
+					<el-pagination
+						@size-change="handleSizeChange"
+						@current-change="handleCurrentChange" 
+						:current-page="currentPage" 
+						:page-size="length" 
+						layout="total, sizes, prev, pager, next, jumper" 
+						:total="total">
+					</el-pagination>
+			    </div>
+				</el-col>	
+			</el-row>		
+		</div>
+		<modal v-show="isModalVisible" @close="closeModal" v-on:close="serlf" v-bind:shujus="shuju"></modal>
+		<Modal v-show="isModalVisibles" @close="closeModals" v-on:close="serlf"></Modal>
+	</div>
+</template>
+
+<script>
+	import modal from './Storecommoditysettingamend'
+	import Modal from './Storecommoditysettingadd'
+	export default {
+		components: {
+			modal,
+			Modal
+		},
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				bussiness:this.$storage.fetch("bussiness"),
+				bussinessstore:this.$storage.fetch("bussinessstore"),//商户下的门店
+				lists:[],
+				storemanage: '',
+				shuju: [],
+				currentPage: 1,
+				total: '',
+				length: 10,
+				isModalVisible: false,
+				isModalVisibles:false,
+				name: '',
+				bussinessId: '',
+				states: [{
+						value: '0',
+						text: '上架'
+					},
+					{
+						value: '1',
+						text: '下架'
+					}
+				],
+				state: '',
+				storeId:'',
+			}
+		},
+		mounted: function() {
+			if(this.$route.query.currentPage == undefined) {
+				this.currentPage = 1
+				this.length = 10
+
+			} else {
+				this.currentPage = this.$route.query.currentPage
+				this.length = this.$route.query.length
+			}
+			this.fined();
+		},
+		computed: {
+
+		},
+		methods: {
+			changeType(val) {
+				this.lists=[];
+				//赋值商户id
+               this.bussinessId=val.target.value;
+               console.log(this.bussinessstore)
+               for(var i=0;i<this.bussinessstore.length;i++){
+					if(this.bussinessId == this.bussinessstore[i].bussinessId){
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+			},
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				this.fined();
+
+			}, //改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length = index;
+				this.fined();
+
+			},
+			handleSizeChange() {
+
+			},
+			showModals(index, all) {
+				this.isModalVisible = true
+				this.$ajax.post(`${this.$url}/service_manager/initUpdateService.html`, { serviceID: all[index].serviceID }).then(data => {
+						console.log(data)
+						this.shuju = data.data.content
+					})
+					.catch((error) => {
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModal(){
+				this.isModalVisible = true
+			},
+			fined() {
+				this.$ajax.post(`${this.$url}/service_manager/selServiceList.html`, {
+						start: this.currentPage,
+						length: this.length,
+						bussinessID: this.bussinessId,
+						serviceName: this.name,
+						storeID:this.storeId,
+						state: this.state,
+					}).then(data => {
+						console.log(data)
+						this.storemanage = (data.data.data.list)
+						this.total = data.data.data.total
+						console.log(this.storemanage)
+						if(data.data.data.size > 10) {
+							this.length = data.data.data.size
+						}
+						console.log(this.length)
+						console.log(this.currentPage)
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			closeModals: function() {
+				this.isModalVisibles = false
+			},
+			serlf() {
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId,
+						currentPage: this.currentPage,
+						length: this.length
+					}
+				})
+			},
+		}
+	}
+</script>

@@ -1,0 +1,574 @@
+<template>
+		
+	<div class="rolesettings">
+		<div class="icon">
+		    <el-tooltip class="item" effect="dark" content="添加" placement="top" v-show="role.isShowAdd">
+			 	<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+		    </el-tooltip>
+			
+			<!--<i class="el-icon-delete delete" size="small delete" @click="shenhe"></i>-->	
+			<!--<i class="el-icon-success delete" size="small delete" @click="shenhe"></i>-->
+		</div>
+		<!--查询列表-->
+		<div id="sousuo">
+		<el-collapse>
+			<el-collapse-item title="搜索列表" name="2" id="lie">
+				<el-row :gutter="10">
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						    <div class="input-group">
+								<span class="input-group-addon">所属商家</span>
+								<select class="shangstate" v-model="bussinessID">
+									<option value="">----全部----</option>
+									<option v-for="item in store" :value="item.bussinessID">{{item.bussinessName}}</option>
+								</select>
+							</div>					
+					</el-col>
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						<el-input  clearable v-model="no">
+							 <template class="biaoti" slot="prepend">门店编号</template>
+						</el-input>
+					</el-col>
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						<el-input clearable v-model="name">
+							 <template class="biaoti" slot="prepend">门店名称</template>
+						</el-input>
+					</el-col>
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						<el-input  clearable v-model="storeName">
+							 <template class="biaoti" slot="prepend">门店电话</template>
+						</el-input>
+					</el-col>
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						<el-input  clearable v-model="storeLinkPerson">
+							 <template class="biaoti" slot="prepend">联系人</template>
+						</el-input>
+					</el-col>
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						<el-input  clearable v-model="phoneNum">
+							 <template class="biaoti" slot="prepend">手机号码</template>
+						</el-input>
+					</el-col>
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						<div class="input-group">
+							<span class="input-group-addon">门店状态</span>
+							<el-select  class="shangstate" v-model="state" placeholder="">
+								<el-option v-for="item in options" :key="item.value" :label="item.text" :value="item.value"></el-option>
+							</el-select>
+						</div>					
+					</el-col>
+					<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						<div class="input-group">
+							<span class="input-group-addon">是否歇业</span>
+							<el-select  class="shangstate" v-model="isRest" placeholder="">
+								<el-option v-for="item in outofbusiness" :key="item.value" :label="item.label" :value="item.value"></el-option>
+							</el-select>
+						</div>					
+					</el-col>			
+				</el-row>
+				<el-row :gutter="10">
+						<div class="chengshi">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="11" :xl="5">
+							<div class="input-group">
+							   <span class="input-group-addon">所在省</span>
+								<select class="xl" v-model="proves" v-on:change="areaprov($event)">
+									<option value="">----全部----</option>
+									<option v-for="(k,index) in provs" :value="k.ID">{{k.areaName}}</option>
+								</select>
+							</div>								
+					   </el-col>
+							<el-col class="row" :xs="19" :sm="18" :md="11" :lg="11" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">所在市</span>
+								<select class="xl" v-model="citys" v-on:change="areacity($event)">
+									<option value="">----全部----</option>
+									<option v-for="k  in cityArr" :value="k.ID">{{k.areaName}}</option>
+								</select>
+							</div>
+							</el-col>
+							<el-col class="row" :xs="19" :sm="18" :md="11" :lg="11" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">所在区</span>
+								<select class="xl" v-model="diqu" v-on:change="xianqus($event)">
+									<option value="">----全部----</option>
+									<option v-for="l in districtArr" :value="l.ID">{{l.areaName}}</option>
+								</select>
+							</div>
+							</el-col>
+							<el-col class="row" :xs="19" :sm="18" :md="11" :lg="11" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">商圈</span>
+								<select class="xl" v-model="storeAreaID" v-on:change="xian($event)">
+									<option value="">----全部----</option>
+									<option v-for="l in street" :value="l.ID">{{l.name}}</option>
+								</select>
+							</div>
+							</el-col>
+						<el-col class="row" :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+						<el-button class="find" @click="fined">查询</el-button>
+					</el-col>
+					</div>
+					</el-row>
+			</el-collapse-item>
+		</el-collapse>
+    </div>
+    <div id="tablist">
+		<el-table ref="multipleTable" :data="tableData3" height="632" tooltip-effect="dark" style="width: 100%">
+			<!--<el-table-column prop="id" v-show="isShow" label="门店ID" width="90" show-overflow-tooltip>
+			</el-table-column>-->
+			<el-table-column prop="no" label="门店编号"  show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="storeName" label="门店名称"  show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="bussinessName" label="所属商家" show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="storeCity" label="所属城市"  show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="storeAreaName" label="商圈"  show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="storeAddress" label="门店地址" show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="doTimeStart" label="营业开始时间" width="110" show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="doTimeEnd" label="营业结束时间" width="110" show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="storePhone" label="门店电话"  show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="storeLinkPerson" label="联系人"  show-overflow-tooltip>
+			</el-table-column>
+			<el-table-column prop="phoneNum" label="手机号码" show-overflow-tooltip>
+			</el-table-column>
+			
+			
+			<!--<el-table-column prop="scopeNamew" label="门店经营范围" width="110" show-overflow-tooltip>
+			</el-table-column>-->
+			
+			
+			
+			<!--<el-table-column prop="joinActivity" label="是否参加活动" width="110" show-overflow-tooltip show-overflow-tooltip>
+				<template slot-scope="scope">
+					<div id="zi1" v-if="scope.row.joinActivity!=1">否</div>
+					<div id="zi" v-if="scope.row.joinActivity==1">是</div>
+				</template>
+			</el-table-column>-->
+			<el-table-column prop="state" label="门店状态"  show-overflow-tooltip>
+				<template slot-scope="scope">
+					<el-button id="zi1" type="text" v-if="scope.row.state==1" size="small">停用</el-button>
+					<el-button id="zi" type="text" v-else="scope.row.state==0" size="small">启用</el-button>
+				</template>
+			</el-table-column>
+			<el-table-column prop="state" label="是否歇业"  show-overflow-tooltip>
+				<template slot-scope="scope">
+					<el-button id="zi1" type="text" v-if="scope.row.isPersonnel==1" size="small">正常营业</el-button>
+					<el-button id="zi" type="text" v-else="scope.row.isPersonnel==0" size="small">歇业中</el-button>
+				</template>
+			</el-table-column>
+			<el-table-column prop="joinActivity" label="预约设置 " show-overflow-tooltip>
+				<template slot-scope="scope">
+					<el-button id="zi1" type="text" class="yuyue" v-if="scope.row.YuYue==0" size="small" @click="order(scope.$index,tableData3)">未开启预约</el-button>
+					<el-button id="zi" type="text" v-else="scope.row.YuYue==1" size="small">预约设置</el-button>
+				</template>
+			</el-table-column>
+			<el-table-column label="操作" width="120">
+				<template slot-scope="scope">
+					<el-button type="text" size="small" @click="deletes(scope.$index,tableData3)" v-show="role.isShowDel">删除</el-button><!--{{menuList[1]}}-->
+					<!--<el-button type="text" size="small" @click="showModals(scope.$index,tableData3,'2')">{{menuList[4]}}查看</el-button>-->
+				    <el-button type="text" size="small" @click="showModals(scope.$index,tableData3,'1')" v-show="role.isShowUpdate">修改</el-button><!--v-show="role.isShowUpdate"-->
+				</template>
+			</el-table-column>
+		</el-table>
+		</div>
+		<div class="block">
+			<!--<el-button type="text" size="small xinzeng" @click="showModal" class="add">{{menuList[0]}}添加</el-button>-->
+			<!--<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+				<div class="pages">
+				<el-pagination 
+				@current-change="handleCurrentChange" 
+				:current-page="currentPage" 
+				:page-size="length" 
+				layout="total, prev, pager, next"
+				:total="total">
+			       </el-pagination>
+			    </div>
+				</el-col>	
+			</el-row>-->
+				<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+					<div class="pages">
+						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+						</el-pagination>
+					</div>
+				</el-col>
+			</el-row>
+		</div>		
+		<modal v-show="isModalVisible" @close="closeModal" v-bind:provlist="provs" v-on:close="serlfs" v-on:closes="serlf"/>
+		<modals v-show="isModalVisibles" @close="closeModals" v-bind:renshu="renshus" v-bind:updates="updatearr" v-on:close="serlfs" v-on:closes="serlf" v-bind:provlist="provs" v-bind:cityArr="cityArrs" v-bind:districtArr="districtArrs" v-bind:street="streets"  v-bind:time="times"/>
+		<!--<store v-show="xianshi" @close="closestore" :fan="scope" v-bind:times="time" v-bind:storenames="storename" v-bind:renshus="renshu" v-bind:storeids="storeID" v-on:close="serlf"/>-->
+	</div>
+</template>
+
+<script>
+	import Modal from './storesadd.vue'
+	import Modals from './storesupdate.vue'
+//	import Store from './storeyuyue.vue'
+	export default {
+		name: 'stores',
+		components: {
+			Modal,
+			Modals,
+//			Store
+		},
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				store: this.$storage.fetch("bussiness"),
+				listCity: this.$storage.fetch("listCity"),
+				areaList: this.$storage.fetch("areaList"),
+				menuList: [],
+				tableData3: '',
+				currentPage: 1,
+				total: '',
+				length: 10,
+				isModalVisible: false,
+				isModalVisibles: false,
+				xianshi: false,
+				isShow:false,
+				updatearr: '',
+				state: '',
+				storeId: '',
+				bussinessID: '',
+				//				bussiness: this.$storage.fetch("bussiness"), //角色下的所有用户
+				//bussinessstore:this.$storage.fetch("bussinessstore");//商户下的门店
+				storelist: [],
+				lists: [],
+				scope: '',
+				times:'',
+				renshus: '',
+				storeID: '',
+				affiliation: '',
+				provs: [],
+				proves: '',
+				cityArr: [],
+				citys: '',
+				districtArr: [],
+				chengshi: '',
+				jutilu: [],
+				juti: [],
+				xian: '',
+				scopeId:'',
+				joinActivity:'',
+				joinActivitys:'',
+				doTimeStart:'',
+				doTimeEnd:'',
+				options: [{
+					value: '',
+					text: '全部'
+				},
+				{
+						value: '0',
+						text: '启用'
+					},
+					{
+						value: '1',
+						text: '停用'
+					}
+				],
+				activity: [
+				{
+						value: '1',
+						text: '是'
+					},
+					{
+						value: '0',
+						text: '否'
+					}
+				],
+				outofbusiness: [{
+					value: '',
+					text: '全部'
+				},{
+						value: '0',
+						label: '是'
+					},
+					{
+						value: '1',
+						label: '否'
+					}
+				],
+				name:'',
+				storeID:'',
+				storename:'',
+				cityArrs:[],
+				districtArrs:[],
+				streets:[],
+				street:[],
+				diqu:'',
+				storeAreaID:'',
+				isRest:'',
+				bussinessName:'',
+				picUrl:'',
+				role:{
+					isShowAdd:false,
+				    isShowDel:false,
+				    isShowUpdate:false,
+				},
+			}
+		},
+		
+		//页面初始化的时候调接口显示数据
+		mounted: function() {
+			this.permission();
+			this.fined();
+			for(let i in this.listCity) {
+						if(this.listCity[i].parentID == '0') {
+							this.provs.push(this.listCity[i])
+						}
+						
+			}
+			console.log(this.provs)
+		},
+		
+		methods: {
+			permission(){
+				this.$storage1.permission(this.$ajax,`${this.$url}/login/selectBtn.html`,this.menuId,this.role);
+				console.log(this.role)
+
+			},
+			areaprov: function(even) {
+				this.proves = even.target.value
+				this.cityArr = [];
+				for(let i in this.listCity) {
+					if(this.proves == this.listCity[i].parentID) {
+						//						this.cityArr = this.arr[i];
+						//this.$set(this.cityArr, i, this.arrLists[i])
+						//vue.set(this.cityArr, i, this.arrLists[i])
+						//this.cityArr.push(this.arrLists[i])
+						this.cityArr.push(this.listCity[i]);
+					}
+				}
+				//				console.log(this.prov)
+			},
+			areacity: function(event) {
+				//this.$emit('areaprovs', event.target.value)
+				this.citys = event.target.value
+				this.districtArr = [];
+				for(let i in this.listCity) {
+					if(this.citys == this.listCity[i].parentID) {
+
+						this.districtArr.push(this.listCity[i]);
+					}
+				}
+			},
+			xianqus(event) {
+				//				console.log(this.rangelist)
+				this.diqu = event.target.value
+				console.log(this.diqu)
+				this.street = [];
+				for(let i in this.areaList) {
+					if(this.diqu == this.areaList[i].areaID) {
+
+						this.street.push(this.areaList[i]);
+					}
+				}
+				console.log(this.street)
+			},
+			xian(event) {
+				this.storeAreaID = event.target.value
+			},
+			changeType(val) {
+				//赋值商户id
+				this.bussinessID = val.target.value;
+				console.log(this.bussinessstore)
+				/*for(var i=0;i<this.bussinessstore.length;i++){
+					if()
+				}*/
+			}, //改变页数触发
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				this.fined();
+			}, //改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length = index;
+				this.fined();
+			},
+			deletes(index, stores) {
+				this.$confirm('此操作将永久删除该门店, 是否继续?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }).then(() => {
+					this.$ajax.post(`${this.$url}/bussinessStore/deleteBussinessStore.html`, { storeID: stores[index].storeID}).then(data => {
+						console.log(data)
+						if(data.data.flag == true) {
+						this.$message({
+							type: 'success',
+							message: data.data.message
+						});
+						this.fined();
+						} else {
+							this.$message({
+								type: 'error',
+								message: data.data.message
+							});
+						}
+					 	
+					})
+				}).catch(() => {
+					//取消操作
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			},
+			order(inde, all) {
+				this.xianshi = true
+				this.storeID = all[inde].storeID
+				this.storename=all[inde].storeName
+				console.log(this.storename)
+//				this.$ajax.post(`${this.$url}/bussinessStore/initYuYueSet.html`, { storeID: this.storeID }).then(data => {
+//					console.log(data)
+////					this.str=data.data.list
+//					this.time= data.data.list[0].split(',')
+//					this.renshu= data.data.list[0].split(',')
+//						console.log(this.time)
+//						console.log(this.renshu)
+//
+//					})
+//					.catch((error) => {
+//						console.log(error)
+//						this.$message.error('获取数据失败');
+//					})
+			},
+			showModals: function(inde, all,flag) {
+				this.isModalVisibles = true
+				this.storeID=all[inde].storeID;
+				console.log(this.storeID)
+				let YuYuelist='';
+				this.$ajax.post(`${this.$url}/bussinessStore/initBussinessStoreUpdate.html`, { storeID: all[inde].storeID }).then(data => {
+						console.log(data)
+						this.updatearr = data.data
+						this.YuYuelist=data.data.listCount
+						this.times = this.YuYuelist[0].split(',')
+						this.renshus = this.YuYuelist[1].split(',')
+//						this.picUrl=this.updatearr.picUrl.split(',')
+//						console.log(this.picUrl)
+//						this.$storage.save("picUrls",this.picUrl);
+//						console.log(this.times)
+//						console.log(this.renshus)
+//						console.log(this.updatearr)
+//						console.log(data.data.content.storeProvinceID)
+						
+//						for(let i in this.store){
+//							if(this.updatearr.bussinessID==this.store[i].bussinessID){
+//								this.bussinessName=this.store[i].bussinessName
+//							}
+//						}
+//						console.log(this.bussinessName)
+						//修改回显城市值
+						
+						 this.cityArrs=[]
+						for(let i in this.listCity) {
+							if(this.updatearr.storeProvinceID == this.listCity[i].parentID) {
+								this.cityArrs.push(this.listCity[i])
+							}
+						}
+						console.log(this.cityArrs)
+//							console.log(this.cityArrs)
+						//修改回显县区值	
+						this.districtArrs=[]
+						for(let i in this.listCity) {
+							if(this.listCity[i].parentID == this.updatearr.storeCityID) {
+								this.districtArrs.push(this.listCity[i])
+							}
+						}
+						//修改回显街道值
+						this.streets=[]
+						for(let i in this.areaList) {
+							if(this.areaList[i].areaID == this.updatearr.storeCountryID) {
+								this.streets.push(this.areaList[i])
+							}
+						}
+//						console.log(this.streets)
+//						alert(this.streets)
+//						console.log(this.districtArrs)
+						if(flag == 2) {
+							this.isClose = false
+							this.disabled = true
+							this.readonly = true
+							this.disable = true
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+
+			},
+			//查找
+			fined() {
+				this.$ajax.post(`${this.$url}/bussinessStore/selBussinessStoreList.html`, { 
+					start: this.currentPage,
+					length: this.length,
+					bussinessID:this.bussinessID,
+					no:this.no,
+					storeName:this.storeName,
+					storePhone:this.storePhone,
+					storeLinkPerson:this.storeLinkPerson,
+					phoneNum:this.phoneNum,
+					state:this.state,
+					isRest:this.isRest,
+					province:this.proves,
+					city:this.citys,
+					county:this.diqu,
+					area:this.storeAreaID
+				}).then(data => {
+						console.log(data)
+						this.tableData3 = (data.data.data.list)
+						this.total = data.data.data.total
+						console.log(this.tableData3)
+						if(data.data.data.size > 10) {
+							this.length = data.data.data.size
+						}
+						console.log(this.length)
+						console.log(this.currentPage)
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModal: function() {
+				this.isModalVisible = true
+			},
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			closestore: function() {
+				this.xianshi = false
+			},
+			//模态框关闭
+			closeModals: function() {
+				this.isModalVisibles = false;
+			},
+			//
+			closeModals: function() {
+				this.isModalVisibles = false;
+			},
+			serlf: function() {
+				this.$router.push({ name: 'backs', query: { menuIds: this.menuId } })
+				/*this.$ajax.post('http://172.19.66.8:8080/new-xyykt-manager/bussinessStore/selBussinessStoreList.html',{start:this.currentPage,length:this.length}).then(data=>{
+					console.log(data)
+					this.tableData3=(data.data.data.list)
+				})
+				.catch((error)=>{
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})*/
+			},
+			serlfs: function() {
+				this.isModalVisible = false
+				this.isModalVisibles = false
+			},
+		}
+	}
+</script>

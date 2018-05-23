@@ -1,0 +1,249 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" v-show="show">
+			<div class="modals" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>员工设置---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col :span="10" class="gutterspan">
+								<div class="box">
+							        <span class="mc">员工工号</span>
+									<el-input placeholder="" v-model="employeeCode" class="name1" clearable>
+									</el-input>
+								</div>	
+							</el-col>
+								<el-col :span="10" class="gutterspan">
+									<div class="box">
+							        <span class="mc">员工姓名</span>
+									<el-input placeholder="" v-model="employeeName" class="name1" clearable>
+									</el-input>
+									</div>
+								</el-col>
+									<el-col :span="10" class="gutterspan">
+									<div class="box">
+								        <span class="mc">身份证号</span>
+										<el-input placeholder="" v-model="identity" class="name1" clearable>
+										</el-input>
+									</div>	
+									</el-col>
+								<el-col :span="10" class="gutterspan">
+									<div class="box">
+									    <span class="mc">手机号</span>
+										<el-input placeholder="" v-model="phoneNum" class="name1" clearable>
+										</el-input>
+								    </div>		
+								</el-col>															
+								<el-col :span="10" class="gutterspan">
+									<div class="box">
+									    <span class="mc">生日</span>
+									<el-date-picker  class="xl" placeholder="" v-model="employeeBirthday" format="yyyy-MM-dd">										
+									</el-date-picker>
+									</div>
+									</el-col>
+								<div class="xinxi">
+									<el-col :span="10" class="gutterspan">
+										<div class="box">
+									    <span class="mc">性别</span>
+									<el-select  class="xl" v-model="sex">
+										<el-option v-for="sexId in sexs" :key="sexId.value" :label="sexId.text" :value="sexId.value"></el-option>
+									</el-select>
+									</div>
+									</el-col>
+									<el-col :span="10" class="gutterspan">
+										<div class="box">
+									    <span class="mc">员工状态</span>
+									<el-select class="xl" v-model="stat">
+										<el-option v-for="sel in states" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
+									</el-select>
+									</div>
+									</el-col>
+									<el-col :span="10" class="gutterspan">
+									<div class="box">
+									    <span class="mc">职务</span>
+									<el-select  class="xl" v-model="positiond">
+										<el-option v-for="se in positions" :key="se.positionID" :label="se.positionName" :value="se.positionID"></el-option>
+									</el-select>
+									</div>
+									</el-col>
+								</div>
+								<div class="shangjai">
+									<el-col :span="10" class="gutterspan">
+										<div class="box">
+									    <span class="mc">所属商家</span>
+									<select class="xl" v-model="bussinessId" v-on:change="changeType($event)">
+										<option v-for="buss in bussinesss" :value="buss.bussinessId">{{ buss.bussinessName }}</option>
+									</select>
+									</div>
+									</el-col>
+									<!--门店列表-->
+									<el-col :span="10" class="gutterspan">
+										<div class="box">
+									    <span class="mc">所属门店</span>
+									<select class="xl" v-model="storeId">
+										<option v-for="(j,index) in lists" :value="j.id">{{j.storeName}}</option>
+									</select>
+									</div>
+									</el-col>
+								</div>
+								<el-col :span="10" class="gutterspan">
+									<div class="box">
+									    <span class="mc">门店地址</span>
+									<el-input placeholder="" v-model="employeeAddress" class="name1" clearable>
+									</el-input>
+									</div>
+						      </el-col>
+								
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--primary queding" @click="getCheckedNodes">确 定</button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>						
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				sexs: [{
+						value: '0',
+						text: '男'
+					},
+					{
+						value: '1',
+						text: '女'
+					}
+				],
+				states: [{
+						value: '0',
+						text: '离职'
+					},
+					{
+						value: '1',
+						text: '在职'
+					}
+				],
+				positions: '',
+				bussinessId: '',
+				storeId: '',
+				bussinesss: this.$storage.fetch("bussiness"),
+				bussinessstore: this.$storage.fetch("bussinessstore"),
+				employeeBirthday: '',
+				lists: [],
+				sex: '',
+				stat: ''
+			};
+		},
+		//初始化门店的经营类别
+		mounted: function() {
+			this.$ajax.post(`${this.$url}/storeEmployee/selectPositionList.html`, {}).then(res => {
+					console.log(res)
+					this.positions = res.data.data
+					console.log(this.positions)
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				});
+
+		},
+		methods: {
+			//调用父组建的方法
+			close: function() {
+				//				console.log(this.assar)
+				this.$emit('close');
+
+			},
+			changeType(val) {
+				//赋值商户id
+				this.lists = [];
+				this.bussinessId = val.target.value;
+				console.log(this.bussinessstore)
+				for(var i = 0; i < this.bussinessstore.length; i++) {
+					if(this.bussinessId == this.bussinessstore[i].bussinessId) {
+						//获取门店数据
+						this.lists.push(this.bussinessstore[i]);
+					}
+				}
+			},
+			getCheckedNodes() {
+				this.employeeBirthday = this.GMTToStr(this.employeeBirthday);
+				console.log(this.employeeBirthday);
+				let r = /^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/;
+				var cp = /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+				//				var reg=/^\d{1,20}$/;
+
+				if(!r.test(this.phoneNum)) {
+					alert('请填写正确的手机号码');
+					return;
+				} else if(!cp.test(this.identity)) {
+					alert('证件填写有误');
+					return;
+				} else {
+					this.$ajax.post(`${this.$url}/storeEmployee/validEmployeePhoneNum.html`, {
+							storeID: this.storeId,
+							employeeCode: this.employeeCode,
+							phoneNum: this.phoneNum,
+							identity: this.identity,
+						}).then(data => {
+							console.log(data.request.responseText)
+							var dd = JSON.parse(data.request.responseText);
+//							console.log(dd.flag)
+							   
+							if(dd.flag == true) {
+								this.$message(dd.message);
+								this.$ajax.post(`${this.$url}/storeEmployee/insertEmployee.html`, {
+										bussinessID: this.bussinessId,
+										storeID: this.storeId,
+										employeeCode: this.employeeCode,
+										employeeName: this.employeeName,
+										employeeBirthday: this.employeeBirthday,
+										employeeSex: this.sex,
+										employeeAddress: this.employeeAddress,
+										employeePositionID: this.positiond,
+										phoneNum: this.phoneNum,
+										identity: this.identity,
+										state: this.stat
+									}).then(restaurants => {
+										this.$emit('close');
+									})
+									.catch((error) => {
+										console.log(error)
+										this.$message.error('添加失败');
+									})
+							}else{
+								this.$message(dd.message);
+								
+							}
+						})
+						.catch((error) => {
+							console.log(error)
+							this.$message.error('data.data.message');
+						})
+					
+									
+				}
+				},
+				GMTToStr(time) {
+					let date = new Date(time)
+					let Str = date.getFullYear() + '-' +
+						(date.getMonth() + 1) + '-' +
+						date.getDate()
+					return Str
+				}
+
+			}
+		}
+</script>
+
