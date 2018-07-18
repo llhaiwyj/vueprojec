@@ -1,0 +1,211 @@
+<template>
+	<div class="billings">
+		<div class="zuo">
+			<div class="zong">
+				<div class="zong-left">
+					<div class="meal">
+						<p class="order">订单详情</p>
+						<div class="information">
+							<div class="xingming">
+								<p class="xingming-l">客户姓名：</p>
+								<p>张三</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">手机号码：</p>
+								<p>17610038211</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">车牌号码：</p>
+								<p>津A88888</p>
+							</div>
+							<div class="ServiceProject">
+								<p class="xingming-l">服务项目：</p>
+								<div class="project">
+									<div class="project1">
+										<p>打蜡</p>
+										<p><i class="el-icon-remove"></i></p>
+										<p>2</p>
+										<p><i class="el-icon-circle-plus"></i></p>
+										<p>￥100.00</p>
+										<p><i class="el-icon-delete"></i></p>
+									</div>
+									<div class="project1">
+										<p>打蜡</p>
+										<p><i class="el-icon-remove"></i></p>
+										<p>2</p>
+										<p><i class="el-icon-circle-plus"></i></p>
+										<p>￥100.00</p>
+										<p><i class="el-icon-delete"></i></p>
+									</div>
+									<div class="project1">
+										<p>打蜡</p>
+										<p><i class="el-icon-remove"></i></p>
+										<p>2</p>
+										<p><i class="el-icon-circle-plus"></i></p>
+										<p>￥100.00</p>
+										<p><i class="el-icon-delete"></i></p>
+									</div>
+								</div>
+							</div>
+							<div class="UseCombo">
+								<p class="xingming-l">使用套餐：</p>
+								<div class="UseCombo-r">
+									<p>小鱼精洗年费套餐</p>
+									<p>小鱼精洗终生美容套餐</p>
+								</div>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">服务人员：</p>
+								<p>刘温</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">合计金额：</p>
+								<p>500.00</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">优惠券：</p>
+								<p>50.00</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">实付金额：</p>
+								<p>450.00</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="zong-right">
+					<div class="billing">
+						<el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
+							<el-tab-pane label="会员开单" name="first">
+								<div class="memberorder">
+									<div class="chazhao">
+										<input type="text" placeholder="请输入查询条件" class="tiaojian" />
+										<div class="ruselts">
+											<div class="ruselts-1">
+												<p>17610038211</p>
+												<p>刘温</p>
+											</div>
+											<div class="ruselts-1">
+												<p>17610038211</p>
+												<p>刘温</p>
+											</div>
+											<div class="ruselts-1">
+												<p>17610038211</p>
+												<p>刘温</p>
+											</div>
+										</div>
+									</div>
+									<div class="xingming">
+										<p class="xingming-l">车牌号码：</p>
+										<p>津A88888</p>
+									</div>
+									<div class="ChoosePackage">
+										<p class="ChoosePackage-l">选择套餐：</p>
+										<el-tabs v-model="activeName1" type="card" @tab-click="handleClicks" class="package">
+											<el-tab-pane label="套餐A" name="one">
+												<div class="packageA">
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>5</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>5</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>5</span></p>
+													</div>
+												</div>
+											</el-tab-pane>
+											<el-tab-pane label="套餐B" name="tow">
+                                                <div class="packageA">
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>4</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>4</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>4</span></p>
+													</div>
+												</div>
+											</el-tab-pane>
+											<el-tab-pane label="套餐C" name="three">
+                                                <div class="packageA">
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>3</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>3</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>3</span></p>
+													</div>
+												</div>
+											</el-tab-pane>
+										</el-tabs>
+									</div>
+									<div class="Buy">购买服务，套餐及商品</div>
+								</div>
+							</el-tab-pane>
+							<el-tab-pane label="散客开单" name="second">
+                                <div class="individualorder">
+                                	
+                                </div>
+							</el-tab-pane>
+						</el-tabs>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="you">
+			<div class="timg"><img src="../../../build/logo.png" alt="" /></div>
+			<p class="name">张三</p>
+			<div class="boxtime">
+				<p class="jtime">距上次到店距离</p>
+				<span class="timenumber">27</span><span>天</span>
+			</div>
+			<div class="jilubox">
+				<div class="julist">
+					<span class="jilu">该顾客消费记录:</span>
+					<span class="gengduo"><a href="">更多</a></span>
+				</div>
+				<div class="julist">
+					<span class="servername">服务项目名称</span>
+					<span class="serverdata">2018.3.27</span>
+				</div>
+				<div class="julist">
+					<span class="servername">服务项目名称</span>
+					<span class="serverdata">2018.3.27</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	import "../../assets/css/billing.css"
+	export default {
+		data() {
+			return {
+				activeName2: 'first',
+				activeName1: 'one'
+			};
+		},
+		methods: {
+			handleClick(tab, event) {
+				console.log(tab, event);
+			},
+			handleClicks(tab, event) {
+				console.log(tab, event);
+			}
+		}
+	};
+</script>

@@ -1,0 +1,582 @@
+<template>
+	<div class="billings">
+		<div class="zuo">
+			<div class="zong">
+				<div class="zong-left">
+					<div class="meal">
+						<p class="order">订单详情</p>
+						<div class="information">
+							<div class="xingming">
+								<p class="xingming-l">客户姓名：</p>
+								<p>{{informatione.username}}</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">手机号码：</p>
+								<p>{{informatione.phone}}</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">车牌号码：</p>
+								<p>{{car.carNum}}</p>
+							</div>
+							<div class="ServiceProject">
+								<p class="xingming-l">服务项目：</p>
+								<div class="project">
+									<div class="project1">
+										<p>打蜡</p>
+										<p><i class="el-icon-remove"></i></p>
+										<p>2</p>
+										<p><i class="el-icon-circle-plus"></i></p>
+										<p>￥100.00</p>
+										<p><i class="el-icon-delete"></i></p>
+									</div>
+									<div class="project1">
+										<p>打蜡</p>
+										<p><i class="el-icon-remove"></i></p>
+										<p>2</p>
+										<p><i class="el-icon-circle-plus"></i></p> 
+										<p>￥100.00</p>
+										<p><i class="el-icon-delete"></i></p>
+									</div>
+									<div class="project1">
+										<p>打蜡</p>
+										<p><i class="el-icon-remove"></i></p>
+										<p>2</p>
+										<p><i class="el-icon-circle-plus"></i></p>
+										<p>￥100.00</p>
+										<p><i class="el-icon-delete"></i></p>
+									</div>
+								</div>
+							</div>
+							<div class="UseCombo">
+								<p class="xingming-l">使用套餐：</p>
+								<div class="UseCombo-r">
+									<p v-for="i in customerMealList">{{i.mealName}}</p>
+								</div>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">服务人员：</p>
+								<p>刘温</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">合计金额：</p>
+								<p>{{customerMealLists.oldPrice}}</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">优惠券：</p>
+								<p>{{customerMealLists.mealPrice}}</p>
+							</div>
+							<div class="xingming">
+								<p class="xingming-l">实付金额：</p>
+								<p>450.00</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="zong-right">
+					<div class="billing">
+						<el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
+							<el-tab-pane label="会员开单" name="first">
+								<div class="individualorder" v-show="fwtc">
+									<el-tabs type="border-card" v-model="activeName" @tab-click="memberkaidan">
+										<el-tab-pane>
+											<span slot="label"><i class="el-icon-date"></i> 返回</span>
+										</el-tab-pane>
+										<el-tab-pane label="服务" name="yi">
+											<div class="sever">
+												<ul class="sever-l">
+													<li v-for="i in groupList" @click="grouping(i.groupingId)">{{i.groupingName}}</li>
+												</ul>
+												<div class="sever-specific">
+													<div class="specifics" v-for="i in serviceList">
+														<p class="specifics-name">{{i.serviceName}}</p>
+														<p class="jian" @click="jian(i.canUseCount)"><i class="el-icon-remove"></i></p>
+														<p v-model="buyCount">{{buyCount}}</p>
+														<p class="jia" @click="jia(i.canUseCount)"><i class="el-icon-circle-plus"></i></p>
+													</div>
+												</div>
+											</div>
+											<button class="determine">确认</button>
+											<button class="quxiao" @click="quxiao">取消</button>
+										</el-tab-pane>
+										<el-tab-pane label="商品" name="er">
+											<ul class="sever-l">
+											    <li v-for="i in mealList" @click="grouping(i.mealID)">{{i.mealName}}</li>
+											</ul>
+											
+											
+										</el-tab-pane>
+										<el-tab-pane label="套餐" name="san">
+											<div class="sever">
+												<ul class="sever-l">
+													<li v-for="i in mealList" @click="grouping(i.mealID)">{{i.mealName}}</li>
+												</ul>
+												<div class="sever-specific">
+													<div class="specifics" v-for="i in mealDetailLists">
+														<p class="specifics-name">{{i.serviceName}}</p>
+														<p class="jian" @click="jian(i.canUseCount)"><i class="el-icon-remove"></i></p>
+														<p v-show="bubian">{{i.canUseCount}}</p>
+														<p v-model="canUseCount" v-show="bian">{{canUseCount}}</p>
+														<p class="jia" @click="jia(i.canUseCount)"><i class="el-icon-circle-plus"></i></p>
+													</div>
+												</div>
+											</div>
+											<button class="determine">确认</button>
+											<button class="quxiao" @click="quxiao">取消</button>
+										</el-tab-pane>
+									</el-tabs>
+								</div>
+								<div class="memberorder" v-show="fuwutaocan">
+									<div class="chazhao">
+										<input type="text" v-model="phone" placeholder="请输入查询手机号" class="tiaojian" />
+										<div class="ruselts">
+											<div class="ruselts-1">
+												<p>{{informatione.phone}}</p>
+												<p>{{informatione.username}}</p>
+											</div>
+											<!--<div class="ruselts-1">
+												<p>17610038211</p>
+												<p>刘温</p>
+											</div>
+											<div class="ruselts-1">
+												<p>17610038211</p>
+												<p>刘温</p>
+											</div>-->
+										</div>
+									</div>
+									<div class="xingming">
+										<p class="xingming-l">车牌号码：</p>
+										<p>{{car.carNum}}</p>
+									</div>
+									<div class="ChoosePackage">
+										<p class="ChoosePackage-l">选择套餐：</p>
+										<ul class="havemeal">
+											<li v-for="(i,index) in customerMealList" @click="changeMeal(index)" :class="{active:index == num}">{{i.mealName}}</li>
+										</ul>
+										<div class="packageA">
+											<div class="packageA-1" v-for="(i,index) in customerMealDetailList"  v-show="index == num">
+												<p>{{i.buyMealID}}</p>
+												<p>剩余：<span>{{i.orderCount}}</span></p>
+											</div>
+										</div>
+										<!--<el-tabs v-model="activeName1" type="card" @tab-click="handleClicks" class="package" v-for="i in customerMealList">
+											<el-tab-pane label="i.mealName" name="one">
+												<div class="packageA">
+													<div class="packageA-1" v-for="i in customerMealDetailList">
+														<p>{{i.buyMealID}}</p>
+														<p>剩余：<span>{{i.orderCount}}</span></p>
+													</div>
+												</div>
+											</el-tab-pane>
+											<el-tab-pane label="套餐B" name="tow">
+												<div class="packageA">
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>4</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>4</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>4</span></p>
+													</div>
+												</div>
+											</el-tab-pane>
+											<el-tab-pane label="套餐C" name="three">
+												<div class="packageA">
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>3</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>3</span></p>
+													</div>
+													<div class="packageA-1">
+														<p>子套餐详细名称</p>
+														<p>剩余：<span>3</span></p>
+													</div>
+												</div>
+											</el-tab-pane>
+										</el-tabs>-->
+									</div>
+									<div class="Buy" @click="Buysever">购买服务，套餐及商品</div>
+								</div>
+							</el-tab-pane>
+							<el-tab-pane label="散客开单" name="second">
+								<div class="individualorder">
+									<el-tabs type="border-card" v-model="activeName" @tab-click="memberkaidan">
+										<el-tab-pane>
+											<span slot="label"><i class="el-icon-date"></i> 返回</span>
+										</el-tab-pane>
+										<el-tab-pane label="服务" name="yi">
+											<div class="sever">
+												<ul class="sever-l">
+													<li v-for="i in groupList" @click="grouping(i.groupingId)">{{i.groupingName}}</li>
+												</ul>
+												<div class="sever-specific">
+													<div class="specifics" v-for="i in serviceList">
+														<p class="specifics-name">{{i.serviceName}}</p>
+														<p class="jian" @click="jian(i.canUseCount)"><i class="el-icon-remove"></i></p>
+														<p v-model="buyCount">{{buyCount}}</p>
+														<p class="jia" @click="jia(i.canUseCount)"><i class="el-icon-circle-plus"></i></p>
+													</div>
+													<!--<div class="specifics">
+														<p class="specifics-name">商品详细名称</p>
+														<p class="jian"><i class="el-icon-remove"></i></p>
+														<p>2</p>
+														<p class="jia"><i class="el-icon-circle-plus"></i></p>
+													</div>
+													<div class="specifics">
+														<p class="specifics-name">商品详细名称</p>
+														<p class="jian"><i class="el-icon-remove"></i></p>
+														<p>2</p>
+														<p class="jia"><i class="el-icon-circle-plus"></i></p>
+													</div>
+													<div class="specifics">
+														<p class="specifics-name">商品详细名称</p>
+														<p class="jian"><i class="el-icon-remove"></i></p>
+														<p>2</p>
+														<p class="jia"><i class="el-icon-circle-plus"></i></p>
+													</div>
+													<div class="specifics">
+														<p class="specifics-name">商品详细名称</p>
+														<p class="jian"><i class="el-icon-remove"></i></p>
+														<p>2</p>
+														<p class="jia"><i class="el-icon-circle-plus"></i></p>
+													</div>-->
+												</div>
+											</div>
+											<button class="determine">确认</button>
+											<button class="quxiao">取消</button>
+										</el-tab-pane>
+										<el-tab-pane label="商品" name="er">
+                                            <ul class="sever-l">
+												<li v-for="i in mealList" @click="grouping(i.mealID)">{{i.mealName}}</li>
+											</ul>
+										</el-tab-pane>
+										<el-tab-pane label="套餐" name="san">
+											<ul class="sever-l">
+												<li v-for="i in mealList" @click="grouping(i.mealID)">{{i.mealName}}</li>
+											</ul>
+											<div class="sever-specific">
+												<div class="specifics" v-for="i in mealDetailLists">
+													<p class="specifics-name">{{i.serviceName}}</p>
+													<p class="jian" @click="jian(i.canUseCount)"><i class="el-icon-remove"></i></p>
+													<!--<p v-show="bubian">{{i.canUseCount}}</p>-->
+													<!--<p v-model="canUseCount" v-show="bian">{{canUseCount}}</p>-->
+													<p v-model="buyCount">{{buyCount}}</p>
+													<p class="jia" @click="jia(i.canUseCount)"><i class="el-icon-circle-plus"></i></p>
+												</div>
+											</div>
+										</el-tab-pane>
+									</el-tabs>
+								</div>
+							</el-tab-pane>
+						</el-tabs>
+					</div>
+				</div>
+			</div>
+			<div class="xia">
+				<button class="createOrder" @click="trueorder">生成订单</button>
+				<button class="cancel">取消</button>
+			</div>
+		</div>
+		<div class="you">
+			<div class="timg"><img :src="informatione.headImg" alt="" /></div>
+			<p class="name">{{informatione.username}}</p>
+			<div class="boxtime">
+				<p class="jtime">距上次到店距离</p>
+				<span class="timenumber">{{informatione.lastDay}}</span><span>天</span>
+			</div>
+			<div class="jilubox">
+				<div class="julist">
+					<span class="jilu">该顾客消费记录:</span>
+					<span class="gengduo"><a href="">更多</a></span>
+				</div>
+				<div class="julist">
+					<span class="servername">服务项目名称</span>
+					<span class="serverdata">2018.3.27</span>
+				</div>
+				<div class="julist">
+					<span class="servername">服务项目名称</span>
+					<span class="serverdata">2018.3.27</span>
+				</div>
+			</div>
+		</div>
+		<!--<button class="determine">确认</button>
+		<button class="quxiao">取消</button>-->
+	</div>
+</template>
+
+<script>
+	import "../../assets/css/billing.css"
+	export default {
+		data() {
+			return {
+				bussiness: this.$storage.fetch("bussiness"),
+				store: this.$storage.fetch("bussinessstore"),
+				bussinessID: this.$storage.fetch("buss"),
+				currentPage: 1,
+				length: 10, 
+				activeName: 'yi',
+				activeName2: 'first',
+				activeName1: 'one',
+				tabPosition: 'left',
+				isCustomer: '1',
+				phone: '',
+				//				bussinessID:'',
+				storeID: '',
+				activity: '',
+				informatione: '',
+				car: '',
+				fuwutaocan: true,
+				fwtc: false,
+				groupingCategory: '1',
+				groupList: '',
+				groupingId: '',
+				serviceList: '',
+				mealList: '',
+				mealDetailLists: '',
+				canUseCount: '',
+				bubian: true,
+				bian: false,
+				customerMealList: '',
+				customerMealLists: '',
+				customerMealDetailList: '',
+				buyCount: 0,
+				num: 0,
+			};
+		},
+		watch: {
+			phone: function(val, oldVal) {
+				this.phone = val
+				console.log(this.phone)
+				let r = /^((0\d{2,3}-\d{7,8})|(1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}))$/;
+				if(!r.test(this.phone)) {
+					return false;
+				} else {
+					//					18522055588
+					//					for(let i in this.bussiness) {
+					//							if(this.bussiness[i].phoneNum == this.phone) {
+					//								this.bussinessID=this.bussiness[i].bussinessID
+					//							}
+					//								console.log(this.bussinessID)
+					//					}
+					//				    for(let i in this.store) {
+					//							if(this.store[i].phoneNum == this.phone) {
+					//								this.storeID=this.store[i].storeID
+					//							}
+					//								console.log(this.storeID)
+					//					}
+					this.fined()
+				}
+			},
+			deep: true
+
+		},
+		mounted: function() {
+
+		},
+		methods: {
+			fined() {
+				this.$ajax.post(`${this.$url}/customerOrder/selectCustomer.html`, {
+						phone: this.phone,
+						isCustomer: this.isCustomer,
+						bussinessID: this.bussinessID,
+						storeID: this.store[0].storeID,
+					}).then(data => {
+						console.log(data)
+						this.informatione = data.data.customer
+						this.car = data.data.carManageList[0]
+						this.customerMealList = data.data.customerMealList
+						this.customerMealLists = data.data.customerMealList[0]
+						this.customerMealDetailList = data.data.customerMealList[0].customerMealDetailList
+						//this.uuid = data.data.uuid
+						//						this.$ajax.post(`${this.$url}/customerOrder/selCustomerMealList.html`, {
+						//								customerID: this.informatione.customerID,
+						//								mealBussiness: this.informatione.mealBussiness,
+						//								bussinessID: this.bussinessID,
+						//								storeID: this.store[0].storeID,
+						//							}).then(data => {
+						//								console.log(data)
+						//                              
+						//							})
+						//							.catch((error) => {
+						//								console.log(error)
+						//								this.$message.error('获取数据失败');
+						//							})
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			//选择套餐的切换
+			changeMeal(inde){
+				console.log(inde)
+				 this.num = inde;
+//			    let sort=inde
+			},
+			//初始化服务分组
+			Buysever() {
+				this.fuwutaocan = false
+				this.fwtc = true
+				this.$ajax.post(`${this.$url}/customerOrder/selectGroup.html`, {
+						bussinessID: this.bussinessID,
+						groupingCategory: this.groupingCategory,
+					}).then(data => {
+						console.log(data)
+						this.groupList = data.data.grouplist
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			//点击服务分组获取商品服务列表
+			grouping(e) {
+				//				console.log(e)
+				this.groupingId = e
+				console.log(this.groupingId)
+				this.$ajax.post(`${this.$url}/customerOrder/selServicelist.html`, {
+						bussinessID: this.bussinessID,
+						storeID: this.store[0].storeID,
+						isService: this.groupingCategory,
+						groupingId: this.groupingId,
+					}).then(data => {
+						console.log(data)
+						this.serviceList = data.data.servicelist
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			jian(a) {
+				//xianyin
+				//jiajianzhi
+				//		this.canUseCount=a
+
+//				console.log(a)
+//				this.bubian = false
+//				this.bian = true
+				if(this.buyCount < 1) {
+					this.$message.error('已经到底不能在减了');
+				} else {
+					this.buyCount--
+				}
+//				if(this.canUseCount < 1) {
+//					this.$message.error('已经到底不能在减了');
+//				} else {
+//					this.canUseCount--
+//				}
+//				console.log(this.canUseCount)
+			},
+			jia(a) {
+				//				this.canUseCount=a
+//				console.log(this.canUseCount)
+//				this.bubian = false
+//				this.bian = true
+//				this.canUseCount++
+				this.buyCount++
+//				console.log(this.canUseCount)
+			},
+			quxiao() {
+				this.fuwutaocan = true
+				this.fwtc = false
+			},
+			handleClick(tab, event) {
+				console.log(tab.index)
+				if(tab.index == '0') {
+					//会员
+					this.isCustomer = '1'
+					this.fwtc = false
+					this.fuwutaocan = true
+				} else {
+					//散客
+					this.isCustomer = '0'
+					this.Buysever()
+				}
+
+			},
+			handleClicks(tab, event) {
+				console.log(tab, event);
+				//				if(tab.index == '0') {
+				//					this.isCustomer = '1'
+				//				} else {
+				//					this.isCustomer = '0'
+				//				}
+
+			},
+			handleClickss(tab, event) {
+				console.log(tab, event);
+			},
+			memberkaidan(tab, event) {
+				console.log(tab.index)
+				if(tab.index == '1') {
+					this.groupingCategory = '1'
+					this.Buysever()
+				} else if(tab.index == '2') {
+					this.groupingCategory = '2'
+					this.Buysever()
+				} else if(tab.index == '3') {
+					this.$ajax.post(`${this.$url}/customerOrder/selMeallist.html`, {
+							bussinessID: this.bussinessID,
+							storeID: this.store[0].storeID,
+						}).then(data => {
+							console.log(data)
+							this.mealList = data.data.meallist
+							this.mealDetailLists = data.data.meallist[0].mealDetailList
+							console.log(this.mealDetailLists)
+						})
+						.catch((error) => {
+							console.log(error)
+							this.$message.error('获取数据失败');
+						})
+				}
+			},
+			trueorder() {
+				//				this.$ajax.post(`${this.$url}/customerOrder/insertMeal.html`, {
+				//						uuid:this.uuid,
+				//						customerID:this.customerID,
+				//						userName:this.informatione.username,
+				//						phoneNum:this.informatione.phone,
+				//						amount:,
+				//						bussinessID:this.bussinessID,
+				//						storeID:this.store[0].storeID,
+				//						activityTicketType:,
+				//						activityTicketID:,
+				//						activityTicketAmount:,
+				//						actualPay:,
+				//						carID:,
+				//						carNum:this.car.carNum:,
+				//						buyMealID:,
+				//						goodsIDs:,
+				//                      orderTypes:this.groupingCategory:,
+				//                      prices:,
+				//                      dicountPrices:,
+				//                      serviceCounts:this.buyCount:,
+				//                      orderSums:,
+				//                      mealPrices:,
+				//                      isMeals:,
+				//                      goodsNames:,
+				//                      buyMealDetailIDs:,
+				//                      servicePersonNames:,
+				//                      salesPushMoneys:,
+				//                      servicePu shMoneys:,
+				//                      deAmounts:,
+				//					}).then(data => {
+				//						console.log(data)
+				//					})
+				//					.catch((error) => {
+				//						console.log(error)
+				//						this.$message.error('获取数据失败');
+				//					})
+			},
+		}
+	};
+</script>

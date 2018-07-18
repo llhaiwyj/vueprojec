@@ -1,0 +1,371 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" @click="close">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>商家服务---修改</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="10" :xl="10" >
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.shujus.serviceName.$error }">
+										<span class="mc">服务名称</span>
+										<el-input @blur="test" v-model="shujus.serviceName" class="name1">
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.shujus.serviceName.required">不能为空</span>
+								</div>
+							</el-col>
+							<!--<el-col :span="7" class="gutterspan">
+								<span class="mc">经营类别：</span>
+								<el-input v-model="businessScope" class="name1" disabled="disabled" clearable>
+								</el-input>
+							</el-col>-->
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="10" :xl="10" >
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.shujus.groupingId.$error }">
+										<span class="mc">服务分组</span>
+										<select class="xl" @blur="test" v-model="shujus.groupingId" v-on:change="fuwufenzu($event)">
+											<option v-for="se in lists" :value="se.groupingId">{{se.groupingName}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.shujus.groupingId.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="10" :xl="10" >
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.shujus.servicePrice.$error }">
+										<span class="mc">服务售价</span>
+										<el-input @blur="test" v-model="shujus.servicePrice" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.shujus.servicePrice.required">不能为空</span>
+									<span class="form-group__message" v-if="!$v.shujus.servicePrice.aa">只能填写数字或小数</span>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="10" :xl="10" >
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.shujus.servicePushMoney.$error }">
+										<span class="mc">服务提成</span>
+										<el-input @blur="test" v-model="shujus.servicePushMoney" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.shujus.servicePushMoney.required">不能为空</span>
+									<span class="form-group__message" v-if="!$v.shujus.servicePushMoney.aa">只能填写数字或小数</span>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="10" :xl="10" >
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.shujus.unit.$error }">
+										<span class="mc">单位</span>
+										<select class="xl" @blur="test" v-model="shujus.unit">
+											<option v-for="se in units" :value="se.value">{{se.text}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.shujus.unit.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="10" :xl="10" >
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.shujus.sort.$error }">
+										<span class="mc">排序</span>
+										<el-input @blur="test" v-model="shujus.sort" class="name1" clearable>
+										</el-input>
+									</div>
+									<span class="form-group__message" v-if="!$v.shujus.sort.required">不能为空</span>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="10" :xl="10" >
+								<div class="box">
+									<div class="form-group" v-bind:class="{'form-group--error': $v.shujus.state.$error }">
+										<span class="mc">是否启用</span>
+										<select @blur="test" class="xl" v-model="shujus.state">
+											<option v-for="sel in states" :value="sel.value">{{sel.text}}</option>
+										</select>
+									</div>
+									<span class="form-group__message" v-if="!$v.shujus.state.required">不能为空</span>
+								</div>
+							</el-col>
+
+							<!--<el-col :span="11" class="gutterspan">
+								<span class="mc">服务名称：</span>
+								<el-input v-model="shujus.serviceName" class="name1" clearable @change="checkeds">
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">经营类别：</span>
+								<el-input v-model="shujus.scopeName" class="name1" disabled="disabled" clearable>
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">服务分组：</span>
+								<select class="xl" v-model="shujus.groupingId" @change="checkeds">
+									<option v-for="se in lists" :value="se.groupingId">{{se.groupingName}}</option>
+								</select>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">服务售价：</span>
+								<el-input v-model="shujus.servicePrice" class="name1" clearable>
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">服务提成：</span>
+								<el-input v-model="shujus.servicePushMoney" class="name1" clearable>
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">单位：</span>
+								<el-input v-model="shujus.unit" class="name1" clearable @change="checkeds">
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">排序：</span>
+								<el-input v-model="shujus.sort" class="name1" clearable>
+								</el-input>
+							</el-col>
+							<el-col :span="11" class="gutterspan">
+								<span class="mc">是否启用：</span>
+								<select class="xl" v-model="shujus.state">
+									<option v-for="sel in states" v-bind:value="sel.value">{{sel.text}}</option>
+								</select>
+							</el-col>-->
+							<!--<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<el-tree :data="bussTees" node-key="id" show-checkbox accordion highlight-current ref="tree" :props="defaultProps">
+								</el-tree>
+							</el-col>-->
+						</el-row>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--primary" @click="getCheckedNodes">确 定</button>
+						<button type="button" class="el-button el-button--default" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	export default {
+		props: ['shujus', 'businessScopes', 'ids', ],
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				lists: this.$storage.fetch("lists"),
+				businessScope: '',
+				units: [{
+					value: '次',
+					text: '次'
+				}],
+				states: [{
+						value: '0',
+						text: '停用'
+					},
+					{
+						value: '1',
+						text: '启用'
+					}
+				],
+				defaultProps: {
+					children: 'children',
+					label: 'name'
+				},
+				//				state: '',
+				//				Scope: '',
+				//				assar: '',
+
+			};
+		},
+		validations: {
+			shujus: {
+				serviceName: {
+					required
+				},
+				groupingId: {
+					required
+				},
+				servicePrice: {
+					required,
+					aa: value => {
+					if(value.split(".").length == 2) {
+
+						var p1 = /^(((\d*).\d+)|(\d+.(\d*)|\d+))$/;
+
+						return p1.test(value);
+					} else {
+						var p = /[^\d]/g;
+						return !p.test(value);
+					}
+
+				}
+				},
+				servicePushMoney: {
+					required,
+					aa: value => {
+					if(value.split(".").length == 2) {
+
+						var p1 = /^(((\d*).\d+)|(\d+.(\d*)|\d+))$/;
+
+						return p1.test(value);
+					} else {
+						var p = /[^\d]/g;
+						return !p.test(value);
+					}
+
+				}
+				},
+				unit: {
+					required
+				},
+				sort: {
+					required
+				},
+				state: {
+					required
+				}
+			}
+		},
+		//初始化门店的经营类别
+		mounted: function() {
+
+		},
+		methods: {
+			test() {
+				this.$v.shujus.serviceName.$touch()
+				if(this.$v.shujus.serviceName.$error) {
+					return false;
+				}
+				this.$v.shujus.groupingId.$touch()
+				if(this.$v.shujus.groupingId.$error) {
+					return false;
+				}
+				this.$v.shujus.servicePrice.$touch()
+				if(this.$v.shujus.servicePrice.$error) {
+					return false;
+				}
+				this.$v.shujus.servicePushMoney.$touch()
+				if(this.$v.shujus.servicePushMoney.$error) {
+					return false;
+				}
+				this.$v.shujus.unit.$touch()
+				if(this.$v.shujus.unit.$error) {
+					return false;
+				}
+				this.$v.shujus.sort.$touch()
+				if(this.$v.shujus.sort.$error) {
+					return false;
+				}
+				this.$v.shujus.state.$touch()
+				if(this.$v.shujus.state.$error) {
+					return false;
+				}
+				return true;
+			},
+//			checkeds() {
+//				//保存点击验证
+//				let tip = this.$message.error;
+//				let tipyu = "请输入服务名称";
+//				if(this.serviceName == "") {
+//					this.$storage1.UserName(this.serviceName, tip, tipyu);
+//					return false;
+//				}
+//				tipyu = "请选择服务分组";
+//				if(this.groupingId == "") {
+//					//this.$message.error("请输入查询的内容");
+//					this.$storage1.UserName(this.groupingId, tip, tipyu);
+//					return false;
+//				}
+//				tipyu = "请填写服务售价";
+//				if(this.servicePrice == "") {
+//					this.$storage1.UserName(this.servicePrice, tip, tipyu);
+//					return false;
+//				}
+//				tipyu = "请选择单位";
+//				if(this.unit == "") {
+//					this.$storage1.UserName(this.unit, tip, tipyu);
+//					return false;
+//				}
+//				tipyu = "请输入序号";
+//				if(this.sort == "") {
+//					this.$storage1.UserName(this.sort, tip, tipyu);
+//					return false;
+//				}
+//				tipyu = "请选择门店状态";
+//				if(this.state == "") {
+//					this.$storage1.UserName(this.state, tip, tipyu);
+//					return false;
+//				}
+//				return true;
+//			},
+			//调用父组建的方法
+			close: function() {
+
+				this.$emit('close');
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId,
+					}
+				})
+
+			},
+
+			//			fuwufenzu(event){
+			//				this.fuwu = event.target.value
+			//			},
+			//			zhuangtai(event) {
+			//				console.log(this.lists)
+			//				this.state = event.target.value
+			//			},
+			//			jingyinleibie(event) {
+			//				this.Scope = event.target.value
+			//			},
+			getCheckedNodes() {
+				if(!this.test()) {
+					return false;
+				}
+//				let flags = this.checkeds()
+//				if(flags) {
+					//					this.assar = JSON.stringify(this.$refs.tree.getCheckedNodes());
+					//					this.$ajax.post(`${this.$url}/bussinessService/updateService.html`, { serviceID: this.ids, serviceName: this.shujus.serviceName }).then(data => {
+					//						console.log(data)
+					//						if(data.data.flag == true) {
+					this.$ajax.post(`${this.$url}/bussinessService/updateService.html`, {
+							bussinessID: this.shujus.bussinessID,
+							serviceID: this.shujus.serviceID,
+							serviceName: this.shujus.serviceName,
+							//									businessScope: this.shujus.businessScope,
+							groupingId: this.shujus.groupingId,
+							servicePrice: this.shujus.servicePrice,
+							servicePushMoney: this.shujus.servicePushMoney,
+							unit: this.shujus.unit,
+							sort: this.shujus.sort,
+							state: this.shujus.state,
+						}).then(data => {
+							console.log(data)
+							this.$emit('closes');
+						})
+						.catch((error) => {
+							this.$message.error('获取数据失败');
+						});
+					//						} else {
+					//							this.$message.error(data.data.message);
+					//						}
+					//					})
+//				}
+			},
+
+		}
+	}
+</script>
+
+<style>
+
+</style>

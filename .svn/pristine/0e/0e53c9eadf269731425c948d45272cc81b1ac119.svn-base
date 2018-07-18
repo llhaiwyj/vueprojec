@@ -1,0 +1,343 @@
+<template>
+	<div class="conmmercial">
+		<div class="icon">
+			<el-tooltip class="item" effect="dark" content="添加" placement="top">
+			 	<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+		    </el-tooltip>
+			<!--<el-tooltip class="item" effect="dark" content="删除" placement="top">
+			<i class="el-icon-delete delete" size="small delete" @click="deletes()"></i>
+			</el-tooltip>-->
+		</div>	
+		<div id="sousuo">
+			<el-collapse v-model="activeNames" >
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+									<span class="input-group-addon">商户名称</span>
+									<select v-model="businessId" >
+										<option value="">全部</option>
+										<option v-for="item in business" :value="item.bussinessID">{{item.bussinessName}}</option>
+									</select>
+							</div>							
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<el-input v-model="groupCategoryName"  clearable >
+								<template class="biaoti" slot="prepend">分组名称</template>
+							</el-input>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+									<span class="input-group-addon">分组类别</span>
+									<select v-model="groupCategory" v-on:change="changeGroupCategory($event)">
+										<option v-for="item in options" :value="item.value">{{item.label}}</option>
+									</select>
+							</div>
+						</el-col> 
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+									<span class="input-group-addon">分组状态</span>
+									<select v-model="state" v-on:change="changeState($event)">
+										<option v-for="item in optionState" :value="item.value">{{item.label}}</option>
+									</select>
+							</div>
+						</el-col> 
+						<el-col class="row" :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+							<el-button class="find" @click="finds">查询</el-button>
+						</el-col>
+					</el-row>
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="groupCategoryData" height="632" tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange">
+				<!--<el-table-column type="selection" prop="groupingId" :selectable='checkboxInit' @selection-change="handleSelectionChange">
+				</el-table-column>-->
+				<el-table-column prop="groupingCode" label="分组编号" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="groupingName" label="分组名称" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="bussinessName" label="商户名称" show-overflow-tooltip>
+				</el-table-column>				
+				<el-table-column prop="groupingCategory" label="分组类别" show-overflow-tooltip>
+						<template slot-scope="scope">
+						<div v-if="scope.row.groupingCategory==1">服务</div>
+						<div v-if="scope.row.groupingCategory==2">商品</div>
+					</template>
+				</el-table-column>
+				<el-table-column prop="state" label="分组状态" show-overflow-tooltip>
+					<template slot-scope="scope">
+						<div v-if="scope.row.state==1">启用</div>
+						<div v-if="scope.row.state==0">停用</div>
+					</template>
+				</el-table-column>
+<!--				<el-table-column prop="createPerson" label="创建人" show-overflow-tooltip>
+				</el-table-column>-->
+				<el-table-column label="操作">
+					<template slot-scope="scope">
+						<el-button type="text" size="small" @click="showModals(scope.$index,groupCategoryData)">修改</el-button>
+						<el-button type="text" size="small"@click="deletes(scope.$index,groupCategoryData)">删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+				<div class="pages">
+					<el-pagination
+						@size-change="handleIndexChange"
+						@current-change="handleCurrentChange" 
+						:current-page="currentPage" 
+						:page-size="length" 
+						layout="total, sizes, prev, pager, next, jumper" 
+						:total="total">
+					</el-pagination>
+			    </div>
+				</el-col>	
+			</el-row>	
+		</div>
+		<modal v-show="isModalVisible" @close="closeModal" v-bind:uuid="uuid" v-bind:busines="business"  v-on:close="serlf"></modal>
+		<modals v-show="isModalVisibles" @close="closeModals" v-bind:uuid="uuid" v-bind:busines="business" v-bind:groupCategoryObj="groupCategoryObj"  v-on:close="serlf"></modals>
+	</div>
+</template>
+<script>
+	import Modal from './commoditygroupingadd.vue'
+	import Modals from './commoditygroupingamend.vue'			
+	export default {
+		name: 'conmmercial',
+		components: {
+			Modal,
+			Modals
+		},
+		data() {
+			return {
+				
+				menuId: this.$route.query.menuIds,
+				//multipleSelection:[],
+				currentPage: 1,
+				total: '',
+				length: 10,
+				groupCategoryData:[],
+				business: [],
+				options: [{
+					value: '',
+					label: '全部'
+				}, {
+					value: '1',
+					label: '服务'
+				}, {
+					value: '2',
+					label: '商品'
+				}],
+				optionState: [{
+					value: '',
+					label: '全部'
+				}, {
+					value: '1',
+					label: '启用'
+				}, {
+					value: '2',
+					label: '停用'
+				}],
+				isModalVisible: false,
+				isModalVisibles: false,
+				state: '',
+				businessId: '',
+				groupCategory:'',
+				uuid:'',
+				groupCategoryName:'',
+				groupCategoryObj:'',
+
+			}
+		},
+		//初始化获取列表
+		mounted: function() {
+			
+			if(this.$route.query.currentPage == undefined){
+				this.currentPage=1
+				this.length=10
+				
+			}else{
+				this.currentPage=this.$route.query.currentPage
+				this.length=this.$route.query.length
+			}
+			this.finds();
+		},
+		methods: {
+			//改变页数触发
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				//this.fined();
+				this.finds();
+
+			}, //改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length = index;
+				//this.fined();
+				this.finds();
+			},
+			/*changeBusinessId(val) {
+                console.log(val)
+				this.businessId = val.target.value;
+				//alert(val.target.value)
+			},*/
+			changeState(value) {
+
+				this.state = val.target.value;
+				//alert(this.scopeId)
+			},
+			changeGroupCategory(value) {
+
+				this.groupCategory = val.target.value;
+				//alert(this.scopeId)
+			},
+			
+			
+			finds() {
+				this.$ajax.post(`${this.$url}/groupCategory/selectGroupCategory.html`, {
+						start: this.currentPage,
+						length: this.length,
+						state: this.state,
+						groupCategory: this.groupCategory,
+						businessId: this.businessId,
+						groupCategoryName: this.groupCategoryName
+					}).then(data => {
+						console.log(data)
+						this.groupCategoryData = data.data.data.list
+						this.total = data.data.data.total
+						
+						this.business= data.data.business
+						this.uuid=data.data.uuid
+
+						if(data.data.data.size > 10){
+							that.length = data.data.data.size
+						}
+
+						//					console.log(that.length)
+						//					console.log(that.currentPage)
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModal: function() {
+				this.isModalVisible = true
+			},
+			showModals: function(inde, all) {
+				this.isModalVisibles = true
+				//获取回显的数据
+				this.$ajax.post(`${this.$url}/groupCategory/selectGoodsCategoryId.html`, {
+						groupingId: all[inde].groupingId
+					}).then(res => {
+						console.log(res.data.data)
+						this.groupCategoryObj = res.data.data
+						
+
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			serlf() {
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId,
+						currentPage:this.currentPage,
+						length:this.length
+					}
+				})
+			},
+
+			closeModals() {
+				this.isModalVisibles = false
+			},
+			handleSelectionChange: function(val) {
+				
+			},
+			/*deletes() {
+		      if (this.multipleSelection.length == 0) {
+	    		    this.$message({
+							type: 'info',
+							message: '请选择要删除的条数!'
+						});				
+	 				return false;
+	 	             } 
+				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					let deleteId = '';			
+					for(var i = 0; i < this.multipleSelection.length; i++) {
+						if(deleteId == '') {
+							deleteId = this.multipleSelection[i].groupingId
+						} else {
+							deleteId = deleteId + "," + this.multipleSelection[i].groupingId
+						}
+					}
+					this.$ajax.post(`${this.$url}/groupCategory/deleteGoodsCategory.html`, {
+						ids: deleteId
+					}).then(data => {
+						this.finds();
+						this.$message({
+							type: 'success',
+							message: '删除成功!'
+						});
+					})
+					//确定操作
+
+				}).catch(() => {
+					//取消操作
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			}*/
+            deletes(inde,all) {	      
+				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					//封装参数
+					  var dataMap = {};
+				      
+				      dataMap['ids'] = all[inde].groupingId;
+				      dataMap['groupingCategory'] = all[inde].groupingCategory;
+				      var sign = this.$utilMd5s.md5Code(JSON.stringify(dataMap));
+				      dataMap['sign'] = sign;
+				      dataMap['uuid'] = this.uuid;
+
+				      var jsonData = JSON.stringify(dataMap);
+					this.$ajax.post(`${this.$url}/groupCategory/deleteGoodsCategory.html`, {
+						jsonData:jsonData
+					}).then(data => {
+						this.finds();
+						this.$message({
+							type: 'success',
+							message: '删除成功!'
+						});
+					})
+					//确定操作
+
+				}).catch(() => {
+					//取消操作
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			}
+		}
+	};
+</script>

@@ -1,0 +1,192 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>活动券设置---详情</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-tabs v-model="activeName2" type="card" @tab-click="memberList">
+							<el-tab-pane label="会员信息" name="first">
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<span class="mc">姓名</span>
+										<el-input v-model="memberinfors.username" class="name1" clearable>
+										</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<span class="mc">性别</span>
+										<el-select class="xl" v-model="memberinfors.sex">
+											<el-option v-for="item in sexs" :key="item.value" :label="item.label" :value="item.value"></el-option>
+										</el-select>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<span class="mc">电话</span>
+										<el-input v-model="memberinfors.phone" class="name1" clearable>
+										</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<span class="mc">生日</span>
+										<el-date-picker v-model="memberinfors.birthday" class="xl" type="date">
+										</el-date-picker>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<span class="mc">注册时间</span>
+										<el-input v-model="memberinfors.createTime" class="name1" disabled="disabled">
+										</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<span class="mc">最后到店时间</span>
+										<el-input v-model="memberinfors.lastTime" class="name1" disabled="disabled">
+										</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+										<span class="mc">未到店天数</span>
+										<el-input v-model="memberinfors.lastDay" class="name1" clearable disabled="disabled">
+										</el-input>
+									</div>
+								</el-col>
+							</el-tab-pane>
+							<el-tab-pane label="会员订单" name="second">
+								<div id="tablist">
+									<el-table ref="multipleTable" :data="activity" height="632" tooltip-effect="dark" style="width: 100%">
+										<el-table-column prop="username" label="姓名" show-overflow-tooltip>
+										</el-table-column>
+										<el-table-column prop="sex" label="性别" show-overflow-tooltip>
+										</el-table-column>
+										<el-table-column prop="phone" label="会员电话" show-overflow-tooltip>
+										</el-table-column>
+										<el-table-column prop="createTime" label="注册时间" show-overflow-tooltip>
+										</el-table-column>
+										<el-table-column prop="score" label="积分" show-overflow-tooltip>
+										</el-table-column>
+										<el-table-column label="操作" width="180">
+											<template slot-scope="scope">
+												<el-button type="text" size="small" @click="renewalfees(scope.$index,activity)">详情</el-button>
+											</template>
+										</el-table-column>
+									</el-table>
+								</div>
+								<div class="block">
+									<el-row :gutter="10">
+										<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+											<div class="pages">
+												<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+												</el-pagination>
+											</div>
+										</el-col>
+									</el-row>
+								</div>
+							</el-tab-pane>
+							<el-tab-pane label="预约订单" name="third">预约订单
+							</el-tab-pane>
+							<el-tab-pane label="积分明细" name="fourth">积分明细
+							</el-tab-pane>
+							<el-tab-pane label="优惠券" name="five">优惠券
+							</el-tab-pane>
+							<el-tab-pane label="套餐" name="six">套餐
+							</el-tab-pane>
+							<el-tab-pane label="车辆" name="seven">车辆
+							</el-tab-pane>
+						</el-tabs>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button class="el-button el-button--primary queding" @click="determine">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props: ['memberinfors', 'uuid'],
+		data() {
+			return {
+				activeName2: 'first',
+				currentPage: 1,
+				total: '',
+				length: 10,
+				sexs: [{
+						value: '0',
+						label: '男'
+					},
+					{
+						value: '1',
+						label: '女'
+					}
+				],
+			}
+		},
+		methods: {
+			//回显的值
+//			handleClick(tab, event) {
+//				console.log(tab, event);
+//			},
+			close() {
+				this.$emit('close');
+			},
+			closeModal() {
+				this.listadd = false
+			},
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				this.memberList();
+
+			}, //改变条数触发
+			handleSizeChange(index) {
+				console.log(index)
+				this.length = index;
+				this.memberList();
+
+			},
+			memberList() {
+				this.$ajax.post(`${this.$url}/customer/selCustomerOrderList.html`, {
+						start: this.currentPage,
+						length: this.length,
+						customerID: this.memberinfors.customerID,
+						consumerStore:this.memberinfors.consumerStore
+					}).then(restaurants => {
+						console.log(restaurants)
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('添加失败,请核实您的信息');
+					})
+			},
+			determine() {
+
+			}
+		},
+	}
+</script>
+<style>
+	.el-tabs__content {
+		overflow: visible !important;
+		position: relative;
+	}
+	
+	.el-tabs__nav {
+		border: 0px solid #fff !important;
+	}
+</style>

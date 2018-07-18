@@ -1,0 +1,98 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>会员订单---详情</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<div id="tablist">
+							<el-table ref="multipleTable" :data="taocanList" height="632" tooltip-effect="dark" style="width: 100%">
+								<el-table-column prop="username" label="订单号" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="sex" label="订单时间" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="phone" label="订单状态" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="createTime" label="结算商家" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="score" label="结算门店" show-overflow-tooltip>
+								</el-table-column>
+									<el-table-column prop="score" label="支付方式" show-overflow-tooltip>
+								</el-table-column>
+									<el-table-column prop="score" label="订单金额" show-overflow-tooltip>
+								</el-table-column>
+									<el-table-column prop="score" label="实付金额" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="score" label="退款时间" show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+						</div>
+						<div class="block">
+							<el-row :gutter="10">
+								<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+									<div class="pages">
+										<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+										</el-pagination>
+									</div>
+								</el-col>
+							</el-row>
+						</div>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+              taocanList:'', 
+			}
+		},
+		mounted: function() {
+
+		},
+		methods: {
+            handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+//				this.shuju();
+			}, //改变条数触发
+			handleSizeChange(index) {
+				console.log(index)
+				this.length = index;
+//				this.shuju();
+			},
+			shuju () {
+				//加上两个字段 lenght 和stare  来显示
+				this.$ajax.post(`${this.$url}/customer/selCustomerOrderDetail.html`, {
+					        start:  this.currentPage,
+							length: this.length,
+					}).then(restaurants => {
+							console.log(restaurants)
+						})
+						.catch((error) => {
+							console.log(error)
+							this.$message.error('添加失败,请核实您的信息');
+						})
+			},
+			close(){
+				this.$emit('close');
+			},
+		}
+	}
+</script>
+<style>
+
+</style>

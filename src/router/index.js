@@ -10,7 +10,7 @@ import stores from '@/components/bussinessStore/stores'
 //import examine from '@/components/examine'
 import usermanage from '@/components/usermanage/usermanage'
 import backs from '@/components/back'
-import memberinfo from '@/members/memberinfo'
+import member from '@/components/Member/member'
 import storeEmployee  from '@/components/storeEmp/storeEmployee'
 import shopcategory from '@/components/shopcategory/shopcategory'
 import attribute from '@/components/attribute/attribute'
@@ -20,6 +20,11 @@ import servicemanagement from '@/components/storemanagement/servicemanagement'
 import Shangping from '@/components/Codecommodity/Shangping'
 import merchantExamine from '@/components/merchant/merchantExamine'
 import Storecommoditysetting from '@/components/Storecommoditysetting/Storecommoditysetting'
+import activityticket from '@/components/activityticket/ActivityTicket'
+import meal from '@/components/meal/meal'
+//import backMeal from '@/components/backMeal/backMeal'
+import billing from '@/components/Billing/billing'
+import oderlist from '@/components/oderlist/oderlist'
 //import storecombo from '@/components/storecombo/storecombo'
 
 
@@ -92,22 +97,20 @@ export default new Router({
       name: 'SC0402',
       component: Shangping
       },
-
-      /*{
-      path: '/examine',
-      name: 'examine',
-      component: examine
-      }
-      ,*/
+      {
+      path: '/activityticket',
+      name: 'SC0501',
+      component: activityticket
+      },
       {
       path: '/backs',
       name: 'backs',
       component: backs
       } ,
       {
-      path: '/memberinfo',
+      path: '/member',
       name: 'SC0203',
-      component: memberinfo
+      component: member
       },
       {
       path: '/storeEmployee',
@@ -130,9 +133,29 @@ export default new Router({
       component: Storecommoditysetting
       },
       {
+      path: '/meal',
+      name: 'SC0301',
+      component: meal
+      },
+//     {
+//    path: '/backMeal',
+//    name: 'SC0303',
+//    component: backMeal
+//    },
+       {
+      path: '/billing',
+      name: 'SC0101',
+      component: billing,
+      },
+      {
+      path: '/oderlist',
+      name: 'SC0104',
+      component: oderlist,
+      },
+      {
       path: '/merchantExamine',
       name: 'merchantExamine',
-      component: merchantExamine
+      component: merchantExamine,
       }
     ]
     }

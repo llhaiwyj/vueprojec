@@ -1,0 +1,169 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>会员订单---详情</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">订单号</span>
+									<el-input v-model="xiangqing.orderID" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">订单时间</span>
+									<el-input v-model="xiangqing.createTime" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">订单状态</span>
+									<el-input v-model="xiangqing.statusName" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">结算商家</span>
+									<el-input v-model="xiangqing.bussinessName" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">结算门店</span>
+									<el-input v-model="xiangqing.storeName" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">支付方式</span>
+									<el-input v-model="xiangqing.payTypeName" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">订单金额</span>
+									<el-input v-model="xiangqing.amount" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan">
+							<div class="box">
+									<span class="mc">实付金额</span>
+									<el-input v-model="xiangqing.actualPay" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan" v-show="tuikuan">
+							<div class="box">
+									<span class="mc">退款时间</span>
+									<el-input v-model="xiangqing.backTime" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :span="7" class="gutterspan" v-show="tuikuan">
+							<div class="box">
+									<span class="mc" v-show="tuikuan">退款金额</span>
+									<el-input v-model="xiangqing.isBack" class="name1" disabled="disabled">
+									</el-input>
+							</div>
+						</el-col>
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<div id="tablist">
+							<el-table ref="multipleTable" :data="taocanList" height="325" tooltip-effect="dark" style="width: 100%">
+								<el-table-column prop="goodsName" label="商品/服务" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="price" label="原价" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="dicountPrice" label="折扣价" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="serviceCount" label="数量" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="orderSum" label="小计" show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+						</div>
+						<!--<div class="block">
+							<el-row :gutter="10">
+								<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+									<div class="pages">
+										<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+										</el-pagination>
+									</div>
+								</el-col>
+							</el-row>
+						</div>-->
+						</el-col>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props:['taocanList','xiangqing'],
+		data() {
+			return {
+//            taocanList:'', 
+              zhuangtai: this.$storage.fetch("zhuangtai"),
+              tuikuan:false,
+			}
+		},
+		mounted: function() {
+            if(this.zhuangtai==0||this.zhuangtai==1){
+            	this.tuikuan=false
+            }else{
+            	this.tuikuan=true
+            }
+		},
+		methods: {
+//          handleCurrentChange(page) {
+//				console.log(page)
+//				this.currentPage = page;
+////				this.shuju();
+//			}, //改变条数触发
+//			handleSizeChange(index) {
+//				console.log(index)
+//				this.length = index;
+////				this.shuju();
+//			},
+//			shuju () {
+//				//加上两个字段 lenght 和stare  来显示
+//				this.$ajax.post(`${this.$url}/customer/selCustomerOrderDetail.html`, {
+//					        start:  this.currentPage,
+//							length: this.length,
+//					}).then(restaurants => {
+//							console.log(restaurants)
+//						})
+//						.catch((error) => {
+//							console.log(error)
+//							this.$message.error('添加失败,请核实您的信息');
+//						})
+//			},
+			close(){
+				this.$emit('close');
+			},
+		}
+	}
+</script>
+<style>
+
+</style>

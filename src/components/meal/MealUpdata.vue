@@ -1,0 +1,697 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>套餐设置---修改</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.mealups.mealName.$error }">
+									<span class="mc">套餐名称</span>
+									<el-input @blur="verification" v-model="mealups.mealName" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.mealups.mealName.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.mealups.beginTime.$error }">
+									<span class="mc">发放日期</span>
+									<el-date-picker v-model="mealups.beginTime" class="xl" @blur="verification" type="date">
+									</el-date-picker>
+								</div>
+								<span class="form-group__message" v-if="!$v.mealups.beginTime.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.mealups.endTime.$error }">
+									<span class="mc">结束日期</span>
+									<el-date-picker v-model="mealups.endTime" class="xl" @blur="verification" type="date">
+									</el-date-picker>
+								</div>
+								<span class="form-group__message" v-if="!$v.mealups.endTime.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.mealups.useEndTimeSum.$error }">
+									<span class="mc">使用有效期</span>
+									<el-input @blur="verification" v-model="mealups.useEndTimeSum" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.mealups.useEndTimeSum.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.mealups.sort.$error }">
+									<span class="mc">排序</span>
+									<el-input @blur="verification" v-model="mealups.sort" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.mealups.sort.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.mealups.salesPushMoney.$error }">
+									<span class="mc">销售提成</span>
+									<el-input @blur="verification" v-model="mealups.salesPushMoney" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.mealups.salesPushMoney.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.mealups.state.$error }">
+									<span class="mc">套餐状态</span>
+									<el-select @blur="verification" class="xl" v-model="mealups.state">
+										<el-option v-for="item in activestate" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.mealups.state.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<el-tree default-expand-all :data="bussarrs" node-key="id" show-checkbox accordion highlight-current ref="tree" :default-checked-keys="bussdataID":props="defaultProps">
+							</el-tree>
+						</el-col>
+						<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<div class="reforms">
+								<h5>商品/服务列表<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+							</div>
+							<div class="icons">
+								<el-tooltip class="item" effect="dark" content="商品添加" placement="top">
+									<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="shoplistAdd"></i>
+								</el-tooltip>
+							</div>
+							<div class="iconss">
+								<el-tooltip class="item" effect="dark" content="服务添加" placement="top">
+									<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="fuwulistAdd"></i>
+								</el-tooltip>
+							</div>
+						</el-col>
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<!--<div id="tablist">-->
+							<el-table ref="multipleTable" :data="servList" height="300" tooltip-effect="dark" style="width: 100%">
+								<el-table-column prop="goodsName" label="商品/服务名称" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="goodsPrice" label="商品/服务原价" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="goodsMealPrice" label="套餐内售价" show-overflow-tooltip>
+									<template slot-scope="scope">
+										<!--<div class="prices" id="taocan" contenteditable="true" v-model="prices"></div>-->
+										<!--<input class="prices" id="taocan" v-model="prices" />-->
+										<el-input v-model="servList[scope.$index].goodsMealPrice" name="mealPrices" @blur="countMealSum(scope.$index,servList)">
+										</el-input>
+										<p style="display: none;" v-model="pr"></p>
+									</template>
+								</el-table-column>
+								<el-table-column prop="orderCount" label="数量" show-overflow-tooltip>
+									<template slot-scope="scope">
+										<el-input v-model="servList[scope.$index].orderCount" name="orderCount" @blur="countMealSum(scope.$index,servList)">
+										</el-input>
+										<p style="display: none;" v-model="mu"></p>
+										<!--<div class="prices" id="prices" contenteditable="true" v-model="much"></div>-->
+										<!--<input class="prices" id="prices" v-model="much" name="much" />-->
+										<!--<input type="text" name="text" id="prices" class="prices" @click="dianji" />-->
+									</template>
+								</el-table-column>
+								<el-table-column prop="unit" label="单位" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="orderSum" label="原价小计" show-overflow-tooltip>
+									<template slot-scope="scope">
+										<el-input id="allyuanjia" v-model="servList[scope.$index].orderSum" name="orderSum" disabled="disabled">
+										</el-input>
+										<p style="display: none;" v-model="mesum"></p>
+										<!--<div class="prices" id="allyuanjia" disabled="disabled"></div>-->
+										<!--<input class="prices" id="allyuanjia" disabled="disabled" v-model="mealups.oldPrice" name="yuan" />-->
+										<!--<input type="text" id="prices" name="yuan" class="prices" disabled="disabled" />-->
+									</template>
+								</el-table-column>
+								<el-table-column prop="useEndTimeSum" label="套餐价小计" show-overflow-tooltip>
+									<template slot-scope="scope">
+										<el-input id="alltao" v-model="servList[scope.$index].mealSum" name="mealPrice" disabled="disabled">
+										</el-input>
+										<p style="display: none;" v-model="dosum"></p>										
+									</template>
+								</el-table-column>
+								<el-table-column label="操作" width="180">
+									<template slot-scope="scope">
+										<el-button type="text" size="small" @click="deletes(scope.$index,servList)">删除</el-button>
+									</template>
+								</el-table-column>
+							</el-table>
+							<!--</div>-->
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<span class="mc">原价(元)</span>
+								<el-input v-model="mealups.oldPrice" class="name1" disabled="disabled">
+								</el-input>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<span class="mc">套餐售价(元)</span>
+								<el-input v-model="mealups.mealPrice" class="name1" disabled="disabled">
+								</el-input>
+							</div>
+						</el-col>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button class="el-button el-button--primary queding" @click="determine">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+				<mealservice v-show="Shoplistadd" @close="closeModal" v-bind:shopList="shopList" v-on:multipleSelection="huixian"></mealservice>
+				<mealshop v-show="Seveicelistadd" @close="closeModals" v-bind:shopList="shopList" v-on:multipleSelection="huixian"></mealshop>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	import mealservice from './MealService.vue'
+	import mealshop from './Mealshop.vue'
+	export default {
+		props: ['uuid', 'mealups','bussarrs','bussdataID','mealID','servList'],
+		components: {
+			mealservice,
+			mealshop
+		},
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				store: this.$storage.fetch("bussiness"),
+				isAdmin: this.$storage.fetch("isAdmin"),
+				bussinessId: this.$storage.fetch("buss"),
+				activestate: [{
+						value: '0',
+						label: '停用'
+					},
+					{
+						value: '1',
+						label: '启用'
+					},
+				],
+				defaultProps: {
+					children: 'children',
+					label: 'name'
+				},
+				//功能元素
+				bussinessID: '',
+				bussinessName: '',
+				bussarrs: '',
+				//表格元素
+				Shoplistadd: false,
+				Seveicelistadd:false,
+				isService: '',
+				shopList: '',
+				prices: '',
+				much: '',
+				goodsPrice: '',
+				beginTime:'',
+				endTime:'',
+				pr: [],
+				mu: [],
+				mesum: [],
+				dosum: [],
+				list: [],
+				orderTypes:[],
+			}
+		},
+//		watch: {
+//			much: function(val, oldVal) { //普通的watch监听
+//				this.much = val
+//				console.log(this.much)
+//				this.mealups.oldPrice = Number(this.much) * Number(this.goodsPrice)
+//				this.mealups.mealPrice = Number(this.much) * Number(this.prices)
+//				console.log(this.much)
+//				console.log(this.mealups.oldPrice)
+//
+//			},
+//			prices: function(val, oldVal) {
+//				this.prices = val
+//				this.mealups.mealPrice = Number(this.much) * Number(this.prices)
+//			}
+//
+//		},
+		mounted: function() {
+			this.bussinessID = this.bussinessId;
+			console.log(this.bussinessID);
+			for(let i in this.store) {
+				if(this.bussinessID == this.store[i].bussinessID) {
+					this.bussinessName = this.store[i].bussinessName
+				}
+				console.log(this.bussinessName)
+			}
+			this.$ajax.post(`${this.$url}/activityTicket/selectStoreTree.html`, {
+					bussinessID: this.bussinessID,
+					bussinessName: this.bussinessName,
+				}).then(data => {
+					console.log(data)
+					this.bussarrs = data.data.bussTree
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+		},
+		validations: {
+			mealups: {
+				mealName: {
+					required
+				},
+				beginTime: {
+					required
+				},
+				endTime: {
+					required
+				},
+				useEndTimeSum: {
+					required
+				},
+				sort: {
+					required
+				},
+				salesPushMoney: {
+					required
+				},
+				state: {
+					required
+				},
+			}
+		},
+		methods: {
+			//验证
+			verification() {
+				this.$v.mealups.mealName.$touch()
+				if(this.$v.mealups.mealName.$error) {
+					return false;
+				}
+				this.$v.mealups.beginTime.$touch()
+				if(this.$v.mealups.beginTime.$error) {
+					return false;
+				}
+				this.$v.mealups.endTime.$touch()
+				if(this.$v.mealups.endTime.$error) {
+					return false;
+				}
+				this.$v.mealups.useEndTimeSum.$touch()
+				if(this.$v.mealups.useEndTimeSum.$error) {
+					return false;
+				}
+				this.$v.mealups.sort.$touch()
+				if(this.$v.mealups.sort.$error) {
+					return false;
+				}
+				this.$v.mealups.salesPushMoney.$touch()
+				if(this.$v.mealups.salesPushMoney.$error) {
+					return false;
+				}
+				this.$v.mealups.state.$touch()
+				if(this.$v.mealups.state.$error) {
+					return false;
+				}
+				return true;
+			},
+				countMealSum(index, all) {
+				var docMealPrice = '';
+				var mealPrice = '';
+				var docMealmuch = '';
+				var mealCount = '';
+				var docOldSum = '';
+				var mealOldSum = '';
+				var docMealSum = '';
+				var mealMealSum = '';
+				var orderSum = '';
+				var mealPrice = '';
+				// 当前行的套餐内售价
+				docMealPrice = document.getElementsByName("mealPrices");
+				mealPrice = docMealPrice[index].value;			
+				// 当前行的商品/服务数量
+				docMealmuch = document.getElementsByName("orderCount");
+				mealCount = docMealmuch[index].value;
+				// 原价的小计
+				docOldSum = document.getElementsByName("orderSum");
+				// 套餐的小计
+				docMealSum = document.getElementsByName("mealPrice");
+				if(mealPrice != "" && mealPrice != null) {
+					if(mealCount != "" && mealCount != null) {
+						// 转换类型
+						var fMealPrice = parseFloat(mealPrice);
+//						this.pr.push(fMealPrice);
+						var iMealCount = parseInt(mealCount);
+//						this.mu.push(iMealCount);
+						var fGoodsPrice = parseFloat(all[index].goodsPrice);
+						//  套餐行小计
+						docMealSum[index].value = fMealPrice * iMealCount;
+						console.log(docMealSum[index].value)
+						this.dosum.push(docMealSum[index].value);
+						// 原价小计
+						docOldSum[index].value = fGoodsPrice * iMealCount;
+						this.mesum.push(docOldSum[index].value);
+					}
+				}
+				// 总计
+				orderSum = 0.00;
+				mealPrice = 0.00;
+				for(var i = 0; i < docMealSum.length; i++) {
+					var rowMealSum = docMealSum[i].value;
+					if(rowMealSum != '' && rowMealSum != null) {
+						mealPrice += parseFloat(rowMealSum);
+					}
+					var rowOldSum = docOldSum[i].value;
+					if(rowOldSum != '' && rowOldSum != null) {
+						orderSum += parseFloat(rowOldSum);
+					}
+				}
+				// 套餐总金额小计
+				this.mealups.oldPrice = orderSum
+				this.mealups.mealPrice = mealPrice
+			},
+			//回显的值
+			huixian: function(data) {
+				console.log(data)
+//				this.servList = data
+//				this.goodsPrice = this.servList[0].goodsPrice
+              if(this.isService == '0') {
+	           	for(let i in data) {
+	           		 data[i]['orderType']=this.isService
+					  this.servList.push(data[i])
+					}					
+				}else if(this.isService == '1'){
+					for(let i in data) {
+						let a = new Object();
+						a.goodsID=data[i].serviceID
+						a.goodsName = data[i].serviceName
+						a.goodsPrice = data[i].servicePrice
+						a.unit=data[i].unit		
+						a.mealSums=data[i].mealSums
+						a.goodsMealPrice=data[i].serviceMealPrice
+						a.orderType='1'
+						this.servList.push(a)
+					}
+				}
+				console.log(this.servList)
+			},
+			//			dianji() {
+			//				//				console.log(Number(this.servList[0].goodsPrice))
+			//				//				let shuliang = document.getElementById('prices');
+			//				let shuliang = document.getElementsByName('text');
+			//				let zongjia = document.getElementsByName('yuan');
+			////				let zongjia = document.getElementById('allyuanjia');
+			//				let Taocan = document.getElementById('taocan');
+			//				let Alltao = document.getElementById('alltao');
+			//				for(let j = 0; j < this.servList.length; j++) {
+			//					for(let i = 0; i < shuliang.length; i++) {
+			//                      for(let k = 0; k < zongjia.length; k++) {
+			//                      	if(i==j){
+			//                      		zongjia[k].vlaue=Number(shuliang[i].value) * Number(this.servList[j].goodsPrice)
+			//                              console.log(zongjia[k].vlaue)
+			//                              break;
+			//                      	}
+			//					    }
+			//					}
+			//				}
+			//				
+			//				//              alert(shuliang[0].value)
+			//				//              alert(shuliang[1].value)
+			//
+			//				//				for(let k = 0; k < this.zongjia.length; k++) {
+			//				//							alert(3);
+			//				//						
+			//				//						}
+			//				//				console.log(Number(shuliang.innerText))
+			//				//              	if(shuliang[i].innerText == '') {
+			//				//								this.$message.error('请输入数量');
+			//				//							} else {
+			//				//								zongjia[k].innerText = Number(shuliang[i].innerText) * Number(this.servList[j].goodsPrice)
+			//				//								console.log(zongjia[k].innerText)
+			//				//							}
+			//				//				if(Taocan.innerText == '' || shuliang.innerText == '') {
+			//				//					this.$message.error('套餐售价和数量不能为空');
+			//				//				} else {
+			//				//					Alltao.innerText = Number(shuliang.innerText) * Number(Taocan.innerText)
+			//				//				}
+			//
+			//			},
+			//			//			selectFlag(){
+			//			//				console.log(this.much)
+			//			//				if(this.much){
+			//			//					this.allyuan=Number(this.much*this.servList.goodsPrice)
+			//			//				}
+			//			//				console.log(this.allyuan)
+			//			//			},
+			shoplistAdd() {
+				this.isService = '0';
+//				this.orderTypes.push(this.isService);
+				this.fuwuList = false;
+				this.shopList = '';
+				this.oldPrice = '';
+				this.mealPrice = '';
+				this.$storage.save("isService", this.isService);
+				this.$ajax.post(`${this.$url}/meal/selectServiceList.html`, {
+						bussinessID: this.bussinessID,
+						isService: this.isService
+					}).then(data => {
+						console.log(data)
+						this.shopList = data.data.servicelist
+						this.Seveicelistadd = true
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+				this.listadd = true
+			},
+			fuwulistAdd() {
+				this.isService = '1'
+//				this.orderTypes.push(this.isService);
+				this.fuwuList = true;
+				this.shopList = '';
+				this.oldPrice = '';
+				this.mealPrice = '';
+				this.$storage.save("isService", this.isService);
+				this.$ajax.post(`${this.$url}/meal/selectServiceList.html`, {
+					bussinessID: this.bussinessID,
+					isService: this.isService
+					}).then(data => {
+						console.log(data)
+						this.shopList = data.data.servicelist
+						console.log(this.shopList)
+						this.Shoplistadd = true
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+				deletes(index, all) {
+			        all.splice(all[index], 1)    
+			},
+			determine() {
+				let orderType='';
+				if(!this.verification()) {
+					return false;
+				}
+				if(this.isService==''){
+					for(let i in this.servList){
+						this.orderTypes.push(this.servList[i].orderType)
+					}
+					console.log(this.orderTypes)
+				}
+				let goodsNames = [];
+					let units = [];
+					let goodsIDs = [];
+					let goodsPrices = [];
+					console.log(this.servList);
+					for(let i in this.servList) {
+						goodsNames.push(this.servList[i].goodsName)
+						units.push(this.servList[i].unit)
+						goodsIDs.push(this.servList[i].goodsID)
+						goodsPrices.push(this.servList[i].goodsPrice)	
+						this.dosum.push(this.servList[i].mealSum)
+						this.pr.push(this.servList[i].goodsMealPrice)
+						this.mu.push(this.servList[i].orderCount)
+						this.mesum.push(this.servList[i].orderSum)
+						this.orderTypes.push(this.servList[i].orderType)
+					}
+				let storeId = '';
+				let listName = [].concat(this.$refs.tree.getCheckedNodes())
+				let listTree = [].concat(this.$refs.tree.getCheckedKeys())
+				let ls = [].concat(this.$refs.tree.getHalfCheckedKeys());
+				if(ls == '') {
+					listTree[0] = '';
+				}
+				if(listTree.length > 0) {
+					for(let i = 0; i < listTree.length; i++) {
+						if(storeId == '') {
+							storeId = listTree[i];
+							//							storeName=listTree[i].name;
+						} else {
+							storeId = storeId + ',' + listTree[i];
+							//							storeName=storeName+','+listTree[i].name;
+						}
+					}
+				}
+
+				//获取选中的门店名称
+				let storeName = [];
+				let storeids = storeId.split();
+				console.log(storeids);
+				for(let i in storeids) {
+					//alert(storeids[i]);
+					for(let j in listName) {
+						if(storeids[i] == listName[j].id) {}
+						storeName.push(listName[j].name)
+					}
+				}
+				console.log(storeId)
+				console.log(storeName)
+//				let typs=orderTypes.join(',');
+				let para = this.pr.join(',');
+				let mu = this.mu.join(',');
+				let sum = this.mesum.join(',');
+				let sums = this.dosum.join(',');
+				let goodname = goodsNames.join(',');
+				let unitadd = units.join(',');
+				let gID = goodsIDs.join(',');
+				let goodpic = goodsPrices.join(',');
+				let storeNames = storeName.join(',')
+				orderType=this.orderTypes.join(',');
+				//              console.log(this.times)
+				this.beginTime = this.GMTToStr(this.mealups.beginTime);
+				this.endTime = this.GMTToStr(this.mealups.endTime);
+
+				this.$ajax.post(`${this.$url}/meal/updateMeal.html`, {
+                            mealID:this.mealID,
+                            uuid: this.uuid,
+							mealName: this.mealups.mealName,
+							beginTime: this.beginTime,
+							endTime: this.endTime,
+							useEndTimeSum: this.mealups.useEndTimeSum,
+							salesPushMoney: this.mealups.salesPushMoney,
+							state: this.mealups.state,
+							oldPrice: this.mealups.oldPrice,
+							mealPrice:this.mealups.mealPrice,
+							sort:this.mealups.sort,
+							bussinessID: this.bussinessID,
+							bussinessName: this.bussinessName,
+							storeID: storeId,
+							storeName: storeNames,
+							goodsIDs: gID,
+							goodsNames: goodname,
+							units: unitadd,
+							goodsPrices: goodpic,
+							mealPrices: para,
+							mealCounts: mu,
+							orderTypes: orderType,
+							orderSums: sum,
+							mealSums:sums,
+							//orderSums: this.mealups.oldPrice,
+					}).then(data => {
+						console.log(data)
+						this.$emit('closes');
+						this.$message({
+							type: 'success',
+							message: data.data.message
+						});
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+
+			},
+			close() {
+				this.$emit('close');
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId,
+					}
+				})
+			},
+			serlfs: function() {
+				this.listadd = false
+			},
+			closeModal() {
+				this.listadd = false
+			},
+			closeModal() {
+				this.Shoplistadd = false
+			},
+			closeModals() {
+				this.Seveicelistadd = false
+			},
+//			formatDate: function(time) {
+//				var y = time.getFullYear();
+//				var m = time.getMonth() + 1;
+//				m = m < 10 ? '0' + m : m;
+//				var d = time.getDate();
+//				d = d < 10 ? ('0' + d) : d;
+//				return y + '-' + m + '-' + d;
+//			},
+
+						GMTToStr(time) {
+							let date = new Date(time)
+							let Str = date.getFullYear() + '-' +
+								(date.getMonth() + 1) + '-' +
+								date.getDate()
+							return Str
+						},
+		},
+	}
+</script>
+<style>
+	.reforms h5 {
+		width: 130px;
+		background: #00bafc;
+		padding: 10px;
+		text-align: center;
+		font-size: 14px;
+		float: left;
+		color: #fff;
+	}
+	
+	.reformbox {
+		position: relative;
+	}
+	
+	.icons {
+		position: absolute;
+		top: 2px;
+		right: 50px;
+		height: 42px;
+		line-height: 40px;
+		display: inline-block;
+	}
+	
+	.iconss {
+		position: absolute;
+		top: 2px;
+		right: 21px;
+		height: 42px;
+		line-height: 40px;
+		display: inline-block;
+	}
+	
+	.prices {
+		width: 73px;
+		height: 30px;
+		border: 1px solid #ccc;
+	}
+</style>

@@ -1,0 +1,478 @@
+<template>
+	<div class="activity">
+		<div class="icon">
+			<el-tooltip class="item" effect="dark" content="添加" placement="top" v-show="role.isShowAdd">
+				<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+			</el-tooltip>
+		</div>
+		<div id="sousuo">
+			<el-collapse>
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="12" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<el-input clearable v-model="ticketName">
+									<template class="biaoti" slot="prepend">活动券名称</template>
+								</el-input>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="12" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">活动券类型</span>
+								<select  v-model="type">
+									<option value="">----全部----</option>
+									<option v-for="item in activetype" :value="item.value">{{item.label}}</option>
+								</select>
+							</div>
+						</el-col>
+					    <el-col class="row" :xs="19" :sm="12" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">开始使用日期</span>
+								<el-date-picker class="shangstate" v-model="beginTime" @blur="verification" type="date" style="width: 100%;">
+								</el-date-picker>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="12" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">结束使用日期</span>
+								<el-date-picker class="shangstate" v-model="endTime"  @blur="verification" type="date" style="width: 100%;">
+									</el-date-picker>
+							</div>
+						</el-col>
+						<!--<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">活动券类型</span>
+								<el-date-picker class="xl" @change="Time" v-model="times" type="daterange" align="right" unlink-panels range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+								</el-date-picker>
+							</div>
+						</el-col>-->
+						<el-col class="row" :xs="19" :sm="12" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">状态</span>
+								<select class="shangstate"  v-model="state">
+									<option value="">----全部----</option>
+									<option v-for="item in activestate" :value="item.value">{{item.label}}</option>
+								</select>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+							<el-button class="find" @click="fined"><!--{{menuList[3]}}-->查询</el-button>
+						</el-col>
+					</el-row>
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="activity" height="632" tooltip-effect="dark" style="width: 100%">
+				<el-table-column prop="ticketName" label="活动券名称" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="type" label="活动券类型 " show-overflow-tooltip>
+					<template slot-scope="scope">
+						<el-button type="text" v-if="scope.row.type==0" size="small">代金券</el-button>
+						<el-button type="text" v-else-if="scope.row.type==1" size="small">折扣券</el-button>
+						<el-button type="text" v-else size="small">抵用券</el-button>
+				    </template>
+				</el-table-column>
+				<el-table-column prop="isService" label="适用类别 " show-overflow-tooltip>
+					<template slot-scope="scope">
+						<el-button type="text" v-if="scope.row.isService==0" size="small">商品</el-button>
+						<el-button type="text" v-else-if="scope.row.isService==1" size="small">服务</el-button>
+						<el-button type="text" v-else size="small">全部</el-button>
+				    </template>
+				</el-table-column>
+				<el-table-column prop="useTime" label="使用有效期" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="groupName" label="服务分组" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="serviceName" label="适用商品或服务" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="state" label="商家状态 " show-overflow-tooltip>
+					<template slot-scope="scope">
+						<el-button id="zi1" type="text" v-if="scope.row.state==0" size="small">停用</el-button>
+						<el-button id="zi" type="text" v-else="scope.row.state==1" size="small">启用</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column label="操作" width="180">
+					<template slot-scope="scope">
+						<el-button type="text" size="small" @click="renewalfees(scope.$index,activity)">查看</el-button>
+						<el-button type="text" size="small" @click="showModals(scope.$index,activity)" v-show="role.isShowUpdate">修改</el-button>
+						<el-button type="text" size="small" @click="deletes(scope.$index,activity)" v-show="role.isShowDel">删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+					<div class="pages">
+						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+						</el-pagination>
+					</div>
+				</el-col>
+			</el-row>
+		</div>
+		<modal v-show="isModalVisible" @close="closeModal" v-on:close="serlfs" v-on:closes="serlf" v-bind:uuid="uuid" />
+		<modals v-show="isModalVisibles" @close="closeModals" v-on:close="serlfs" v-on:closes="serlf" v-bind:uuid="uuid" v-bind:actUpdata="actUp" v-bind:times="Time" v-bind:serverFZ="serverFZ" v-bind:shopall="shopall" v-bind:bussarrs="bussarr" v-bind:bussdataID="bussdataid"/>
+		<modalss v-show="isModalVisibless" @close="closeModalss" v-on:close="serlfs" v-on:closes="serlf" v-bind:uuid="uuid" v-bind:actUpdata="actUp" v-bind:times="Time" v-bind:serverFZ="serverFZ" v-bind:shopall="shopall" v-bind:bussarrs="bussarr" v-bind:bussdataID="bussdataid"/>
+	</div>
+</template>
+
+<script>
+	import Modal from './ActivityTicketAdd.vue'
+	import Modals from './ActivityTicketUpdata.vue'
+	import Modalss from './Activitylook.vue'
+	export default {
+		name: 'stores',
+		components: {
+			Modal,
+			Modals,
+			Modalss,
+		},
+		data() {
+			return {
+				uuid: '',
+				actUp: '',
+				menuId: this.$route.query.menuIds,
+				bussinessId: this.$storage.fetch("buss"),
+				store: this.$storage.fetch("bussiness"),
+				currentPage: 1,
+				total: '',
+				length: 10,
+				ticketName: '',
+				type: '',
+				state: '',
+				activity: '',
+				isModalVisible: false,
+				isModalVisibles: false,
+				isModalVisibless: false,
+				activetype: [{
+						value: '0',
+						label: '代金券'
+					},
+					{
+						value: '1',
+						label: '折扣券'
+					},
+					{
+						value: '2',
+						label: '抵用券'
+					}
+				],
+				activestate: [{
+						value: '0',
+						label: '停用'
+					},
+					{
+						value: '1',
+						label: '启用'
+					},
+				],
+				times: '',
+				beginTime: '',
+				endTime: '',
+				Time: [],
+				serverFZ: [],
+				shopall: [],
+				bussdataid: [],
+				bussarr: '',
+				role:{
+					isShowAdd:false,
+				    isShowDel:false,
+				    isShowUpdate:false,
+				},
+				bussinessID:'',
+				bussinessName:'',
+//				fuwu:false,
+//				shangpin:false,
+			}
+		},
+		mounted: function() {
+			this.permission();
+			this.fined();
+		},
+		methods: {
+			permission(){
+				this.$storage1.permission(this.$ajax,`${this.$url}/login/selectBtn.html`,this.menuId,this.role);
+				console.log(this.role)
+
+			},
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				this.fined();
+			}, //改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length = index;
+				this.fined();
+			},
+//			Time() {
+//				this.beginTime = this.formatDate(this.times[0]);
+//				this.endTime = this.formatDate(this.times[1]);
+//			},
+			fined() {
+				this.bussinessID = this.bussinessId
+				this.serverFZ = [];
+//				let beginTime='';
+//				let endTime='';
+//				beginTime = this.formatDate(this.beginTime);
+//				endTime = this.formatDate(this.endTime);
+				this.$ajax.post(`${this.$url}/activityTicket/selActivityTicketList.html`, {
+						start: this.currentPage,
+						length: this.length,
+						ticketName: this.ticketName,
+						type: this.type,
+						state: this.state,
+						beginTime: this.beginTime,
+						endTime: this.endTime
+					}).then(data => {
+						console.log(data)
+						this.activity = data.data.data.list
+//						for(let i in this.activity)
+//						if(this.activity[i].isService=='1'){
+//							this.fuwu=true
+//						}else if(this.activity[i].isService=='2'){
+//							this.shangpin=true
+//						}
+						this.uuid = data.data.uuid
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModal: function() {
+				this.isModalVisible = true
+			},
+			renewalfees(inde, all) {
+				this.bussinessID = this.bussinessId
+				this.serverFZ = [];
+				this.shopall = [];
+				var storesid = [];
+				this.$ajax.post(`${this.$url}/activityTicket/initActivityTicketUpdate.html`, {
+						activityTicketID: all[inde].activityTicketID
+					}).then(data => {
+						this.isModalVisibless = true;
+						console.log(data.data.data)
+						this.actUp = data.data.data
+						storesid =data.data.data.storeID .split(',');
+						this.$storage.save("types", data.data.data.type);
+						//将标准时间转换成中国标准时间
+						this.beginTime = this.formatterDate(data.data.data.beginTime)
+						this.endTime = this.formatterDate(data.data.data.endTime)
+						//获取分组
+						this.$ajax.post(`${this.$url}/activityTicket/selectGroupList.html`, {
+								bussinessID: this.bussinessID,
+								isService: data.data.data.isService,
+							}).then(data => {
+								this.serverFZ = data.data.grouplist
+							})
+							.catch((error) => {
+							console.log(error)
+							this.$message.error('获取数据失败');
+						})
+							//获取商品和服务
+						this.$ajax.post(`${this.$url}/activityTicket/selectServiceList.html`, {
+								bussinessID: this.bussinessID,
+								isService: data.data.data.isService,
+								groupingId: data.data.data.serviceGroup,
+							}).then(data => {
+								console.log(data)
+								this.shopall = data.data.servicelist
+							})
+							.catch((error) => {
+								console.log(error)
+								this.$message.error('获取数据失败');
+							})
+								for(let i in this.store) {
+							if(this.bussinessID == this.store[i].bussinessID) {
+								this.bussinessName = this.store[i].bussinessName
+							}
+							console.log(this.bussinessName)
+						}
+						this.$ajax.post(`${this.$url}/activityTicket/selectStoreTree.html `, {
+								bussinessID: this.bussinessID,
+								bussinessName: this.bussinessName,
+							}).then(data => {
+								console.log(data)
+								this.bussarr = data.data.bussTree
+								this.bussdataid = [];
+								for(var k = 0; k < this.bussarr.length; k++) {
+										let list = this.bussarr[k].children
+										this.bussarr[k].disabled=true
+										console.log(list)
+										for(var i=0; i<storesid.length; i++) {
+											for(var y = 0; y < list.length; y++) {
+												list[y].disabled=true
+											    if(storesid[i] == list[y].id) {
+												    this.bussdataid.push(list[y].id)
+											    }
+										    }
+										}
+								}
+                              console.log(this.bussdataid)
+                              this.isModalVisibless = true;
+							})
+							.catch((error) => {
+								console.log(error)
+								this.$message.error('获取数据失败');
+							})
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModals(index, all) {
+				this.bussinessID = this.bussinessId
+				console.log(this.bussinessID)
+				this.serverFZ = [];
+				this.shopall = [];
+				var storesid = [];
+				console.log(all[index].activityTicketID)
+				this.$ajax.post(`${this.$url}/activityTicket/initActivityTicketUpdate.html`, {
+						activityTicketID: all[index].activityTicketID
+				}).then(data => {
+						console.log(data)
+//						console.log(data.data.data.storeID)
+						storesid =data.data.data.storeID .split(',');
+						console.log(storesid)
+						this.actUp = data.data.data
+						this.$storage.save("types", data.data.data.type);
+						this.$storage.save("isService", data.data.data.isService);
+						//将标准时间转换成中国标准时间
+						this.beginTime = this.formatterDate(data.data.data.beginTime)
+						this.endTime = this.formatterDate(data.data.data.endTime)
+						//						console.log(this.Time)
+						//获取分组
+						this.$ajax.post(`${this.$url}/activityTicket/selectGroupList.html`, {
+								bussinessID: this.bussinessID,
+								isService: data.data.data.isService,
+							}).then(data => {
+								this.serverFZ = data.data.grouplist
+
+							})
+							.catch((error) => {
+								console.log(error)
+								this.$message.error('获取数据失败');
+							})
+						//获取商品和服务
+						this.$ajax.post(`${this.$url}/activityTicket/selectServiceList.html`, {
+								bussinessID: this.bussinessID,
+								isService: data.data.data.isService,
+								groupingId: data.data.data.serviceGroup,
+							}).then(data => {
+								console.log(data)
+								this.shopall = data.data.servicelist
+							})
+							.catch((error) => {
+								console.log(error)
+								this.$message.error('获取数据失败');
+							})
+						//获取树
+						for(let i in this.store) {
+							if(this.bussinessID == this.store[i].bussinessID) {
+								this.bussinessName = this.store[i].bussinessName
+							}
+							console.log(this.bussinessName)
+						}
+						this.$ajax.post(`${this.$url}/activityTicket/selectStoreTree.html `, {
+								bussinessID: this.bussinessID,
+								bussinessName: this.bussinessName,
+							}).then(data => {
+								console.log(data)
+								this.bussarr = data.data.bussTree
+								this.bussdataid = [];
+								for(var k = 0; k < this.bussarr.length; k++) {
+										let list = this.bussarr[k].children
+										console.log(list)
+										for(var i=0; i<storesid.length; i++) {
+											for(var y = 0; y < list.length; y++) {
+											    if(storesid[i] == list[y].id) {
+//												    list[y].checked==true
+												    this.bussdataid.push(list[y].id)
+											    }
+										    }
+										}
+								}
+                              console.log(this.bussdataid)
+                              this.isModalVisibles = true;
+//								console.log(this.bussdataid)
+							})
+							.catch((error) => {
+								console.log(error)
+								this.$message.error('获取数据失败');
+							})
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			deletes(inde, all) {
+				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					this.$ajax.post(`${this.$url}/activityTicket/deleteActivityTicket.html`, {
+							uuid: this.uuid,
+							activityTicketID: all[inde].activityTicketID
+						}).then(data => {
+							this.fined();
+							//						console.log(data)
+							this.$message({
+								type: 'success',
+								message: data.data.message
+							});
+							//					   this.$message.error('data.data.message');
+						})
+						.catch((error) => {
+							console.log(error)
+							this.$message.error('获取数据失败');
+						})
+				}).catch(() => {
+					//取消操作
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			},
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			//模态框关闭
+			closeModals: function() {
+				this.isModalVisibles = false;
+			},
+			//
+			closeModalss: function() {
+				this.isModalVisibless = false;
+			},
+			closeModals: function() {
+				this.isModalVisibles = false;
+			},
+			serlf: function() {
+				this.$router.push({ name: 'backs', query: { menuIds: this.menuId } })
+			},
+			serlfs: function() {
+				this.isModalVisible = false
+				this.isModalVisibles = false
+				this.isModalVisibless = false
+			},
+			formatDate: function(time) {
+				var y = time.getFullYear();
+				var m = time.getMonth() + 1;
+				m = m < 10 ? '0' + m : m;
+				var d = time.getDate();
+				d = d < 10 ? ('0' + d) : d;
+				return y + '-' + m + '-' + d;
+			},
+			formatterDate: function(date) {
+				let result = new Date(date);
+				return result;
+			}
+		},
+	}
+</script>

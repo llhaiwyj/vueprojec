@@ -1,0 +1,332 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop" v-show="show">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>角色设置---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-row :gutter="10">
+							<el-col class="row reformbox" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<div class="reform">
+									<h5>角色基本信息<i class="el-collapse-item__arrow el-icon-arrow-right"></i></h5>
+								</div>
+							</el-col> 
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8" >
+								<div class="box">
+								 <div class="form-group" v-bind:class="{'form-group--error': $v.roleID.$error }">
+							  	<span class="mc">角色ID :</span>
+								<el-input  v-model="roleID" @blur="test" class="name1" @change="selectRoleId" clearable>
+								</el-input>	
+								    <i class="yes el-icon-check" v-if="isShow"></i>
+									<i class="no el-icon-close" v-if="isShows"></i>
+									</div>
+									<span class="form-group__message" v-if="!$v.roleID.required">不能为空</span>							    
+								</div>
+							  </el-col>
+							  	<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8" >
+							   <div class="box">
+							   	<div class="form-group" v-bind:class="{'form-group--error': $v.rolename.$error }">
+							  	<span class="mc">角色名称 :</span>
+								<el-input v-model="rolename" @blur="test"  class="name1"  clearable>
+								</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.rolename.required">不能为空</span>
+								</div>
+							  </el-col>
+							 <el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8" >
+							  	 <div class="box">
+							  	<span class="mc">角色备注 :</span>
+								<el-input v-model="remarks" class="name1" clearable>
+								</el-input>	
+								</div>
+							  </el-col>
+							    <el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8" >
+							    	<div class="box">
+							    		<div class="form-group" v-bind:class="{'form-group--error': $v.state.$error }">
+							  	<span class="mc">选择角色：</span>
+							  	<select class="xl">								
+									<option  v-model="state" :value="1">系统角色</option>
+									<option  v-model="state" :value="2">商家角色</option>									
+								 </select>
+								 </div>
+								<span class="form-group__message" v-if="!$v.state.required">不能为空</span>
+								</div>
+							  </el-col>	
+							  <el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8" >				  
+							  	<el-tree :data="arrs" node-key="id" show-checkbox accordion highlight-current ref="tree" :props="defaultProps">
+								</el-tree>	
+							  </el-col>
+								<!--<el-col id="pand" class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input placeholder="" v-model="roleID" class="name1" @change="selectRoleId" clearable>
+										 <template class="biaoti" slot="prepend">角色ID</template>
+									</el-input>
+									<i class="yes el-icon-check" v-if="isShow"></i>
+									<i class="no el-icon-close" v-if="isShows"></i>
+								</el-col>-->
+								<!--<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input placeholder="" v-model="rolename" class="name1" clearable>
+										 <template class="biaoti" slot="prepend">请输入角色名称</template>
+									</el-input>
+								</el-col>-->
+								<!--<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+									<el-input placeholder="" v-model="remarks" class="name1" clearable>
+										 <template class="biaoti" slot="prepend">请输入备注</template>
+									</el-input>
+								</el-col>-->
+								<!--<el-col class="row" :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+								<div class="input-group">
+									<span class="input-group-addon">请选择角色</span>
+									<select class="select">								
+									<option  v-model="state" :value="1">系统管理角色</option>
+									<option  v-model="state" :value="2">商户管理角色</option>									
+								   </select>
+							     </div>							
+							   </el-col>-->
+								<!--<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+								<el-tree :data="arrs" node-key="id" show-checkbox accordion highlight-current ref="tree" :props="defaultProps">
+								</el-tree>
+							</el-col>-->
+								<!--<select v-on:change="indexSelects($event)">
+									<option>请选择</option>
+									<option v-for="(j,index) in mendian" :value="j.id">{{j.storeName}}</option>
+								</select>-->
+							<!--</el-col>-->
+						</el-row>						
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button   @click="getCheckedNodes($v.newUser)" class="el-button el-button--primary queding">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>						
+						<!--<button type="button" class="el-button el-button--primary" @click="close">确 定</button>-->
+					</slot>
+				</div>
+			</div>z
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, minLength} from 'vuelidate/lib/validators'
+	export default {
+		props:['uuid'],
+		data() {
+			return {			
+				arrs: '',
+				roleID: '',
+				state: '1',
+				rolename: '',
+				remarks: '',
+				assar: '',
+				mendianname:'',
+				isShow:false,
+				isShows:false,
+				bh:this.$storage.fetch("bianhao"),
+				mendian:[],
+				defaultProps: {
+					children: 'children',
+					label: 'name'
+				},			
+			}
+		},
+		validations: {   
+		    rolename: {  
+		      required 
+		    } , 
+		    remarks: {  
+		      required  
+		    },  
+		    roleID: {  
+		      required  
+		    },state:{
+		    	required
+		    }
+    },
+		//获取树形菜单
+		mounted: function() {			
+			        this.$ajax.post(`${this.$url}/role/loadMenuTree.html`,{bussinessId:this.stid}).then(res => {
+					console.log(res)
+					this.arrs = res.data
+					console.log(this.arrs)
+				    })
+			        .catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				    });
+				/*if(this.admin==1){
+					if(this.bid!=''){
+						this.$ajax.post('http://172.19.66.9:120120/new-xyykt-manager/role/loadMenuTree.html',{bussinessId:this.stid}).then(res => {
+					console.log(res)
+					this.arrs = res.data
+					console.log(this.arrs)
+				    })
+			        .catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				    });
+					}else{
+						this.$ajax.post('http://172.19.66.9:120120/new-xyykt-manager/role/loadMenuTree.html').then(res => {
+					console.log(res)
+					this.arrs = res.data
+					console.log(this.arrs)
+				    })
+			        .catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				    });
+					}
+				}else if(this.admin==2){
+					this.$ajax.post('http://172.19.66.9:120120/new-xyykt-manager/role/loadMenuTree.html',{bussinessId:this.stid}).then(res => {
+					console.log(res)
+					this.arrs = res.data
+					console.log(this.arrs)
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				});
+				}else{
+					console.log("您没有权限")
+				}*/
+			
+
+		},
+		methods: {
+             test(){
+             	this.$v.roleID.$touch()
+             	if(this.$v.roleID.$error){
+					return false;
+				}
+             	this.$v.rolename.$touch()
+             	if(this.$v.rolename.$error){
+					return false;
+				}
+             	this.$v.state.$touch()
+             	if(this.$v.state.$error){
+					return false;
+				}
+             	return true;
+             },
+			selectRoleId(){
+				//获取id值去后台查询
+				this.$ajax.post(`${this.$url}/role/validRole.html`, { roleID: this.roleID}).then(restaurants => {
+					console.log(restaurants)
+					//alert(restaurants.data)
+					if(restaurants.data == true){
+						
+						this.isShow=true
+//						alert(restaurants.data.flag)
+						this.isShows=false
+					}else{
+						this.isShow=false
+						this.isShows=true						
+//						alert(restaurants.data)
+					}
+					
+					
+				}) 
+			},
+			getCheckedNodes(value) {
+				
+				if(!this.test()){
+					return false;
+				}
+//				value.$touch();//验证所有信息
+				//this.assar = JSON.stringify(this.$refs.tree.getCheckedNodes());
+				let listTree=[].concat(this.$refs.tree.getCheckedKeys(), this.$refs.tree.getHalfCheckedKeys())
+				let treeList=[];
+				for(var i=0;i < listTree.length; i++){
+					let obj=this.$refs.tree.getNode(listTree[i]).data
+					    delete obj.childNodes;
+					treeList.push(obj)
+				}
+				console.log(treeList)
+				this.assar = JSON.stringify(treeList);
+				
+				//组织MD5加密	
+				 var dataMap = {};
+				      dataMap['roleID'] = this.roleID;
+				      dataMap['roleName'] = this.rolename;
+				      dataMap['roleRemark'] = this.remarks;
+				     
+				      dataMap['state'] = this.state;
+				      
+				      var sign = this.$utilMd5s.md5Code(JSON.stringify(dataMap));
+				      dataMap['sign'] = sign;
+				       dataMap['arr'] = this.assar;
+				       dataMap['uuid'] = this.uuid;
+				      var jsonData = JSON.stringify(dataMap);
+			this.$ajax.post(`${this.$url}/role/insertRole.html`, { jsonData:jsonData}).then(restaurants => {
+					console.log(restaurants)
+					this.$emit('close',restaurants.data.message);
+				})
+				/*this.$ajax.post(`${this.$url}/role/insertRole.html`, { roleID: this.roleID, roleName: this.rolename, roleRemark: this.remarks, arr: this.assar,state:this.state}).then(restaurants => {
+					console.log(restaurants)
+					this.$emit('close',restaurants.data.message);
+				}) */                                                                                                                                                                                                                                                                                                                 
+			},
+			/*indexSelect(event) {
+                console.log(event.target.value)
+                
+                this.stid=event.target.value
+                console.log(this.stid)
+                this.$ajax.post('http://172.19.66.9:120120/new-xyykt-manager/role/loadMenuTree.html',{bussinessId:this.admin}).then(res => {
+					console.log(res)
+					this.arrs = res.data
+					console.log(this.arrs)
+				})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				});
+                this.$storage.save("bianhao",this.stid);
+                console.log(this.bh)
+//              console.log(this.bussinessStore.length)
+                if(this.stid!=this.bh ){
+                	this.mendian= [];
+                	for(let j=0;j<this.bussinessStore.length;j++){
+                	if(this.stid==this.bussinessStore[j].bussinessId){
+                	
+                		this.mendian.push(this.bussinessStore[j])
+                		console.log(this.mendian)
+                		
+                	}
+                }
+                }else{
+                	this.mendian= [];
+                	for(let j=0;j<this.bussinessStore.length;j++){
+                	if(this.stid==this.bussinessStore[j].bussinessId){
+                	
+                		this.mendian.push(this.bussinessStore[j])
+                		console.log(this.mendian)
+                		
+                	}
+                    }
+                }
+			},
+			indexSelects(val) {
+			   console.log(val.target.value)
+               this.bid=val.target.value
+			},*/
+			//调用父组建的方法
+			close: function() {
+				//				console.log(this.assar)
+				this.$emit('close');
+
+			},
+			handleRemove(file, fileList) {
+				console.log(file, fileList);
+			},
+			handlePreview(file) {
+				console.log(file);
+			},
+			handleNodeClick(data) {
+				console.log(data);
+			}
+		}
+	}
+</script>

@@ -1,0 +1,162 @@
+<template>
+	<div class="box">
+		<div class="zuo">
+			<div class="zong">
+				<div class="zong-left">
+					<div class="meal">
+						<p class="order">订单详情</p>
+						<div class="information">
+						    <div class="xingming">
+						    	<p class="xingming-l">客户姓名：</p>
+						    	<p>张三</p>
+						    </div>
+						    <div class="xingming">
+						    	<p class="xingming-l">手机号码：</p>
+						    	<p>17610038211</p>
+						    </div>
+						    <div class="xingming">
+						    	<p class="xingming-l">车牌号码：</p>
+						    	<p>津A88888</p>
+						    </div>
+						    <div class="ServiceProject">
+						    	<p class="xingming-l">服务项目：</p>
+						    	<div class="project">
+						    		<p>打蜡</p>
+						    		<p><i class="el-icon-remove"></i></p>
+						    		<p>2</p>
+						    		<p><i class="el-icon-circle-plus"></i></p>
+						    		<p>￥</p>
+						    	</div>
+						    </div>
+						    <div class="UseCombo">
+						    	<p class="xingming-l">使用套餐：</p>
+						    	<p>津A88888</p>
+						    </div>
+						    <div class="xingming">
+						    	<p class="xingming-l">服务人员：</p>
+						    	<p>刘温</p>
+						    </div>
+						    <div class="xingming">
+						    	<p class="xingming-l">合计金额：</p>
+						    	<p>500.00</p>
+						    </div>
+						    <div class="xingming">
+						    	<p class="xingming-l">优惠券：</p>
+						    	<p>50.00</p>
+						    </div>
+						    <div class="xingming">
+						    	<p class="xingming-l">实付金额：</p>
+						    	<p>450.00</p>
+						    </div>
+					   </div>
+					</div>
+				</div>
+				<div class="zong-right">
+					<div class="billing">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="you"></div>
+	</div>
+</template>
+
+<script>
+</script>
+
+<style>
+	.box{
+		width:100%;
+		height:80%;
+		background:#fff;
+	}
+	.zuo{
+		width:84%;
+		height:100%;
+		float:left;
+	}
+	.zong{
+		width:100%;
+		height:76%;
+		margin-top:6%;
+	}
+	.zong-left{
+		width:50%;
+		height:100%;
+		float:left;
+		background:#00BAFC;
+	}
+	.meal{
+		width:80%;
+		height:100%;
+		background:red;
+		margin-left:20%;
+	}
+	.order{
+		width:75%;
+		height:41px;
+		line-height: 41px;
+		font-size:16px;
+		color:#333;
+		border-bottom:1px solid #c3c7c8;
+	}
+	.information{
+		width:92%;
+		/*height:472px;*/
+		margin-left:8%;
+		margin-top:15px;
+	}
+	.xingming{
+		width:100%;
+		height:35px;
+		font-size:14px;
+		color:#666;
+		line-height: 35px;
+	}
+	.xingming p{
+		float:left;
+		margin-right:10px;
+	}
+	.xingming-l{
+		width:20%;
+	}
+	.ServiceProject{
+		width:100%;
+		height:120px;
+		font-size:14px;
+		color:#666;
+		line-height: 35px;
+	}
+	.ServiceProject p{
+		float:left;
+		margin-right:10px;
+	}
+	.project{
+		float:left;
+	}
+	
+	
+	
+	
+	
+	
+	
+	.zong-right{
+		width:50%;
+		height:100%;
+		float:left;
+	}
+	.billing{
+		width:80%;
+		height:100%;
+		background:red;
+		margin-left:20%;
+	}
+	.you{
+		width:16%;
+		height:100%;
+		background:#273238;
+		float:left;
+	}
+</style>

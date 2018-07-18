@@ -1,0 +1,81 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>会员套餐---详情</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<div id="tablist">
+							<el-table ref="multipleTable" :data="mealFindLooks" height="325" tooltip-effect="dark" style="width: 100%">
+								<el-table-column prop="serviceName" label="名称" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="serviceMealPrice" label="套餐内售价" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="orderCount" label="数量" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="orderSum" label="小计" show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+						    </div>
+						</el-col>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props:['mealFindLooks'],
+		data() {
+			return {
+//            taocanList:'', 
+			}
+		},
+		mounted: function() {
+
+		},
+		methods: {
+//          handleCurrentChange(page) {
+//				console.log(page)
+//				this.currentPage = page;
+////				this.shuju();
+//			}, //改变条数触发
+//			handleSizeChange(index) {
+//				console.log(index)
+//				this.length = index;
+////				this.shuju();
+//			},
+//			shuju () {
+//				//加上两个字段 lenght 和stare  来显示
+//				this.$ajax.post(`${this.$url}/customer/selCustomerOrderDetail.html`, {
+//					        start:  this.currentPage,
+//							length: this.length,
+//					}).then(restaurants => {
+//							console.log(restaurants)
+//						})
+//						.catch((error) => {
+//							console.log(error)
+//							this.$message.error('添加失败,请核实您的信息');
+//						})
+//			},
+			close(){
+				this.$emit('close');
+			},
+		}
+	}
+</script>
+<style>
+
+</style>

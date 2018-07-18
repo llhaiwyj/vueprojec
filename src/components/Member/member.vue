@@ -1,0 +1,238 @@
+<template>
+	<div class="member">
+		<div class="icon">
+			<el-tooltip class="item" effect="dark" content="添加" placement="top">
+				<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+			</el-tooltip>
+		</div>
+		<div id="sousuo">
+			<el-collapse>
+				<el-collapse-item title="搜索列表" name="2" id="lie">
+					<el-row :gutter="10">
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<el-input clearable v-model="username">
+									<template class="biaoti" slot="prepend">会员姓名</template>
+								</el-input>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<el-input clearable v-model="phone">
+									<template class="biaoti" slot="prepend">会员电话</template>
+								</el-input>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">所属商家</span>
+								<select v-model="bussinessID">
+									<option value="">----全部----</option>
+									<option v-for="item in bussiness" :value="item.bussinessID">{{item.bussinessName}}</option>
+								</select>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">注册时间</span>
+								<el-date-picker v-model="createTime" type="date" style="width: 100%;">
+								</el-date-picker>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<el-input clearable v-model="score">
+									<template class="biaoti" slot="prepend">用户积分</template>
+								</el-input>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+							<el-button class="find" @click="fined">
+								<!--{{menuList[3]}}-->查询</el-button>
+						</el-col>
+					</el-row>
+				</el-collapse-item>
+			</el-collapse>
+		</div>
+		<div id="tablist">
+			<el-table ref="multipleTable" :data="activity" height="632" tooltip-effect="dark" style="width: 100%">
+				<el-table-column prop="username" label="姓名" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="sex" label="性别" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="phone" label="会员电话" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="createTime" label="注册时间" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="score" label="积分" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column label="操作" width="180">
+					<template slot-scope="scope">
+						<el-button type="text" size="small" @click="renewalfees(scope.$index,activity)">详情</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+			<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+					<div class="pages">
+						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+						</el-pagination>
+					</div>
+				</el-col>
+			</el-row>
+		</div>
+		<modals v-show="isModalVisibles" @close="closeModal" v-on:close="serlfs" v-on:closes="serlf" v-bind:uuid="uuid" v-bind:memberinfors="memberinfor" v-bind:cityArr="chengshi" v-bind:districtArr="xianqu"/>
+		<modal v-show="isModalVisible" @close="closeModal" v-on:close="serlfs" v-on:closes="serlf" v-bind:uuid="uuid" />
+	</div>
+</template>
+
+<script>
+	import Modals from './memberDetails.vue'
+	import Modal from './memberAdd.vue'
+	export default {
+		name: 'stores',
+		components: {
+			Modals,
+			Modal
+		},
+		data() {
+			return {
+				//基础
+				uuid: '',
+				listCity: this.$storage.fetch("listCity"),
+				menuId: this.$route.query.menuIds,
+				bussiness: this.$storage.fetch("bussiness"),
+				store: this.$storage.fetch("bussinessstore"),
+				bussinessId: this.$storage.fetch("buss"),
+				currentPage: 1,
+				total: '',
+				length: 10,
+				isModalVisible: false,
+				isModalVisibles: false,
+				//查询
+				username: '',
+				phone: '',
+				bussinessID: '',
+				createTime: '',
+				score: '',
+				memberinfor: '',
+			}
+		},
+		mounted: function() {
+			this.fined();
+		},
+		methods: {
+			handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				this.fined();
+
+			}, //改变条数触发
+			handleSizeChange(index) {
+				console.log(index)
+				this.length = index;
+				this.fined();
+
+			},
+			fined() {
+				this.$ajax.post(`${this.$url}/customer/selCustomerlist.html`, {
+						start: this.currentPage,
+						length: this.length,
+						username: this.username,
+						bussinessID: this.bussinessID,
+						createTime: this.createTime,
+						phone: this.phone,
+						score: this.score,
+					}).then(data => {
+						console.log(data)
+						this.activity = data.data.data.list
+						this.uuid = data.data.uuid
+						this.total = data.data.data.total
+						if(data.data.data.size > 10) {
+							this.length = data.data.data.size
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+			showModal: function() {
+				this.isModalVisible = true
+			},
+			renewalfees(index, all) {
+				this.$ajax.post(`${this.$url}/customer/selectCustomerDetail.html`, {
+						customerID: all[index].customerID,
+						createTime: all[index].createTime,
+					}).then(data => {
+						console.log(data)
+						this.memberinfor = data.data
+						this.isModalVisibles = true
+						 this.chengshi=[]
+						for(let i in this.listCity) {
+							if(this.listCity[i].parentID == data.data.province) {
+								this.chengshi.push(this.listCity[i])
+							}
+						}
+						this.xianqu=[]
+						for(let i in this.listCity) {
+							if(this.listCity[i].parentID == data.data.city) {
+								this.xianqu.push(this.listCity[i])
+							}
+						}
+						//						this.activity = data.data.data.list
+						//						this.uuid = data.data.uuid
+                        //获取会订单列表
+//						this.$ajax.post(`${this.$url}/customer/selCustomerOrderList.html`, {
+//								start: this.currentPage,
+//								length: this.length,
+//								customerID: all[index].customerID,
+//								consumerStore: all[index].consumerStore
+//							}).then(restaurants => {
+//								console.log(restaurants)
+//							})
+//							.catch((error) => {
+//								console.log(error)
+//								this.$message.error('添加失败,请核实您的信息');
+//							})
+					})
+					.catch((error) => {
+						console.log(error)
+						this.$message.error('获取数据失败');
+					})
+			},
+
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			serlf: function() {
+				this.$router.push({
+					name: 'backs',
+					query: { menuIds: this.menuId }
+				})
+			},
+			serlfs: function() {
+				this.isModalVisibles = false
+			},
+			formatDate: function(time) {
+				var y = time.getFullYear();
+				var m = time.getMonth() + 1;
+				m = m < 10 ? '0' + m : m;
+				var d = time.getDate();
+				d = d < 10 ? ('0' + d) : d;
+				return y + '-' + m + '-' + d;
+			},
+			//转换中国标准时间
+			formatterDate: function(date) {
+				let result = new Date(date);
+				return result;
+			}
+		},
+	}
+</script>
+
+<style>
+
+</style>

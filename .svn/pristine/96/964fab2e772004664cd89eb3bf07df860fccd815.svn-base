@@ -1,0 +1,65 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>活动券设置---添加</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<!--<div id="tablist">-->
+							<el-table ref="multipleTable" :data="shopList" height="300" tooltip-effect="dark" style="width: 100%">
+								<el-table-column type="selection" :selectable='checkboxInit' width="55">
+                                </el-table-column>
+								<el-table-column prop="goodsName" label="商品/服务名称" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="goodsPrice" label="商品/服务原价" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="unit" label="单位" show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+							<!--</div>-->
+						</el-col>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button class="el-button el-button--primary queding" @click="determine">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		props: ['shopList'],
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+			}
+		},
+		mounted: function() {
+		
+		},
+		methods: {
+			determine() {
+                 for(let i in this.shopList){
+                 	console.log(this.shopList[i])
+                 }
+
+			},
+			close() {
+				this.$emit('close');
+			},
+		},
+	}
+</script>
+<style>
+
+</style>

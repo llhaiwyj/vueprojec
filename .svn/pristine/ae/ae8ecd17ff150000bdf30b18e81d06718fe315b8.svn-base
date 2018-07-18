@@ -1,0 +1,208 @@
+<template>
+	<div class="activity">
+		<div class="icon">
+		    <el-tooltip class="item" effect="dark" content="添加" placement="top">
+			 	<i class="el-icon-circle-plus-outline xinzeng" size="small" @click="showModal"></i>
+		    </el-tooltip>
+		</div>
+	    <div id="sousuo">
+		    <el-collapse>
+		    	<el-collapse-item title="搜索列表" name="2" id="lie">
+		    		<el-row :gutter="10">
+		    			<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						    <div class="input-group">
+								<el-input  clearable v-model="ticketName">
+							        <template class="biaoti" slot="prepend">活动券名称</template>
+						        </el-input>
+							</div>					
+					    </el-col>
+					    <el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						    <div class="input-group">
+								<span class="input-group-addon">活动券类型</span>
+								<select class="xl" v-model="type">
+									<option value="">----全部----</option>
+									<option v-for="item in activetype" :value="item.value">{{item.label}}</option>
+								</select>
+							</div>					
+					    </el-col>
+					    <!--<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+							<div class="input-group">
+								<span class="input-group-addon">使用时间</span>
+								<el-date-picker class="shangstate" v-model="durationTime" type="date" style="width: 100%;">
+								</el-date-picker>
+							</div>
+						</el-col>-->
+						<el-col class="row" :xs="19" :sm="18" :md="11" :lg="10" :xl="5">
+						    <div class="input-group">
+								<span class="input-group-addon">状态</span>
+								<select class="xl" v-model="state">
+									<option value="">----全部----</option>
+									<option v-for="item in activestate" :value="item.value">{{item.label}}</option>
+								</select>
+							</div>					
+					   </el-col>
+		    		</el-row>
+		    	</el-collapse-item>
+		    </el-collapse>
+        </div>
+        <div id="tablist">
+			<el-table ref="multipleTable" :data="activity" height="632" tooltip-effect="dark" style="width: 100%">
+				<el-table-column prop="ticketName" label="活动券名称" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="type" label="活动券类型" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="endTime" label="使用有效期" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="isService" label="适用类别" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="serviceGroup" label="服务分组" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="serviceID" label="适用商品或服务" show-overflow-tooltip>
+				</el-table-column>
+				<el-table-column prop="state" label="商家状态 " show-overflow-tooltip>
+					<template slot-scope="scope">
+						<el-button id="zi1" type="text" v-if="scope.row.state==0" size="small">停用</el-button>
+						<el-button id="zi" type="text" v-else-if="scope.row.state==1" size="small">启用</el-button>
+						<!--<el-button id="zi1" type="text" @click="currentstate(scope.row.state,scope.$index,merchantData)" v-else size="small">待审核</el-button>-->
+					</template>
+				</el-table-column>
+				<el-table-column label="操作" width="180">
+					<template slot-scope="scope">
+						<el-button type="text" size="small" @click="renewalfees(scope.$index,activity)">查看</el-button>
+						<el-button type="text" size="small" @click="showModals(scope.$index,activity)">修改</el-button>
+						<el-button type="text" size="small" @click="deletes(scope.$index,activity)">删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<div class="block">
+				<el-row :gutter="10">
+				<el-col class="row" :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+					<div class="pages">
+						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-size="length" layout="total, sizes, prev, pager, next, jumper" :total="total">
+						</el-pagination>
+					</div>
+				</el-col>
+			</el-row>
+		</div>	
+		<modal v-show="isModalVisible" @close="closeModal" v-on:close="serlfs" v-on:closes="serlf" v-bind:uuid="uuid"/>
+		<modals v-show="isModalVisibles" @close="closeModals" v-on:close="serlfs" v-on:closes="serlf" v-bind:uuid="uuid" v-bind:actUpdata="actUp"/>
+	</div>
+</template>
+
+<script>
+	import Modal from './ActivityTicketAdd.vue'
+	import Modals from './ActivityTicketUpdata.vue'
+	export default {
+		name: 'stores',
+		components: {
+			Modal,
+			Modals,
+		},
+	    data(){
+		    return{
+		    	uuid:'',
+		    	actUp:'',
+		    	menuId: this.$route.query.menuIds,
+			    currentPage: 1,
+			    total: '',
+				length: 10,
+				ticketName:'',
+				type:'',
+				state:'',
+				activity:'',
+				isModalVisible: false,
+				isModalVisibles: false,
+				activetype: [{
+						value: '0',
+						label: '代金券'
+					},
+					{
+						value: '1',
+						label: '折扣券'
+					},
+					{
+						value: '2',
+						label: '抵用券'
+					}
+				],
+				activestate: [{
+						value: '0',
+						label: '停用'
+					},
+					{
+						value: '1',
+						label: '启用'
+					},
+				],
+		    }
+	    },
+	    mounted: function() {
+	    	this.fined();
+	    },
+	    methods: {
+	    	handleCurrentChange(page) {
+				console.log(page)
+				this.currentPage = page;
+				this.fined();
+			}, //改变条数触发
+			handleIndexChange(index) {
+				console.log(index)
+				this.length = index;
+				this.fined();
+			},
+			fined() {
+				this.$ajax.post(`${this.$url}/activityTicket/selActivityTicketList.html`, { 
+					start: this.currentPage,
+					length: this.length,
+					ticketName:this.ticketName,
+					type:this.type,
+					state:this.state,
+				}).then(data => {
+						console.log(data)
+						this.activity=data.data.data.list
+						this.uuid=data.data.uuid
+					})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+			},
+			showModal: function() {
+				this.isModalVisible = true
+			},
+			showModals(inde,all){
+				this.$ajax.post(`${this.$url}/activityTicket/initActivityTicketUpdate.html`, { 
+                    activityTicketID:all[inde].activityTicketID				
+				}).then(data => {
+						console.log(data.data.data)
+						this.actUp=data.data.data
+					})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+			},
+			closeModal: function() {
+				this.isModalVisible = false
+			},
+			//模态框关闭
+			closeModals: function() {
+				this.isModalVisibles = false;
+			},
+			//
+			closeModals: function() {
+				this.isModalVisibles = false;
+			},
+			serlf: function() {
+			    this.$router.push({ name: 'backs', query: { menuIds: this.menuId } })
+			},
+			serlfs: function() {
+				this.isModalVisible = false
+				this.isModalVisibles = false
+			},
+	    },
+	}
+</script>
+
+

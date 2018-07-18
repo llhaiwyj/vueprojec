@@ -1,0 +1,517 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>活动券设置---修改</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.actUpdata.ticketName.$error }">
+									<span class="mc">活动券名称</span>
+									<el-input @blur="verification" v-model="actUpdata.ticketName" class="name1" clearable>
+									</el-input>
+								</div>
+								<span class="form-group__message" v-if="!$v.actUpdata.ticketName.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.actUpdata.type.$error }">
+									<span class="mc">活动券类型</span>
+									<select @blur="verification" class="xl" v-model="actUpdata.type" v-on:change="acttype($event)">
+										<option v-for="item in activetype" :value="item.value">{{item.label}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.actUpdata.type.required">不能为空</span>
+							</div>
+						</el-col>
+						<!--<el-col :span="7" class="gutterspan">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.times.$error }">
+									<span class="mc">有效使用期</span>
+									<el-date-picker
+										@blur="verification"
+										v-model="times"
+										class="xl"
+										type="daterange"
+										align="right"
+										unlink-panels
+										range-separator="至"
+										start-placeholder="开始日期"
+										end-placeholder="结束日期"
+										>
+                                    </el-date-picker>
+								</div>
+								<span class="form-group__message" v-if="!$v.times.required">不能为空</span>
+							</div>
+						</el-col>-->
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.actUpdata.beginTime.$error }">
+									<span class="mc">开始使用日期</span>
+									<el-date-picker v-model="actUpdata.beginTime" class="xl" @blur="verification" type="date">
+									</el-date-picker>
+								</div>
+								<span class="form-group__message" v-if="!$v.actUpdata.beginTime.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.actUpdata.endTime.$error }">
+									<span class="mc">结束使用日期</span>
+									<el-date-picker v-model="actUpdata.endTime" class="xl" @blur="verification" type="date">
+									</el-date-picker>
+								</div>
+								<span class="form-group__message" v-if="!$v.actUpdata.endTime.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.actUpdata.state.$error }">
+									<span class="mc">活动券状态</span>
+									<el-select @blur="verification" class="xl" v-model="actUpdata.state">
+										<el-option v-for="item in activestate" :key="item.value" :label="item.label" :value="item.value"></el-option>
+									</el-select>
+								</div>
+								<span class="form-group__message" v-if="!$v.actUpdata.state.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" v-show="daiactive">
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+								<div class="box">
+									<span class="mc">代金券面值</span>
+									<el-input v-model="actUpdata.amount" class="name1" clearable>
+									</el-input>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+								<div class="box">
+									<span class="mc">最低消费使用</span>
+									<el-input v-model="actUpdata.monetary" class="name1" clearable>
+									</el-input>
+								</div>
+							</el-col>
+						</el-col>
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24"  v-show="zheactive">
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+								<div class="box">
+									<span class="mc">折扣券面值</span>
+									<el-input v-model="actUpdata.discount" class="name1" clearable>
+									</el-input>
+								</div>
+							</el-col>
+							<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+								<div class="box">
+									<span class="mc">最低消费使用</span>
+									<el-input v-model="actUpdata.monetary" class="name1" clearable>
+									</el-input>
+								</div>
+							</el-col>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+								<div class="form-group" v-bind:class="{'form-group--error': $v.actUpdata.isService.$error }">
+									<span class="mc">所属类别</span>
+									<select @blur="verification" class="xl" v-model="actUpdata.isService" v-on:change="leibie($event)">
+										<option v-for="item in category" :value="item.value">{{item.label}}</option>
+									</select>
+								</div>
+								<span class="form-group__message" v-if="!$v.actUpdata.isService.required">不能为空</span>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+							<div class="box">
+							<!--	<div class="form-group" v-bind:class="{'form-group--error': $v.serviceGroup.$error }">-->
+									<span class="mc">服务分组</span>
+									<select @blur="verification" class="xl" v-model="actUpdata.serviceGroup" v-on:change="fuwufenzu($event)">
+										<option v-for="item in serverFZ" :value="item.groupingId">{{item.groupingName}}</option>
+									</select>
+								<!--</div>
+								<span class="form-group__message" v-if="!$v.serviceGroup.required">不能为空</span>-->
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8"  v-show="fuwu">
+							<div class="box">
+								<!--<div class="form-group" v-bind:class="{'form-group--error': $v.serviceID.$error }">-->
+								<!--	v-on:change="FWshop($event)"-->
+								<span class="mc">适用商品或服务</span>
+								<select class="xl" v-model="actUpdata.serviceID">
+									<option v-for="item in shopall" :value="item.serviceID">{{item.serviceName}}</option>
+								</select>
+								<!--</div>
+								<span class="form-group__message" v-if="!$v.serviceID.required">不能为空</span>-->
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8"  v-show="shangpin">
+							<div class="box">
+								<span class="mc">适用商品或服务</span>
+								<select class="xl" v-model="actUpdata.serviceID">
+									<option v-for="item in shopall" :value="item.goodsID">{{item.goodsName}}</option>
+								</select>
+							</div>
+						</el-col>
+						<el-col class="row" :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
+								<div class="box">
+									<span class="mc">详情</span>
+									<el-input v-model="actUpdata.remark" class="name1" clearable>
+									</el-input>
+								</div>
+						</el-col>
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+							<el-tree default-expand-all :data="bussarrs" node-key="id" show-checkbox accordion highlight-current ref="tree" :default-checked-keys="bussdataID" :props="defaultProps">
+							</el-tree>
+						</el-col>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button class="el-button el-button--primary queding" @click="determine">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	import { required, numeric, minLength, maxLength, or } from 'vuelidate/lib/validators'
+	export default {
+		props: ['uuid','actUpdata','times','serverFZ','shopall','bussarrs','bussdataID'], 
+		data() {
+			return {
+				menuId: this.$route.query.menuIds,
+				store: this.$storage.fetch("bussiness"),
+				isAdmin: this.$storage.fetch("isAdmin"),
+				bussinessId: this.$storage.fetch("buss"),
+				types: this.$storage.fetch("types"),
+				isServices:this.$storage.fetch("isService"),
+				activetype: [{
+						value: '0',
+						label: '代金券'
+					},
+					{
+						value: '1',
+						label: '折扣券'
+					},
+					{
+						value: '2',
+						label: '抵用券'
+					}
+				],
+				activestate: [{
+						value: '0',
+						label: '停用'
+					},
+					{
+						value: '1',
+						label: '启用'
+					},
+				],
+				category: [{
+						value: '2',
+						label: '商品'
+					},
+					{
+						value: '1',
+						label: '服务'
+					},
+					{
+						value: '',
+						label: '全部'
+					},
+				],
+				daiactive:false,
+				zheactive:false,
+				bussinessShows:false,
+				bussinessShow:false,
+				bussinessID:'',
+				bussinessName:'',
+				beginTime:'',
+				endTime:'',
+//				serverFZ:[],
+//				shopall:[],
+				bussarrs:'',
+				scope:'',
+				defaultProps: {
+					children: 'children',
+					label: 'name'
+				},
+				fuwu:false,
+				shangpin:false,
+			}
+		},
+		mounted: function() {
+            	this.bussinessID=this.bussinessId;
+            	console.log(this.bussinessID);
+				for(let i in this.store){
+					if(this.bussinessID==this.store[i].bussinessID){
+						this.bussinessName=this.store[i].bussinessName
+					}
+					console.log(this.bussinessName)
+				}
+            	this.$ajax.post(`${this.$url}/activityTicket/selectStoreTree.html`, { 
+                    bussinessID:this.bussinessID,
+                    bussinessName:this.bussinessName,
+				}).then(data => {
+						console.log(data)
+						this.bussarrs=data.data.bussTree
+					})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+				if(this.types=='0'){
+					this.daiactive=true
+					this.zheactive=false
+				}else if(this.types=='1'){
+					this.daiactive=false
+					this.zheactive=true
+				}else{
+					this.daiactive=false
+					this.zheactive=false
+				}
+				
+				if(this.isServices=='1'){
+					this.fuwu=true
+					this.shangpin=false
+				}else{
+					this.shangpin=true
+					this.fuwu=false
+				}
+		},
+		validations: {
+//			times:{
+//				required
+//			},
+			actUpdata:{
+				ticketName: {
+				required
+			},
+			type: {
+				required
+			},
+			beginTime: {
+				required
+			},
+			endTime: {
+				required
+			},
+			state:{
+				required
+			},
+			isService:{
+				required
+			},
+			}
+		},
+		methods: {
+			//验证
+			verification() {
+				this.$v.actUpdata.ticketName.$touch()
+				if(this.$v.actUpdata.ticketName.$error) {
+					return false;
+				}
+				this.$v.actUpdata.type.$touch()
+				if(this.$v.actUpdata.type.$error) {
+					return false;
+				}
+				this.$v.actUpdata.beginTime.$touch()
+				if(this.$v.actUpdata.beginTime.$error) {
+					return false;
+				}
+				this.$v.actUpdata.endTime.$touch()
+				if(this.$v.actUpdata.endTime.$error) {
+					return false;
+				}
+//				this.$v.times.$touch()
+//				if(this.$v.times.$error) {
+//					return false;
+//				}
+				this.$v.actUpdata.state.$touch()
+				if(this.$v.actUpdata.state.$error) {
+					return false;
+				}
+				this.$v.actUpdata.isService.$touch()
+				if(this.$v.actUpdata.isService.$error) {
+					return false;
+				}
+//				this.$v.bussinessID.$touch()
+//				if(this.$v.bussinessID.$error) {
+//					return false;
+//				}
+//				this.$v.serviceGroup.$touch()
+//				if(this.$v.serviceGroup.$error) {
+//					return false;
+//				}
+//				this.$v.serviceID.$touch()
+//				if(this.$v.serviceID.$error) {
+//					return false;
+//				}
+			},
+			//类别和商家查服务
+			leibie:function(event){ 
+				this.actUpdata.isService=event.target.value
+				this.bussinessID=this.bussinessId
+				if(this.actUpdata.isService=='1'){
+					this.fuwu=true
+					this.shangpin=false
+				}else{
+					this.fuwu=false
+					this.shangpin=true
+				}
+				for(let i in this.store){
+					if(this.bussinessID==this.store[i].bussinessID){
+						this.bussinessName=this.store[i].bussinessName
+					}
+				}
+				this.serverFZ=[];
+				this.$ajax.post(`${this.$url}/activityTicket/selectGroupList.html`, { 
+                    bussinessID:this.bussinessID,
+                    isService:this.actUpdata.isService,
+				}).then(data => {
+						console.log(data)
+						this.serverFZ=data.data.grouplist
+					})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+				
+			},
+			//类别和商家和分组查商品
+			fuwufenzu(event){
+				this.actUpdata.serviceGroup=event.target.value
+				this.shopall=[];
+				this.$ajax.post(`${this.$url}/activityTicket/selectServiceList.html`, { 
+                    bussinessID:this.bussinessID,
+                    isService:this.actUpdata.isService,
+                    groupingId:this.actUpdata.serviceGroup,
+				}).then(data => {
+						console.log(data)
+						this.shopall=data.data.servicelist
+					})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+			},
+			acttype: function(even) {
+				this.actUpdata.type=even.target.value
+				if(this.actUpdata.type=='0'){
+					this.daiactive=true
+					this.zheactive=false
+				}else if(this.actUpdata.type=='1'){
+					this.daiactive=false
+					this.zheactive=true
+				}else{
+					this.daiactive=false
+					this.zheactive=false
+				}
+			},
+			determine() {
+//				if(!this.verification()) {
+//					return false;
+//				}
+				if(this.actUpdata.serviceGroup=='' && this.actUpdata.serviceID==''){
+//					alert(1)
+					this.scope='1'
+				}else if(this.actUpdata.serviceID==''){
+					this.scope='2'
+				}else{
+					this.scope='3'
+				}
+				console.log(this.scope)
+				
+				let storeId='';
+				let storeName='';
+//				getHalfCheckedNodes
+                console.log(this.$refs.tree.getCheckedNodes())
+                let listName=[].concat(this.$refs.tree.getCheckedNodes())
+				let listTree = [].concat(this.$refs.tree.getCheckedKeys())
+				let ls=[].concat(this.$refs.tree.getHalfCheckedKeys());	
+				if(ls == ''){
+					listTree[0]='';
+				}
+				if(listTree.length > 0){
+					for(let i= 0; i< listTree.length; i++){
+						if(storeId == ''){
+							storeId=listTree[i];
+//							storeName=listTree[i].name;
+						}else{
+							storeId=storeId+','+listTree[i];
+//							storeName=storeName+','+listTree[i].name;
+						}
+					}
+				}
+				for(let i in listName){
+					if(storeId==listName[i].id){
+						storeName=listName[i].name
+					}
+				}
+//				console.log(storeId)
+//				console.log(storeName)
+				this.beginTime= this.formatDate(this.actUpdata.beginTime);
+				this.endTime= this.formatDate(this.actUpdata.endTime);
+				
+				console.log(this.beginTime)
+				console.log(this.endTime)
+				this.$ajax.post(`${this.$url}/activityTicket/updateActivityTicket.html`, { 
+					uuid: this.uuid,
+					ticketName: this.actUpdata.ticketName,
+					type:this.actUpdata.type,
+					beginTime:this.beginTime,
+					endTime:this.endTime,
+					monetary:this.actUpdata.monetary,
+					discount:this.actUpdata.discount,
+					amount:this.actUpdata.amount,
+					isService:this.actUpdata.isService,
+					serviceGroup:this.actUpdata.serviceGroup,
+					serviceID:this.actUpdata.serviceID,
+					state:this.actUpdata.state,
+					bussinessID:this.bussinessID,
+					bussinessName:this.bussinessName,
+					scope:this.scope,
+					storeID:storeId,
+					remark:this.actUpdata.remark,
+					storeName:storeName
+				}).then(data => {
+					    this.$emit('closes');
+//						console.log(data)
+//						this.activity=data.data.data.list
+//						this.uuid=data.data.uuid
+					})
+				.catch((error) => {
+					console.log(error)
+					this.$message.error('获取数据失败');
+				})
+
+			},
+			close() {
+				this.$emit('close');
+				this.$router.push({
+					name: 'backs',
+					query: {
+						menuIds: this.menuId,
+					}
+				})
+			},
+			formatDate:function(time) { 
+				var y = time.getFullYear(); 
+				var m = time.getMonth() + 1;  
+				m = m < 10 ? '0' + m : m;  
+				var d = time.getDate();  
+				d = d < 10 ? ('0' + d) : d;  
+				return y + '-' + m + '-' + d;  
+          },
+		},
+	}
+</script>
+<style>
+
+</style>

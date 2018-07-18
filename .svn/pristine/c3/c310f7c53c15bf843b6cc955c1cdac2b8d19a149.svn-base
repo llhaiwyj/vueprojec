@@ -1,0 +1,121 @@
+<template>
+	<transition name="modal-fade">
+		<div class="modal-backdrop">
+			<div class="modal" @click.stop>
+				<div class="modal-header">
+					<slot name="header">
+						<h2>活动券设置---详情</h2>
+					</slot>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<slot name="body">
+						<el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
+							<el-tab-pane label="会员信息" name="first">
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+											<span class="mc">姓名</span>
+											<el-input v-model="username" class="name1" clearable>
+											</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+											<span class="mc">性别</span>
+											<el-input v-model="sex" class="name1" clearable disabled="disabled">
+											</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+											<span class="mc">电话</span>
+											<el-input v-model="phone" class="name1" clearable>
+											</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+											<span class="mc">生日</span>
+											<el-input v-model="birthday" class="name1" disabled="disabled">
+											</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+											<span class="mc">注册时间</span>
+											<el-input v-model="createTime" class="name1" disabled="disabled">
+											</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+											<span class="mc">最后到店时间</span>
+											<el-input v-model="lastTime" class="name1" disabled="disabled">
+											</el-input>
+									</div>
+								</el-col>
+								<el-col :span="7" class="gutterspan">
+									<div class="box">
+											<span class="mc">未到店天数</span>
+											<el-input v-model="notStoreDay" class="name1" clearable disabled="disabled">
+											</el-input>
+									</div>
+								</el-col>
+							</el-tab-pane>
+							<el-tab-pane label="会员订单" name="second">会员订单
+								
+							</el-tab-pane>
+							<el-tab-pane label="预约订单" name="third">预约订单
+							</el-tab-pane>
+							<el-tab-pane label="积分明细" name="fourth">积分明细
+							</el-tab-pane>
+							<el-tab-pane label="优惠券" name="five">优惠券
+							</el-tab-pane>
+							<el-tab-pane label="套餐" name="six">套餐
+							</el-tab-pane>
+							<el-tab-pane label="车辆" name="seven">车辆
+							</el-tab-pane>
+						</el-tabs>
+					</slot>
+				</div>
+				<div class="modal-footer">
+					<slot name="footer">
+						<el-button class="el-button el-button--primary queding" @click="determine">确定</el-button>
+						<button type="button" class="el-button el-button--default guanbi" @click="close">关闭</button>
+					</slot>
+				</div>
+			</div>
+		</div>
+	</transition>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				activeName2: 'first'
+			}
+		},
+		methods: {
+			//回显的值
+			handleClick(tab, event) {
+				console.log(tab, event);
+			},
+			close() {
+				this.$emit('close');
+			},
+			closeModal() {
+				this.listadd = false
+			},
+
+		},
+	}
+</script>
+<style>
+  .el-tabs__content {
+    overflow:visible !important; 
+    position: relative;
+  }
+  .el-tabs__nav {
+     border:0px solid #fff !important; 
+  }
+</style>
