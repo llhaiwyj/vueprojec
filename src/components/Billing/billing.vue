@@ -21,13 +21,13 @@
 							<div class="ServiceProject" v-show="shopservice">
 								<p class="xingming-l">服务项目：</p>
 								<div class="project">
-									<div class="project1" v-for="(i,index) in changList">
+									<div class="project1" v-for="(i,index) in changList" :key="i.id">
 										<p>{{i.serviceName}}</p>
 										<p @click="jian(index,changList)"><i class="el-icon-remove"></i></p>
-										<p v-model="buyCount">{{buyCount}}</p>
+										<p ref="idx" :id="index" v-model="buyCount">{{buyCount}}</p>
 										<p @click="jia(index,changList)"><i class="el-icon-circle-plus"></i></p>
-										<p v-if="buyCount==1">￥{{i.servicePrice}}</p>
-										<p v-model="jiage" v-else="buyCount==0">￥{{jiage}}</p>
+										<p v-show="yuanjia">￥{{i.servicePrice}}</p>
+										<p v-model="jiage" ref="ids" :id="index" v-shou="suanhou">￥{{jiage}}</p>
 										<p @click="deleteds(index,changList)"><i class="el-icon-delete"></i></p>
 									</div>
 								</div>
@@ -139,7 +139,7 @@
 												</div>
 											</div>
 											<button class="determine">确认</button>
-											
+
 											<button class="quxiao" @click="quxiao">取消</button>
 										</el-tab-pane>
 									</el-tabs>
@@ -177,7 +177,7 @@
 												<p>剩余：<span>{{i.orderCount}}</span></p>
 											</div>
 										</div>
-										
+
 										<!--<el-tabs v-model="activeName1" type="card" @tab-click="handleClicks" class="package" v-for="i in customerMealList">
 											<el-tab-pane label="i.mealName" name="one">
 												<div class="packageA">
@@ -357,29 +357,31 @@
 				num: '',
 				ind: '',
 				changList: [],
-				changTaoList:[],
-				mealDetailList:'',
+				changTaoList: [],
+				mealDetailList: '',
 				jine: '',
 				jiage: '',
 				show: false,
 				realmoney: '',
 				discountmoney: '',
 				servicePersonNames: '刘温',
-				isMeals:'0',
-				groupingID:[],
-				groupingIDs:'',
-				activityDetailList:'',
-				a:[],
-                b:[],
-                c:[],
-                d:[],
-                ordertype:[],
-                activitys:[],
-                activityTicketType:'',
-                activityTicketID:'',
-                activityTicketAmount:'',
-                shopservice:true,
-                meallist:false,
+				isMeals: '0',
+				groupingID: [],
+				groupingIDs: '',
+				activityDetailList: '',
+				a: [],
+				b: [],
+				c: [],
+				d: [],
+				ordertype: [],
+				activitys: [],
+				activityTicketType: '',
+				activityTicketID: '',
+				activityTicketAmount: '',
+				shopservice: true,
+				meallist: false,
+				suanhou: false,
+				yuanjia: true,
 			};
 		},
 		watch: {
@@ -428,7 +430,7 @@
 						phone: this.phone,
 						isCustomer: this.isCustomer,
 						bussinessID: this.bussinessID,
-//						storeID: this.store[0].storeID,
+						//						storeID: this.store[0].storeID,
 					}).then(data => {
 						console.log(data)
 						this.informatione = data.data.customer
@@ -462,7 +464,7 @@
 								storeID: this.store[0].storeID,
 							}).then(data => {
 								console.log(data)
-//								this.servicePersonNames = data.data.storeEmployeeList
+								//								this.servicePersonNames = data.data.storeEmployeeList
 							})
 							.catch((error) => {
 								console.log(error)
@@ -498,39 +500,39 @@
 						this.$message.error('获取数据失败');
 					})
 			},
-		    //优惠券
-		    activity(){
-		    	let goodsIDss=this.b.join(',')
-		    	let orderTypes=this.ordertype.join(',')
-		    	this.$ajax.post(`${this.$url}/customerOrder/selCustomerTicketList.html`, {
-		    		    customerID:this.informatione.customerID,
-				        bussinessID: this.bussinessID,
-				        storeID: this.store[0].storeID,
-				        activityBussiness:this.informatione.activityBussiness,
-				        goodsIDss:goodsIDss,
-				        orderTypes:orderTypes,
+			//优惠券
+			activity() {
+				let goodsIDss = this.b.join(',')
+				let orderTypes = this.ordertype.join(',')
+				this.$ajax.post(`${this.$url}/customerOrder/selCustomerTicketList.html`, {
+						customerID: this.informatione.customerID,
+						bussinessID: this.bussinessID,
+						storeID: this.store[0].storeID,
+						activityBussiness: this.informatione.activityBussiness,
+						goodsIDss: goodsIDss,
+						orderTypes: orderTypes,
 						groupingIDs: this.groupingIDs,
 					}).then(data => {
 						console.log(data)
 						this.activityDetailList = data.data.activityDetailList
-						this.activitys=[];
-						for(let i in this.activityDetailList){
-							if(this.activityDetailList[i].type=='0'){
+						this.activitys = [];
+						for(let i in this.activityDetailList) {
+							if(this.activityDetailList[i].type == '0') {
 								//代金券
 								console.log(Number(this.activityDetailList[i].monetary))
 								console.log(Number(this.jine))
-								if(Number(this.jine)>Number(this.activityDetailList[i].monetary)){
+								if(Number(this.jine) > Number(this.activityDetailList[i].monetary)) {
 									this.activitys.push(this.activityDetailList[i])
 									console.log(this.activitys)
-//									this.jine=this.jine-this.activityDetailList[i].amount
+									//									this.jine=this.jine-this.activityDetailList[i].amount
 								}
-							}else if(this.activityDetailList[i].type=='1'){
+							} else if(this.activityDetailList[i].type == '1') {
 								//抵用券
 								this.activitys.push(this.activityDetailList[i])
-//								this.jine=this.jine-this.activityDetailList[i].amount
-							}else{
+								//								this.jine=this.jine-this.activityDetailList[i].amount
+							} else {
 								//折扣券
-								if(Number(this.jine)>Number(this.activityDetailList[i].monetary)){
+								if(Number(this.jine) > Number(this.activityDetailList[i].monetary)) {
 									this.activitys.push(this.activityDetailList[i])
 									console.log(this.activitys)
 								}
@@ -541,28 +543,28 @@
 						console.log(error)
 						this.$message.error('获取数据失败');
 					})
-		    },
-		    chengeactive(index,all){
-		    	console.log(all[index])
-		    	this.activityTicketType=all[index].type
-		    	this.activityTicketID=all[index].activityTicketID
-		    	this.activityTicketAmount=all[index].amount
-		    	if(all[index].type=='0'){
-		    		this.jine=this.jine-all[index].amount
-		    		this.realmoney=this.jine
-//		    		this.jiage
-		    	}else if(all[index].type=='1'){
-		    		this.jine=this.jine-all[index].amount
-		    		this.realmoney=this.jine
-		    	}else{
-		    		this.jine=this.jine*all[index].amount
-		    		this.realmoney=this.jine
-		    	}
-		    	
-		    },
+			},
+			chengeactive(index, all) {
+				console.log(all[index])
+				this.activityTicketType = all[index].type
+				this.activityTicketID = all[index].activityTicketID
+				this.activityTicketAmount = all[index].amount
+				if(all[index].type == '0') {
+					this.jine = this.jine - all[index].amount
+					this.realmoney = this.jine
+					//		    		this.jiage
+				} else if(all[index].type == '1') {
+					this.jine = this.jine - all[index].amount
+					this.realmoney = this.jine
+				} else {
+					this.jine = this.jine * all[index].amount
+					this.realmoney = this.jine
+				}
+
+			},
 			//点击服务分组获取商品服务列表
 			grouping(e) {
-				
+
 				//				console.log(e)
 				this.groupingId = e
 				console.log(this.groupingId)
@@ -582,67 +584,81 @@
 					})
 			},
 			jian(index, all) {
-				if(this.buyCount < 2) {
+				let num = this.$refs.idx[index].textContent
+				if(num < 2) {
 					this.$message.error('已经到底不能在减了');
 				} else {
-					this.buyCount--
-						this.jiage = this.buyCount * all[index].servicePrice
+					this.$refs.idx[index].textContent--
+						this.jiage = num * all[index].servicePrice
 					this.jine = this.jiage
-					 this.$options.methods.activity.bind(this)();
-					if(this.discountmoney==''){
-					    this.realmoney=this.jine
-				    }
+					this.$options.methods.activity.bind(this)();
+					if(this.discountmoney == '') {
+						this.realmoney = this.jine
+					}
 				}
 			},
 			jia(index, all) {
-				this.buyCount++
-			    this.jiage = this.buyCount * all[index].servicePrice
-				this.jine = this.jiage
-				console.log(this.jiage)
-				 this.$options.methods.activity.bind(this)();
-				if(this.discountmoney==''){
-					this.realmoney=this.jine
+				//				console.log(document.getElementById('num')[0]);
+				//				document.getElementById('index').innerText=index
+				this.$refs.idx[index].textContent++
+
+					//				this.buyCount++
+				let num = this.$refs.idx[index].textContent
+				let jiage=this.$refs.ids[index].textContent
+				console.log(this.$refs.ids[index].textContent)
+				if(num > 0) {
+					this.suanhou = true
+					this.yuanjia = false
+					jiage = num * all[index].servicePrice
+					this.jine = jiage
+					console.log(jiage)
+					this.$options.methods.activity.bind(this)();
+					if(this.discountmoney == '') {
+						this.realmoney = this.jine
+					}
+				} else {
+					this.suanhou = false
+					this.yuanjia = true
 				}
-				
 
 			},
 			//按钮选中之间的切换
 			xuanzhong(index, all) {
-				this.a=[];
-				this.b=[];
-				this.ordertype=[];
+				this.a = [];
+				this.b = [];
+				this.ordertype = [];
 				console.log(index)
 				this.ind = index
-                this.changList.push(all[index])
-                //获取对应的服务分组
+				this.changList.push(all[index])
+				//获取对应的服务分组
 				this.groupingID.push(all[index].groupingId)
-				this.groupingIDs=this.groupingID.join(',')
+				this.groupingIDs = this.groupingID.join(',')
 				console.log(this.changList)
 				//往数组里面orderType值
-                if(this.groupingCategory=='1'){
-                	for(let i in this.changList){
-                		this.changList[i]['orderType']='1'
-                	}
-                }else if(this.groupingCategory=='2'){
-                	for(let i in this.changList){
-                		this.changList[i]['orderType']='0'
-                	}
-                }
-                console.log(this.changList)
-                //分别拿每一个值push到数组
-                for(let i in this.changList){
-                	this.b.push(this.changList[i].servicesID)
-                	this.a.push(this.changList[i].serviceName)
-                	this.c.push(this.changList[i].servicePrice)
-                	this.ordertype.push(this.changList[i].orderType)
-                }
-//              this.$options.methods.activity.bind(let)();
-                this.$options.methods.activity.bind(this)();
-//              this.activity();
-//              console.log(a)
-//              let a1=this.a.join(',')
-//				console.log(this.changList)
-               
+				if(this.groupingCategory == '1') {
+					for(let i in this.changList) {
+						this.changList[i]['orderType'] = '1'
+					}
+				} else if(this.groupingCategory == '2') {
+					for(let i in this.changList) {
+						this.changList[i]['orderType'] = '0'
+					}
+				}
+				console.log(this.changList)
+				//分别拿每一个值push到数组
+				for(let i in this.changList) {
+					this.b.push(this.changList[i].servicesID)
+					this.a.push(this.changList[i].serviceName)
+					this.c.push(this.changList[i].servicePrice)
+					this.ordertype.push(this.changList[i].orderType)
+				}
+				//              this.$options.methods.activity.bind(let)();
+				this.$options.methods.activity.bind(this)();
+				//              this.activity();
+				//              console.log(a)
+				//              let a1=this.a.join(',')
+				//				console.log(this.changList)
+
 				for(let i in this.changList) {
 					if(i > 0) {
 						this.jine = Number(this.jine) + Number(this.changList[i].servicePrice)
@@ -651,33 +667,33 @@
 						this.jine = this.changList[i].servicePrice
 					}
 				}
-				if(this.discountmoney==''){
-					this.realmoney=this.jine
+				if(this.discountmoney == '') {
+					this.realmoney = this.jine
 				}
-				
+
 				//				this.realmoney=this.jine- this.discountmoney
 			},
 			//选择套餐大的类别名称
-			changeTaocanType(index,all){
-				let taocanjiage='';
+			changeTaocanType(index, all) {
+				let taocanjiage = '';
 				console.log(index)
-//				this.ind = index
-				this.isMeals=='1'
+				//				this.ind = index
+				this.isMeals == '1'
 				this.changTaoList.push(all[index])
-				this.mealDetailList=all[index].mealDetailList
+				this.mealDetailList = all[index].mealDetailList
 				console.log(this.changTaoList)
 				console.log(this.mealDetailList)
-				for(let i in this.mealDetailList){
-					this.jine=Number(this.jine) + Number(this.mealDetailList[i].orderSum)
-					this.realmoney=this.jine
+				for(let i in this.mealDetailList) {
+					this.jine = Number(this.jine) + Number(this.mealDetailList[i].orderSum)
+					this.realmoney = this.jine
 				}
-				
+
 			},
 			//选择套餐类名下的商品和服务
-			changeTaocan(index,all){
+			changeTaocan(index, all) {
 				console.log(index)
 				this.ind = index
-//				this.isMeals=='1'
+				//				this.isMeals=='1'
 				this.changList.push(all[index])
 			},
 			xuanzhong1(i, index) {
@@ -708,8 +724,8 @@
 					console.log(this.arrList)
 				}
 			},
-			deleteds(index,all) {
-				 all.splice( all[index], 1 );
+			deleteds(index, all) {
+				all.splice(all[index], 1);
 
 			},
 			quxiao() {
@@ -746,18 +762,18 @@
 			memberkaidan(tab, event) {
 				console.log(tab.index)
 				if(tab.index == '1') {
-					this.shopservice=true
-					this.meallist=false
+					this.shopservice = true
+					this.meallist = false
 					this.groupingCategory = '1'
 					this.Buysever()
 				} else if(tab.index == '2') {
-					this.shopservice=true
-					this.meallist=false
+					this.shopservice = true
+					this.meallist = false
 					this.groupingCategory = '2'
 					this.Buysever()
 				} else if(tab.index == '3') {
-					this.shopservice=false
-					this.meallist=true
+					this.shopservice = false
+					this.meallist = true
 					this.$ajax.post(`${this.$url}/customerOrder/selMeallist.html`, {
 							bussinessID: this.bussinessID,
 							storeID: this.store[0].storeID,
@@ -776,35 +792,35 @@
 			//生成订单
 			trueorder() {
 				this.$ajax.post(`${this.$url}/customerOrder/insertOrder.html`, {
-					    uuid:this.uuid,
+						uuid: this.uuid,
 						customerID: this.informatione.customerID,
 						userName: this.informatione.username,
 						phoneNum: this.informatione.phone,
-						amount: 200,//金额
+						amount: 200, //金额
 						bussinessID: this.bussinessID,
 						storeID: this.store[0].storeID,
-						activityTicketType: this.activityTicketType,  //优惠券
-						activityTicketID:this.activityTicketID ,
-						activityTicketAmount:this.activityTicketAmount ,
+						activityTicketType: this.activityTicketType, //优惠券
+						activityTicketID: this.activityTicketID,
+						activityTicketAmount: this.activityTicketAmount,
 						actualPay: this.realmoney,
 						carID: this.car.carID,
 						carNum: this.car.carNum,
-//						buyMealID:this.changTaoList[0].mealID,   //套餐ID
+						//						buyMealID:this.changTaoList[0].mealID,   //套餐ID
 						goodsIDs: this.changList[0].serviceID,
-						goodsIDss:this.changList[0].servicesID,
+						goodsIDss: this.changList[0].servicesID,
 						orderTypes: this.groupingCategory,
 						prices: this.changList[0].servicePrice,
-						dicountPrices: 100,//折扣价数组
+						dicountPrices: 100, //折扣价数组
 						serviceCounts: this.buyCount,
 						orderSums: this.jine,
-//						mealPrices: this.changTaoList[0].servicePrice,
-						isMeals:this.isMeals ,
+						//						mealPrices: this.changTaoList[0].servicePrice,
+						isMeals: this.isMeals,
 						goodsNames: this.changList[0].serviceName,
 						buyMealDetailIDs: this.buyMealDetailIDs,
-						servicePersonNames:this.servicePersonNames,
-//						salesPushMoneys:10,
-						servicePushMoneys: 10,//服务提成
-						deAmounts: 400,//优惠券抵扣的金额
+						servicePersonNames: this.servicePersonNames,
+						//						salesPushMoneys:10,
+						servicePushMoneys: 10, //服务提成
+						deAmounts: 400, //优惠券抵扣的金额
 					}).then(data => {
 						console.log(data)
 						this.$message.success(data.data.message);
@@ -814,9 +830,9 @@
 						this.$message.error('获取数据失败');
 					})
 			},
-//			取消订单
-			notrueorder(){
-				
+			//			取消订单
+			notrueorder() {
+
 			},
 		}
 	};
